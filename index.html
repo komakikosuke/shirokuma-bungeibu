@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#9cd8e8">
+<meta name="theme-color" content="#5dc0d5"><link rel="icon" type="image/png" href="./assets/polarbear-icon.png">
 <meta name="description" content="シロクマ文芸部の本棚。言葉を届けた人の物語と、みんなで書く楽しさを集める場所。">
 <title>シロクマ文芸部の本棚｜ことばで、世界が少し、やさしくなる。</title>
 <style>
@@ -21,12 +21,48 @@
 @media(max-width:1100px){.container{width:min(100% - 40px,1000px)}.tagline{display:none}.header-nav{gap:14px}.hero-inner{grid-template-columns:1.2fr 1fr;gap:23px}.hero-aside{grid-column:1/-1;display:flex;align-items:center;gap:27px;justify-content:space-between;padding:0}.aside-note{display:none}.aside-line{display:none}.aside-secondary{border-top:0;margin:0;padding:0}.hero-aside a{margin:0}.hero-book{min-height:410px}.bookshelf{grid-template-columns:repeat(4,minmax(0,1fr))}.finder{grid-template-columns:230px 1fr}}
 @media(max-width:700px){.container{width:calc(100% - 30px)}.header-inner{height:65px}.brand-name{font-size:17px}.logo{width:35px;height:35px}.logo svg{width:30px;height:30px}.header-nav{gap:12px}.header-nav a{font-size:10px}.header-nav a:nth-child(2){display:none}.header-nav a:nth-child(3){display:none}.search-jump{width:28px}.hero-inner{grid-template-columns:1fr;gap:23px;padding-top:40px;padding-bottom:35px}.hero-copy h1{font-size:36px;line-height:1.54}.hero-copy p{font-size:12px;line-height:2}.hero-facts{margin-top:22px;gap:17px}.hero-facts>div+div{padding-left:17px}.hero-facts strong{font-size:19px}.hero-book-stage{padding:0 27px}.hero-book{width:290px;min-height:390px}.book-border{inset:14px;padding:21px}.book-mid{padding-top:19px}.book-title{font-size:32px}.hero-aside{grid-column:auto;display:grid;grid-template-columns:1fr 1fr;gap:10px;border-top:1px solid #69b4c9;padding-top:17px}.aside-label{font-size:13px}.aside-number{font-size:48px}.aside-number small{font-size:12px}.aside-secondary{font-size:11px}.hero-aside a{grid-column:1/-1}.main{padding-top:38px}.section-head{align-items:start}.section-head-left{display:block}.section-head h2{font-size:23px}.section-head p{margin-top:6px;font-size:11px}.section-head a{font-size:11px}.bookshelf{display:flex;overflow-x:auto;gap:15px;scroll-snap-type:x mandatory;padding:6px 4px 18px;min-height:0}.shelf-item{min-width:205px;width:205px;scroll-snap-align:start}.mini-book{height:280px}.mini-book h3{font-size:20px}.finder{grid-template-columns:1fr;padding:24px 19px;gap:15px}.finder h2{font-size:23px}.results{grid-template-columns:1fr}.about-inner{grid-template-columns:1fr;gap:20px}.steps{grid-template-columns:1fr}.step{display:grid;grid-template-columns:40px 1fr;gap:2px 8px;align-items:start}.step b{grid-row:1/3}.step strong{margin:0}.search-options select{min-width:140px}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.cover-link{transition:none}}
+
+/* Reference-inspired clothbound literary cover: original Shirokuma avatar */
+.original-icon{display:block;width:100%;height:100%;object-fit:cover;border-radius:50%}
+.logo{background:transparent;width:48px;height:48px;border:0}
+.logo .original-icon{border:2px solid #e4f0f1;box-shadow:0 1px 6px rgba(15,64,83,.12)}
+.hero{background:radial-gradient(ellipse 41% 53% at 50% 42%,rgba(255,255,255,.22),transparent 80%),linear-gradient(113deg,#addde9 0%,#a2d9e8 44%,#8bcee1 100%)}
+.hero .wrap,.hero-inner{min-height:570px}
+.hero-book-stage{perspective:1400px;padding:26px 20px 28px 14px}
+.hero-book{
+ width:min(100%,370px);min-height:470px;
+ border:1px solid #c3c8c6;border-radius:3px 5px 6px 3px;
+ background:linear-gradient(90deg,#ebe8de 0%,#f8f5eb 5%,#fffefa 13%,#fffdf8 88%,#f2efe6 100%);
+ box-shadow:-15px 12px 15px rgba(28,71,89,.30),12px 26px 28px rgba(25,71,92,.22),inset 4px 0 8px rgba(105,118,119,.15),inset -4px 0 7px rgba(98,117,114,.10);
+ transform:perspective(1400px) rotateY(-4deg) rotateZ(-.35deg)
+}
+.hero-book:before{left:-11px;width:11px;background:linear-gradient(90deg,#456d7f,#a1b9bc 38%,#e2e4db 72%,#b8caca);box-shadow:-5px 5px 8px #1b50644c}
+.hero-book:after{right:-9px;width:10px;top:8px;bottom:8px;background:repeating-linear-gradient(to bottom,#fffef9 0 2px,#d2d7d4 2px 3px);box-shadow:4px 6px 7px #1c53643c}
+.book-border{
+ inset:18px;border:1px solid #8fbed0;outline:1px solid #b9d4dc;outline-offset:-8px;
+ padding:31px 31px 29px;background:linear-gradient(180deg,rgba(255,255,255,.12),rgba(255,254,250,.06))
+}
+.book-topline{display:flex;flex-direction:column;align-items:flex-start;gap:4px}
+.hero-book small{font-size:13px;letter-spacing:.1em;color:#355976}
+.book-topline span{font:14px/1.7 var(--serif);letter-spacing:.07em;color:#688394}
+.book-mid{padding-top:25px}
+.book-title{font-size:clamp(33px,3vw,43px);letter-spacing:.08em;font-weight:500;line-height:1.52}
+.book-rule{height:1px;background:#b1cbd4;margin:18px 0}
+.book-description{font:14px/2.1 var(--serif);letter-spacing:.045em;color:#385d73}
+.book-foot{gap:13px}
+.book-stamp{background:none;border:none;width:59px;height:59px;overflow:hidden;box-shadow:none;flex:none}
+.book-stamp img{border:1px solid #7db2c3}
+.book-foot strong{font-size:15px;letter-spacing:.09em}
+.book-foot em{font-size:9px;letter-spacing:.17em}
+.mini-seal-mark{width:30px;height:30px;object-fit:cover;background:none;border:1px solid #8eafbe;border-radius:50%}
+@media(max-width:1100px){.hero .wrap,.hero-inner{min-height:auto}.hero-book-stage{padding:20px 16px}}
+@media(max-width:700px){.logo{width:37px;height:37px}.hero-book{width:min(100%,315px);min-height:420px}.book-border{inset:15px;padding:24px}.book-title{font-size:34px}.book-description{font-size:12px}.book-stamp{width:48px;height:48px}.hero-book-stage{padding:16px 8px 22px}}
 </style>
 </head>
 <body>
 <header class="site-header" id="top">
 <div class="container header-inner">
-<a class="brand" href="#top" aria-label="シロクマ文芸部 ホーム"><span class="logo"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M9 20a8 8 0 1 1 12-10 18 18 0 0 1 7 0A8 8 0 1 1 40 20a19 19 0 0 1-5 18c-5 5-17 5-22 0A19 19 0 0 1 9 20Z" fill="#fff"/><circle cx="18" cy="24" r="2.3" fill="#2b92b4"/><circle cx="30" cy="24" r="2.3" fill="#2b92b4"/><ellipse cx="24" cy="30" rx="3.5" ry="2.7" fill="#2b92b4"/></svg></span><span class="brand-name">シロクマ文芸部</span></a>
+<a class="brand" href="#top" aria-label="シロクマ文芸部 ホーム"><span class="logo"><img class="original-icon" src="./assets/polarbear-icon.png" alt=""></span><span class="brand-name">シロクマ文芸部</span></a>
 <span class="tagline">書くことが、もっと楽しくなる場所。</span>
 <nav class="header-nav" aria-label="主要メニュー"><a href="#top" aria-current="page">ホーム</a><a href="#works">紹介作品</a><a href="#finder">作品をさがす</a><a href="#about">文芸部について</a></nav>
 <button class="search-jump" id="searchJump" aria-label="作品検索へ移動"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="6.7"/><path d="m16 16 5.2 5.2"/></svg></button>
@@ -41,7 +77,7 @@
 <div class="hero-book-stage"><div class="hero-book"><div class="book-border">
 <div class="book-topline"><small>シロクマ文芸部の本棚</small><span id="bookMonth">—</span></div>
 <div class="book-mid"><div class="book-title" id="bookTitle">はじめの、<br>ひと言。</div><div class="book-rule"></div><p class="book-description" id="bookDescription">まだ誰もコメントしていなかった作品に、最初の言葉を届ける。<br>そこから次の物語がはじまります。</p></div>
-<div class="book-foot"><span class="book-stamp"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M9 20a8 8 0 1 1 12-10 18 18 0 0 1 7 0A8 8 0 1 1 40 20a19 19 0 0 1-5 18c-5 5-17 5-22 0A19 19 0 0 1 9 20Z" fill="#fff" stroke="#258ca9" stroke-width="1.4"/><circle cx="18" cy="24" r="2.3" fill="#258ca9"/><circle cx="30" cy="24" r="2.3" fill="#258ca9"/><ellipse cx="24" cy="30" rx="3.5" ry="2.7" fill="#258ca9"/></svg></span><div><strong>シロクマ文芸部</strong><em>SHIROKUMA BUNGEIBU</em></div></div>
+<div class="book-foot"><span class="book-stamp"><img class="original-icon" src="./assets/polarbear-icon.png" alt=""></span><div><strong>シロクマ文芸部</strong><em>SHIROKUMA BUNGEIBU</em></div></div>
 </div></div></div>
 <div class="hero-aside"><p class="aside-note">どこかで、<br>だれかの物語が、<br>きっと、だれかの心を照らす。</p><div class="aside-count"><div class="aside-line"></div><div class="aside-label" id="asideMonth">今月の参加作品</div><div class="aside-number"><span id="asideCount">—</span><small>作品</small></div><div class="aside-foot">収集できた参加作品数</div></div><div class="aside-secondary">本棚に並ぶ紹介作品<strong id="asideFeatured">—</strong></div><a href="#finder">作品をさがす　→</a></div>
 </div></section>
@@ -61,7 +97,7 @@ const monthLabel=str=>/^\d{4}-\d{2}$/.test(str)?str.slice(0,4)+"年"+Number(str.
 const link=(txt,url,cls)=>{const a=make("a",cls,txt);a.href=url;a.target="_blank";a.rel="noopener noreferrer";return a};
 let publicWorks=[];
 function renderShelf(){const root=$("bookshelf");root.replaceChildren();if(!publicWorks.length){const empty=make("div","shelf-empty");empty.append(make("strong","","紹介作品はまだありません"),make("span","","公開が承認された作品が、ここに少しずつ並びます。"));root.append(empty);return}
-for(const w of publicWorks){const outer=make("article","shelf-item");const a=link("",w.url,"cover-link");const book=make("div","mini-book");const inside=make("div","mini-book-content");inside.append(make("div","mini-type","シロクマ文芸部　／　"+monthLabel(w.month)),make("h3","",w.title),make("p","mini-author",w.handle+" さん"),make("p","mini-description","最初のコメントからつながった、ひとつの物語。"));const stamp=make("div","mini-seal");stamp.append(make("span","mini-seal-mark","熊"),make("span","","シロクマ文芸部 文庫"));inside.append(stamp);book.append(inside);a.append(book);outer.append(a);const cap=make("div","book-caption");cap.append(make("span","","@"+w.handle),make("span","caption-badge","紹介中"));outer.append(cap);root.append(outer)}}
+for(const w of publicWorks){const outer=make("article","shelf-item");const a=link("",w.url,"cover-link");const book=make("div","mini-book");const inside=make("div","mini-book-content");inside.append(make("div","mini-type","シロクマ文芸部　／　"+monthLabel(w.month)),make("h3","",w.title),make("p","mini-author",w.handle+" さん"),make("p","mini-description","最初のコメントからつながった、ひとつの物語。"));const stamp=make("div","mini-seal");const seal=make("img","mini-seal-mark");seal.src="./assets/polarbear-icon.png";seal.alt="";stamp.append(seal,make("span","","シロクマ文芸部 文庫"));inside.append(stamp);book.append(inside);a.append(book);outer.append(a);const cap=make("div","book-caption");cap.append(make("span","","@"+w.handle),make("span","caption-badge","紹介中"));outer.append(cap);root.append(outer)}}
 function renderSearch(){const query=$("searchInput").value.trim().normalize("NFKC").toLocaleLowerCase("ja");const mo=$("monthSelect").value;const sort=$("sortSelect").value;let works=publicWorks.filter(w=>(mo==="all"||w.month===mo)&&(!query||(w.title+" "+w.handle).normalize("NFKC").toLocaleLowerCase("ja").includes(query)));works.sort((a,b)=>sort==="old"?String(a.firstCommentAt).localeCompare(String(b.firstCommentAt)):sort==="title"?a.title.localeCompare(b.title,"ja"):String(b.firstCommentAt).localeCompare(String(a.firstCommentAt)));$("resultCount").textContent="検索結果："+formatter.format(works.length)+"作品";const root=$("results");root.replaceChildren();if(!works.length){root.append(make("div","search-empty","該当する紹介作品はありません。"));return}for(const w of works){const a=link("",w.url,"result");a.append(make("strong","",w.title),make("span","",monthLabel(w.month)+"　／　@"+w.handle+"　 ↗"));root.append(a)}}
 function render(data){if(!data||data.version!==1||!Array.isArray(data.months)||!Array.isArray(data.works))throw new Error("公開データの形式が違います");const months=data.months.filter(m=>m&&/^\d{4}-\d{2}$/.test(m.month)&&Number.isInteger(m.participatingWorks)&&m.participatingWorks>=0).sort((a,b)=>b.month.localeCompare(a.month));publicWorks=data.works.filter(w=>w&&/^\d{4}-\d{2}$/.test(w.month)&&typeof w.title==="string"&&typeof w.handle==="string"&&safeUrl(w.url)).map(w=>({...w,url:safeUrl(w.url)})).sort((a,b)=>String(b.firstCommentAt).localeCompare(String(a.firstCommentAt)));const latest=months[0];const total=months.reduce((a,b)=>a+b.participatingWorks,0);$("factWorks").textContent=months.length?formatter.format(total):"—";$("factIntroductions").textContent=formatter.format(publicWorks.length);$("asideCount").textContent=latest?formatter.format(latest.participatingWorks):"—";$("asideMonth").textContent=latest?monthLabel(latest.month)+"の参加作品":"今月の参加作品";$("asideFeatured").textContent=formatter.format(publicWorks.length)+"作品";$("bookMonth").textContent=latest?monthLabel(latest.month):"本棚";if(publicWorks.length){$("bookTitle").textContent=publicWorks[0].title;$("bookDescription").textContent="最初のコメントを届けてくれた、@"+publicWorks[0].handle+" さんの作品。"}const monthsSelect=$("monthSelect");monthsSelect.replaceChildren();const all=make("option","","すべての月");all.value="all";monthsSelect.append(all);for(const m of [...new Set(publicWorks.map(w=>w.month))].sort().reverse()){const option=make("option","",monthLabel(m));option.value=m;monthsSelect.append(option)}renderShelf();renderSearch()}
 $("searchJump").addEventListener("click",()=>{$("finder").scrollIntoView({behavior:window.matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth"});$("searchInput").focus({preventScroll:true})});
