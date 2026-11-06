@@ -47,3 +47,27 @@ a:focus-visible,button:focus-visible{outline:3px solid #006d96;outline-offset:4p
 @media(max-width:680px){.container{width:calc(100% - 30px)}.header-inner{height:65px}.brand{font-size:17px}.brand-icon{width:37px;height:37px}.header-back{font-size:11px}.page-hero{padding:36px 0 39px}.page-intro{font-size:13px}.archive{padding-top:29px;padding-bottom:60px}.article-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:23px 14px}.read-link{font-size:12px}.archive-heading{margin-bottom:16px}}
 @media(max-width:425px){.article-grid{grid-template-columns:1fr;max-width:300px;margin-inline:auto;row-gap:27px}.mini-book{max-width:290px}.mini-title{font-size:clamp(18px,8.2cqw,30px)}.mini-title.long{font-size:clamp(16px,6.8cqw,25px)}.mini-title.very-long{font-size:clamp(14px,5.4cqw,21px)}.mini-creator{font-size:clamp(13px,5.3cqw,18px)}.mini-creator.long{font-size:clamp(11px,4.3cqw,15px)}}
 @media(prefers-reduced-motion:reduce){.cover-link{transition:none}html{scroll-behavior:auto}}
+
+
+/* Shared book layout: a larger title field, measured font fitting, and no truncation. */
+.mini-title,.mini-title.long,.mini-title.very-long{
+ top:17.5%;left:18.5%;width:67%;height:40.5%;
+ margin:0;padding:0;display:flex;align-items:center;
+ font:500 clamp(16px,8.2cqw,30px)/1.27 var(--serif);
+ letter-spacing:.005em;overflow:hidden;overflow-wrap:anywhere;
+}
+.mini-rule{top:59%;left:18.5%;width:64%}
+.mini-creator,.mini-creator.long{
+ top:61.5%;left:18.5%;width:65%;height:14%;max-height:none;
+ margin:0;padding:0;display:flex;align-items:center;
+ font:500 clamp(10px,5.2cqw,17px)/1.35 var(--serif);
+ overflow:hidden;overflow-wrap:anywhere;
+}
+.cover-fit-text{
+ display:block;width:100%;max-width:100%;
+ white-space:normal;overflow-wrap:anywhere;word-break:normal;
+}
+@media(max-width:425px){
+ .mini-title,.mini-title.long,.mini-title.very-long{font-size:clamp(19px,8.2cqw,30px)}
+ .mini-creator,.mini-creator.long{font-size:clamp(12px,5.2cqw,17px)}
+}
