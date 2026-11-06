@@ -350,6 +350,13 @@
   }
   .main{padding-bottom:28px}
 }
+
+/* Tighter archive-link spacing, and keep the key phrase intact on a single line. */
+.shelf-navigation{margin-top:12px}
+.about p .about-nowrap{white-space:nowrap;display:inline-block}
+@media(max-width:700px){
+  .shelf-navigation{margin-top:10px}
+}
 </style>
 </head>
 <body>
@@ -362,7 +369,7 @@
 <section class="hero" aria-labelledby="hero-title"><div class="container hero-inner">
 <div class="hero-copy">
 <h1 id="hero-title">クリエイターの<br>帰る場所。</h1>
-<div class="hero-intro"><p class="hero-intro-lead">noteで創作を楽しむコミュニティです。</p><p class="hero-intro-detail"><strong>毎週、みんなで同じ言葉から文章を書く活動</strong>をしています。</p></div>
+<div class="hero-intro"><p class="hero-intro-lead">noteで創作を楽しむコミュニティです。</p><p class="hero-intro-detail"><strong>毎週、みんなで同じ言葉から文章を書いています。</strong></p></div>
 <div class="weekly-topic" aria-labelledby="weeklyTopicHeading">
 <div class="weekly-topic-meta">
 <div class="weekly-topic-heading" id="weeklyTopicHeading">今週のお題</div>
@@ -378,14 +385,14 @@
 <div class="hero-shell-rule" aria-hidden="true"></div>
 <div class="hero-shell-creator cover-fit" id="heroBookCreator"><span class="cover-fit-text" id="heroBookCreatorText">クリエイター名を確認中</span></div>
 <div class="hero-shell-footer"><strong>シロクマ文芸部</strong><small>SHIROKUMA BUNGEIBU</small></div>
-</div><a class="hero-book-cta" id="heroBookCta" hidden rel="noopener noreferrer" aria-label="注目記事を読む">作品を読む <span aria-hidden="true">→</span></a></div>
-<div class="hero-aside"><p class="aside-note"><strong><span>はじめてnoteを書く人も</span><span>自己紹介がわりにどうぞ！</span></strong></p><div class="aside-count"><div class="aside-line"></div><div class="aside-label" id="asideMonth">#シロクマ文芸部 の累計記事数</div><div class="aside-number"><span id="asideCount">—</span><small>作品</small></div><div class="aside-foot" id="asideFoot">noteのハッシュタグ登録記事数</div></div></div>
+</div><a class="hero-book-cta" id="heroBookCta" hidden rel="noopener noreferrer" aria-label="注目記事を読む">読む <span aria-hidden="true">→</span></a></div>
+<div class="hero-aside"><p class="aside-note"><strong><span>はじめてnoteを書く人も</span><span>自己紹介がわりに！</span></strong></p><div class="aside-count"><div class="aside-line"></div><div class="aside-label" id="asideMonth">#シロクマ文芸部 の累計記事数</div><div class="aside-number"><span id="asideCount">—</span><small>作品</small></div><div class="aside-foot" id="asideFoot">noteのハッシュタグ登録記事数</div></div></div>
 </div></section>
 <main class="main container">
 <section id="works" aria-labelledby="works-title"><div class="section-head"><div class="section-head-left"><h2 id="works-title">注目記事</h2><p>シロクマ文芸部の参加作品に初めてコメントしてくれた人の作品をご紹介します。</p></div></div><div class="shelf-area"><div id="bookshelf" class="bookshelf"><div class="shelf-empty">本棚の作品を読み込み中です。</div></div></div><div class="shelf-navigation"><a class="shelf-all-link" href="./articles/">注目記事の一覧を見る <span aria-hidden="true">→</span></a></div></section>
 
 </main>
-<section class="about" id="about"><div class="container about-inner"><div><h2>はじめてのコメントを、<br>次の作品へ繋ぐ。</h2><p>作品への感想は、クリエイターの励みになります。まだコメントのなかった作品に最初のひと言を届けてくれた人の作品を紹介します。</p></div><div class="steps"><div class="step"><b>1</b><strong>参加作品を読む</strong><small>シロクマ文芸部の作品を見つける。</small></div><div class="step"><b>2</b><strong>最初のひと言を届ける</strong><small>作者本人以外からの初コメントが対象。</small></div><div class="step"><b>3</b><strong>その人の作品を紹介</strong><small>運営者が確認してから掲載します。</small></div></div></div></section>
+<section class="about" id="about"><div class="container about-inner"><div><h2>はじめてのコメントを、<br>次の作品へ繋ぐ。</h2><p>作品への感想はクリエイターの励みになります。<span class="about-nowrap">まだコメントのない作品に</span>最初のひと言を届けてくれた人の作品を紹介します。</p></div><div class="steps"><div class="step"><b>1</b><strong>参加作品を読む</strong><small>noteで文芸部の作品を読む</small></div><div class="step"><b>2</b><strong>最初のひと言を届ける</strong><small>昨日への初コメントが対象</small></div><div class="step"><b>3</b><strong>その人の作品を紹介</strong><small>このサイトに載る</small></div></div></div></section>
 <footer class="footer"><div class="container footer-inner"><span>© シロクマ文芸部</span><a href="https://note.com/hashtag/%E3%82%B7%E3%83%AD%E3%82%AF%E3%83%9E%E6%96%87%E8%8A%B8%E9%83%A8" rel="noopener noreferrer">noteで参加作品を見る ↗</a></div></footer>
 <script src="./assets/fit-cover-text.js?v=1"></script>
 <script>
@@ -441,7 +448,7 @@ function renderShelf(){
   const stamp=make("div","mini-seal"),publisher=make("div","mini-author-block");
   publisher.append(make("span","mini-author","シロクマ文芸部"),make("span","mini-publisher","SHIROKUMA BUNGEIBU"));
   stamp.append(publisher);inside.append(title,rule,byline,stamp);book.append(inside);a.append(book);outer.append(a);
-  const read=link("作品を読む　→",w.url,"book-read-link");
+  const read=link("読む　→",w.url,"book-read-link");
   read.setAttribute("aria-label",creatorName+"「"+w.title+"」を読む");
   outer.append(read);
   root.append(outer);
