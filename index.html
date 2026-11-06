@@ -393,8 +393,8 @@ function updatePublicShelf(){
 }
 function renderShelf(){
  const root=$("bookshelf");root.replaceChildren();
- if(!publicWorks.length){const empty=make("div","shelf-empty");empty.append(make("strong","","掲載作品はまだありません"),make("span","","新しい作品が見つかると、ここに自動で並びます。"));root.append(empty);return}
- for(const w of publicWorks.slice(0,5)){
+ if(publicWorks.length<=1){const empty=make("div","shelf-empty");empty.append(make("strong","","注目記事は準備中です"),make("span","","最新の作品以外に新しい作品が見つかると、ここに並びます。"));root.append(empty);return}
+ for(const w of publicWorks.slice(1,6)){
   const creatorName=creatorDisplayName(w),outer=make("article","shelf-item");
   const a=link("",w.url,"cover-link");a.setAttribute("aria-label",w.title+" ／ "+creatorName+" の作品を読む");
   const book=make("div","mini-book"),inside=make("div","mini-book-content");
