@@ -207,6 +207,38 @@
 .header-nav{gap:0}
 .book-caption{justify-content:flex-start}
 .section-head{justify-content:flex-start}
+
+/* Clean text-free art: the original photo contains baked-in text and must never be used for shelves. */
+.mini-book{
+  background:transparent url("./assets/book-shell.svg") center center / 100% 100% no-repeat !important;
+  aspect-ratio:2 / 3 !important;
+  height:auto !important;
+}
+.mini-book::before,.mini-book::after{
+  content:none !important;
+  display:none !important;
+}
+.mini-type{top:12%;left:17%;width:68%}
+.mini-month{top:17%;left:17%;width:68%}
+.mini-book h3,.mini-book h3.mini-title-long,.mini-book h3.mini-title-very-long{
+  top:26%;left:17%;width:67%;height:25%;
+  display:block;overflow:hidden;
+}
+.mini-rule{top:54%;left:17%;width:66%}
+.mini-seal{
+ top:79%;left:17%;width:70%;max-height:10%;
+ display:flex;align-items:center;gap:8px;
+}
+.mini-seal-mark{
+ display:block !important;width:33px;height:33px;
+ object-fit:cover;border-radius:50%;flex:none;
+}
+.mini-author-block{min-width:0}
+.mini-author{overflow-wrap:anywhere}
+@media(max-width:700px){
+  .mini-book{aspect-ratio:2/3!important}
+  .mini-book h3,.mini-book h3.mini-title-long,.mini-book h3.mini-title-very-long{top:26%;height:25%}
+}
 </style>
 </head>
 <body>
