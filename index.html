@@ -179,6 +179,10 @@
   .hero-copy .hero-intro .hero-intro-detail{font-size:13px}
   .hero-aside .aside-note{font-size:13px;line-height:1.75}
 }
+
+/* Cover alone identifies the work and its creator; remove the redundant footer space. */
+.shelf-area .cover-link{padding-bottom:0}
+.shelf-area .shelf-item{display:flex;flex-direction:column}
 </style>
 </head>
 <body>
@@ -231,12 +235,12 @@ function renderShelf(){
   const book=make("div","mini-book"),inside=make("div","mini-book-content");
   const title=make("h3","",w.title),n=[...w.title].length;
   if(n>39)title.classList.add("mini-title-very-long");else if(n>22)title.classList.add("mini-title-long");
-  const rule=make("div","mini-rule"),byline=make("p","mini-creator","著："+creatorName);
+  const rule=make("div","mini-rule"),byline=make("p","mini-creator",creatorName);
   if([...creatorName].length>17)byline.classList.add("mini-creator-long");
   const stamp=make("div","mini-seal"),publisher=make("div","mini-author-block");
   publisher.append(make("span","mini-author","シロクマ文芸部"),make("span","mini-publisher","SHIROKUMA BUNGEIBU"));
   stamp.append(publisher);inside.append(title,rule,byline,stamp);book.append(inside);a.append(book);outer.append(a);
-  const cap=make("div","book-caption");cap.append(make("span","",creatorName));outer.append(cap);root.append(outer);
+  root.append(outer);
  }
 }
 function render(data){
