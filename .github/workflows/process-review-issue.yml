@@ -1,0 +1,48 @@
+name: Apply Shirokuma approval issue
+
+on:
+  issues:
+    types: [opened]
+
+permissions:
+  contents: write
+  issues: write
+
+concurrency:
+  group: shirokuma-approval-writes
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    if: github.event.issue.user.login == 'komakikosuke' && startsWith(github.event.issue.title, '[シロクマ掲載管理] ')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate the owner and decision
+        run: python3 scripts/process-review-issue.py
+      - name: Commit decision
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/admin-decisions.json
+          if git diff --cached --quiet; then
+            echo "Already applied"
+          else
+            git commit -m "Review Shirokuma featured article from approved owner issue"
+            for attempt in 1 2 3; do
+              if git push origin HEAD:main; then break; fi
+              if [ "$attempt" -eq 3 ]; then exit 1; fi
+              git pull --rebase origin main
+              sleep 2
+            done
+          fi
+      - name: Close completed request
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          NUMBER: ${{ github.event.issue.number }}
+        shell: bash
+        run: |
+          gh issue close "$NUMBER" --comment "掲載状態の変更を反映しました。公式サイトにはGitHub Pagesの更新後に表示されます。"
