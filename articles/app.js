@@ -52,13 +52,15 @@ function articleCard(w){
  coverLink.setAttribute("aria-label",name+"「"+w.title+"」を読む");
  const book=element("div","mini-book");
  const content=element("div","mini-content");
- const title=element("h2","mini-title",w.title);
+ const title=element("h2","mini-title cover-fit");
+ title.append(element("span","cover-fit-text",w.title));
  const n=[...w.title].length;
  if(n>39)title.classList.add("very-long");
  else if(n>22)title.classList.add("long");
  const rule=element("div","mini-rule");
  rule.setAttribute("aria-hidden","true");
- const byline=element("p","mini-creator",name);
+ const byline=element("p","mini-creator cover-fit");
+ byline.append(element("span","cover-fit-text",name));
  if([...name].length>17)byline.classList.add("long");
  const imprint=element("div","mini-footer");
  imprint.append(element("strong","", "シロクマ文芸部"),element("small","","SHIROKUMA BUNGEIBU"));
@@ -79,6 +81,7 @@ function render(){
    for(const work of batch)grid.append(articleCard(work));
  }
  $("itemTotal").textContent="全"+new Intl.NumberFormat("ja-JP").format(articles.length)+"作品";
+ window.shirokumaFitCovers?.();
  $("loadMore").hidden=visibleCount>=articles.length;
  const remainder=articles.length-visibleCount;
  if(remainder>0)$("loadMore").firstChild.textContent="さらに"+Math.min(PAGE_SIZE,remainder)+"作品を見る ";
