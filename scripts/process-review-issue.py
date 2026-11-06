@@ -15,6 +15,16 @@ ROOT=pathlib.Path(__file__).resolve().parents[1]
 MARKER=re.compile(r"<!-- shirokuma-review-request\s*(\{[^\n]*\})\s*-->",re.DOTALL)
 HANDLE=re.compile(r"^[a-zA-Z0-9_-]{2,100}$")
 MONTH=re.compile(r"^\d{4}-\d{2}$")
+WEEK=re.compile(r"^\d{4}-\d{2}-\d{2}$")
+JST=dt.timezone(dt.timedelta(hours=9))
+
+def compute_week_start(iso):
+    value=dt.datetime.fromisoformat(iso.replace("Z","+00:00")).astimezone(JST)
+    days=(value.weekday()-3)%7
+    start=(value-dt.timedelta(days=days)).replace(hour=20,minute=0,second=0,microsecond=0)
+    if value<start:
+        start-=dt.timedelta(days=7)
+    return start.date().isoformat()
 OWNER="komakikosuke"
 ALLOWED={"approved","draft","excluded"}
 
@@ -34,7 +44,7 @@ def main():
     if not match:
         raise SystemExit("Missing review-request payload")
     request=json.loads(match.group(1))
-    if request.get("version")!=1:
+    if request.get("version") not in (1,2):
         raise SystemExit("Unknown request version")
     month,handle,status=request.get("month"),request.get("handle"),request.get("status")
     if not isinstance(month,str) or not MONTH.fullmatch(month):
@@ -43,15 +53,20 @@ def main():
         raise SystemExit("Invalid creator")
     if status not in ALLOWED:
         raise SystemExit("Invalid decision")
-    key=month+"|"+handle
+    period=request.get("weekStart") if request.get("version")==2 else None
+    if period is not None and (not isinstance(period,str) or not WEEK.fullmatch(period)):
+        raise SystemExit("Invalid week")
+    key=(period or month)+"|"+handle
     if not title.endswith(key+" "+status):
         raise SystemExit("Issue title and payload disagree")
     candidates=load("data/candidates.json")
     works=load("data/works.json")
     known=[x for x in list(candidates.get("works",[]))+list(works.get("works",[]))
-           if isinstance(x,dict) and x.get("month")==month and x.get("handle")==handle]
+           if isinstance(x,dict) and x.get("month")==month and x.get("handle")==handle
+           and (period is None or (isinstance(x.get("firstCommentAt"),str)
+                                   and compute_week_start(x["firstCommentAt"])==period))]
     if not known:
-        raise SystemExit("This creator/month has not been discovered as an eligible candidate")
+        raise SystemExit("This creator/period has not been discovered as an eligible candidate")
 
     path=ROOT/"data/admin-decisions.json"
     record=json.loads(path.read_text(encoding="utf-8"))
