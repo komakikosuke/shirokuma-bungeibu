@@ -5,6 +5,7 @@ on:
   push:
     paths:
       - "data/works.json"
+      - "data/candidates.json"
       - "scripts/sync-creators.py"
       - ".github/workflows/sync-creators.yml"
   schedule:
