@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#5dc0d5"><link rel="icon" type="image/png" href="./assets/polarbear-icon.png">
 <meta name="description" content="シロクマ文芸部の本棚。言葉を届けた人の物語と、みんなで書く楽しさを集める場所。">
-<title>シロクマ文芸部｜クリエイターの変える場所。</title>
+<title>シロクマ文芸部｜クリエイターの帰る場所。</title>
 <style>
 :root{--navy:#133e59;--blue:#238bab;--sky:#a3d9e7;--paper:#fffdf7;--muted:#6c8798;--line:#d7e7ee;--sans:-apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;--serif:"Hiragino Mincho ProN","Yu Mincho",YuMincho,"Noto Serif JP",serif}
 *,*:before,*:after{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:#fdfdfa;color:var(--navy);font:15px/1.75 var(--sans)}a{color:inherit}a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #006d96;outline-offset:3px}button,input,select{font:inherit}.container{width:min(1280px,calc(100% - 76px));margin-inline:auto}
@@ -140,6 +140,45 @@
 .mini-author{font-size:clamp(9px,4.2cqw,15px);font-weight:600}
 .mini-publisher{font-size:clamp(6px,2.5cqw,9px)}
 @media(max-width:700px){.hero-bookshell{width:min(100%,315px)}.hero-shell-title{font-size:clamp(23px,7vw,33px)}.hero-shell-footer strong{font-size:12px}.hero-shell-footer small{font-size:7px}}
+
+/* Hero introduction: calm two-step reading hierarchy, same information. */
+.hero-copy .hero-intro{
+  max-width:430px;
+  margin:18px 0 0;
+  padding:2px 0 2px 18px;
+  border-left:2px solid rgba(24,86,108,.38);
+}
+.hero-copy .hero-intro p{
+  margin:0;
+  max-width:none;
+  letter-spacing:.02em;
+  text-shadow:none;
+}
+.hero-copy .hero-intro .hero-intro-lead{
+  font:500 clamp(13px,1.12vw,15px)/1.85 var(--serif);
+  color:#244f66;
+}
+.hero-copy .hero-intro .hero-intro-detail{
+  margin-top:9px;
+  font:400 clamp(13px,1.05vw,14px)/1.9 var(--serif);
+  color:#42677a;
+}
+.hero-copy .hero-intro .hero-intro-detail strong{color:#214961;font-weight:650}
+.hero-copy .hero-facts{margin-top:24px}
+.hero-copy .weekly-topic{margin-top:14px}
+.hero-aside .aside-note{
+  font-size:clamp(12px,1.05vw,15px);
+  line-height:1.8;
+  letter-spacing:.012em;
+}
+.hero-aside .aside-note span{display:block;white-space:nowrap}
+@media(max-width:1100px){.hero-copy .hero-intro{max-width:480px}}
+@media(max-width:700px){
+  .hero-copy .hero-intro{margin-top:17px;padding-left:14px}
+  .hero-copy .hero-intro .hero-intro-lead{font-size:14px}
+  .hero-copy .hero-intro .hero-intro-detail{font-size:13px}
+  .hero-aside .aside-note{font-size:13px;line-height:1.75}
+}
 </style>
 </head>
 <body>
@@ -152,7 +191,7 @@
 <section class="hero" aria-labelledby="hero-title"><div class="container hero-inner">
 <div class="hero-copy">
 <h1 id="hero-title">クリエイターの<br>帰る場所。</h1>
-<p>noteで創作を楽しむコミュニティです。<br><strong>毎週、みんなで同じ言葉から文章を書く活動</strong>をしています。</p>
+<div class="hero-intro"><p class="hero-intro-lead">noteで創作を楽しむコミュニティです。</p><p class="hero-intro-detail"><strong>毎週、みんなで同じ言葉から文章を書く活動</strong>をしています。</p></div>
 <div class="hero-facts"><div><strong>毎週木曜よる８時</strong><small>お題を発表</small></div></div>
 <div class="weekly-topic" aria-labelledby="weeklyTopicHeading">
 <div class="weekly-topic-heading" id="weeklyTopicHeading">今週のお題</div>
@@ -166,14 +205,14 @@
 <div class="hero-shell-rule" aria-hidden="true"></div>
 <div class="hero-shell-footer"><strong>シロクマ文芸部</strong><small>SHIROKUMA BUNGEIBU</small></div>
 </div></div>
-<div class="hero-aside"><p class="aside-note"><strong>はじめてnoteを書く人も自己紹介がわりにどうぞ！</strong></p><div class="aside-count"><div class="aside-line"></div><div class="aside-label" id="asideMonth">#シロクマ文芸部 の累計記事数</div><div class="aside-number"><span id="asideCount">—</span><small>作品</small></div><div class="aside-foot" id="asideFoot">noteのハッシュタグ登録記事数</div></div></div>
+<div class="hero-aside"><p class="aside-note"><strong><span>はじめてnoteを書く人も</span><span>自己紹介がわりにどうぞ！</span></strong></p><div class="aside-count"><div class="aside-line"></div><div class="aside-label" id="asideMonth">#シロクマ文芸部 の累計記事数</div><div class="aside-number"><span id="asideCount">—</span><small>作品</small></div><div class="aside-foot" id="asideFoot">noteのハッシュタグ登録記事数</div></div></div>
 </div></section>
 <main class="main container">
 <section id="works" aria-labelledby="works-title"><div class="section-head"><div class="section-head-left"><h2 id="works-title">注目記事</h2><p>シロクマ文芸部の参加作品に初めてコメントしてくれた人の作品をご紹介します。</p></div></div><div class="shelf-area"><div id="bookshelf" class="bookshelf"><div class="shelf-empty">本棚の作品を読み込み中です。</div></div></div></section>
 
 </main>
 <section class="about" id="about"><div class="container about-inner"><div><h2>はじめてのコメントを、<br>次の作品へ繋ぐ。</h2><p>作品への感想は、クリエイターの励みになります。まだコメントのなかった作品に最初のひと言を届けてくれた人の作品を紹介します。</p></div><div class="steps"><div class="step"><b>1</b><strong>参加作品を読む</strong><small>シロクマ文芸部の作品を見つける。</small></div><div class="step"><b>2</b><strong>最初のひと言を届ける</strong><small>作者本人以外からの初コメントが対象。</small></div><div class="step"><b>3</b><strong>その人の作品を紹介</strong><small>運営者が確認してから掲載します。</small></div></div></div></section>
-<footer class="footer"><div class="container footer-inner"><span>© シロクマ文芸部　ことばを通じて、創作の輪をひろげる。</span><a href="https://note.com/hashtag/%E3%82%B7%E3%83%AD%E3%82%AF%E3%83%9E%E6%96%87%E8%8A%B8%E9%83%A8" rel="noopener noreferrer">noteで参加作品を見る ↗</a></div></footer>
+<footer class="footer"><div class="container footer-inner"><span>© シロクマ文芸部</span><a href="https://note.com/hashtag/%E3%82%B7%E3%83%AD%E3%82%AF%E3%83%9E%E6%96%87%E8%8A%B8%E9%83%A8" rel="noopener noreferrer">noteで参加作品を見る ↗</a></div></footer>
 <script>
 "use strict";
 const $=id=>document.getElementById(id);
