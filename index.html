@@ -112,6 +112,29 @@
  .mini-book h3.mini-title-long{font-size:19px}
  .mini-book h3.mini-title-very-long{font-size:16px}
 }
+
+/* Printed reusable cover image with live typesetting */
+.mini-book{
+ position:relative;
+ width:100%;
+ height:355px;
+ background:#fffdf8 url("./assets/book-shell.svg") center/100% 100% no-repeat;
+ border:0;border-radius:0;
+ box-shadow:none;
+ overflow:visible;
+}
+.mini-book:before,.mini-book:after{display:none!important}
+.mini-book-content{padding:43px 29px 43px 39px}
+.mini-type,.mini-month{font-family:var(--serif);color:#456880}
+.mini-type{font-size:11px}
+.mini-month{font-size:10px}
+.mini-book h3{font-family:var(--serif);font-size:clamp(19px,1.7vw,23px);margin:26px 0 14px;line-height:1.45;max-height:5.8em}
+.mini-book h3.mini-title-long{font-size:clamp(16px,1.45vw,19px)}
+.mini-book h3.mini-title-very-long{font-size:clamp(14px,1.25vw,17px)}
+.mini-rule{background:#a3bfcc}
+.mini-description{font-family:var(--serif);font-size:11px;color:#436981}
+.mini-seal{margin-bottom:2px}
+@media(max-width:700px){.mini-book{height:335px}.mini-book-content{padding:41px 27px 41px 37px}}
 </style>
 </head>
 <body>
