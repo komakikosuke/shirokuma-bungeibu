@@ -1,0 +1,74 @@
+name: Sync Shirokuma hashtag article count
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - ".github/workflows/sync-hashtag-count.yml"
+  schedule:
+    # JST 00:23, 06:23, 12:23, 18:23
+    - cron: "23 3,9,15,21 * * *"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: shirokuma-hashtag-count
+  cancel-in-progress: false
+
+jobs:
+  update-count:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - name: Fetch authoritative hashtag article count
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json
+          import pathlib
+          import urllib.parse
+          import urllib.request
+          from datetime import datetime, timezone
+
+          tag = "シロクマ文芸部"
+          url = "https://note.com/api/v2/hashtags/" + urllib.parse.quote(tag)
+          request = urllib.request.Request(
+              url,
+              headers={
+                  "Accept": "application/json",
+                  "User-Agent": "Mozilla/5.0 (compatible; ShirokumaBungeibuSiteCount/1.0)",
+                  "Referer": "https://note.com/",
+              },
+          )
+          with urllib.request.urlopen(request, timeout=25) as response:
+              payload = json.load(response)
+          value = payload.get("data", {}).get("count")
+          if type(value) is not int or not (0 <= value < 1000000000):
+              raise RuntimeError("Unexpected API result: data.count must be a nonnegative integer")
+          output = {
+              "tag": tag,
+              "count": value,
+              "updatedAt": datetime.now(timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z"),
+              "source": "https://note.com/api/v2/hashtags/" + urllib.parse.quote(tag),
+          }
+          path = pathlib.Path("data/hashtag-total.json")
+          path.parent.mkdir(parents=True, exist_ok=True)
+          path.write_text(json.dumps(output, ensure_ascii=False, separators=(",", ":")) + "\n", encoding="utf-8")
+          print(f"Hashtag count: {value:,}")
+          PY
+      - name: Commit count only if successful
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/hashtag-total.json
+          if git diff --cached --quiet; then
+            echo "No change."
+          else
+            git commit -m "Update Shirokuma hashtag cumulative article count"
+            git push
+          fi
