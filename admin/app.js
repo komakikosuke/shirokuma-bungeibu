@@ -13,7 +13,7 @@ let creators={};
 let selected="all";
 let saving=false;
 
-const statusText={approved:"承認済み",draft:"保留",excluded:"除外"};
+const statusText={approved:"掲載中",draft:"非掲載",excluded:"非掲載"};
 const safeWork=w=>w&&typeof w==="object"&&/^\d{4}-\d{2}$/.test(w.month)&&
   typeof w.handle==="string"&&/^[a-zA-Z0-9_-]{2,100}$/.test(w.handle)&&
   typeof w.title==="string"&&w.title.trim()&&w.title.length<=300&&
@@ -34,9 +34,9 @@ function uniqWorks(){
  return [...m.values()].sort((a,b)=>String(b.firstCommentAt||"").localeCompare(String(a.firstCommentAt||""))||b.month.localeCompare(a.month));
 }
 function stateOf(w){
+ // 候補はデフォルト掲載。過去の保留指定も非掲載として維持する。
  const manual=decisions[keyOf(w)]?.status;
- if(["draft","approved","excluded"].includes(manual))return manual;
- return published.some(x=>keyOf(x)===keyOf(w))?"approved":"draft";
+ return manual==="draft"||manual==="excluded"?"excluded":"approved";
 }
 function make(tag,cl="",text=null){
  const e=document.createElement(tag);if(cl)e.className=cl;
@@ -46,7 +46,6 @@ function draw(){
  const all=uniqWorks();
  const count=state=>all.filter(w=>stateOf(w)===state).length;
  $("count-total").textContent=String(all.length);
- $("count-draft").textContent=String(count("draft"));
  $("count-approved").textContent=String(count("approved"));
  $("count-excluded").textContent=String(count("excluded"));
  document.querySelectorAll("[data-filter]").forEach(b=>b.classList.toggle("selected",b.dataset.filter===selected));
@@ -75,8 +74,8 @@ function draw(){
    }
    item.append(links);
    const controls=make("div","card-controls");
-   for(const next of ["approved","draft","excluded"]){
-     const b=make("button",state===next?"active":"",statusText[next]);
+   for(const next of ["approved","excluded"]){
+     const b=make("button",state===next?"active":"",next==="approved"?"掲載する":"非掲載にする");
      b.type="button";b.dataset.status=next;
      if(saving)b.disabled=true;
      if(state===next)b.setAttribute("aria-pressed","true");
@@ -144,7 +143,7 @@ async function connect(){
    if($("remember").checked)sessionStorage.setItem(AUTHKEY,token);
    else sessionStorage.removeItem(AUTHKEY);
    setConnection(true);
-   notify("接続しました。承認・保留・除外を変更できます。");
+   notify("接続しました。問題のある作品だけ「非掲載にする」を選んでください。");
  }catch(e){
    token="";sessionStorage.removeItem(AUTHKEY);
    setConnection(false);notify(String(e.message||e),true);
@@ -165,8 +164,9 @@ function fromBase64(s){
 }
 async function change(work,next){
  if(saving)return;
+ if(stateOf(work)===next){notify("すでに「"+statusText[next]+"」になっています。");return}
  if(!token){
-   if(next==="excluded"&&!confirm("「"+work.title+"」を除外するためGitHubの確認画面を開きます。よろしいですか？"))return;
+   if(next==="excluded"&&!confirm("「"+work.title+"」を非掲載にしますか？\nあとから掲載に戻すこともできます。"))return;
    const issueTitle="[シロクマ掲載管理] "+work.month+"|"+work.handle+" "+next;
    const request={version:1,month:work.month,handle:work.handle,status:next};
    const issueBody="シロクマ文芸部の掲載管理画面からの申請です。\n内容を確認して「Submit new issue」を押すと反映されます。\n\n"
@@ -178,8 +178,7 @@ async function change(work,next){
    notify("GitHubの確認画面を開きました。GitHubで「Submit new issue」を押すと変更が確定し、自動で公式サイトに反映されます。");
    return;
  }
- if(stateOf(work)===next){notify("すでに「"+statusText[next]+"」になっています。");return}
- if(next==="excluded"&&!confirm("「"+work.title+"」を除外しますか？\nいつでも承認や保留に戻せます。"))return;
+ if(next==="excluded"&&!confirm("「"+work.title+"」を非掲載にしますか？\nあとから掲載に戻すこともできます。"))return;
  const key=keyOf(work);
  saving=true;draw();notify("GitHubへ変更を保存しています…");
  try{
