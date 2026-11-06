@@ -67,7 +67,7 @@ function articleCard(w){
  imprint.append(element("strong","", "シロクマ文芸部"),element("small","","SHIROKUMA BUNGEIBU"));
  content.append(title,rule,byline,imprint);
  book.append(content);coverLink.append(book);card.append(coverLink);
- const read=link("作品を読む　→",w.url,"read-link");
+ const read=link("読む　→",w.url,"read-link");
  read.setAttribute("aria-label",name+"「"+w.title+"」を読む");
  card.append(read);
  return card;
