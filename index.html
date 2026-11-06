@@ -262,6 +262,18 @@
 @media(prefers-reduced-motion:reduce){
  .hero-book-cta,.book-read-link{transition:none}
 }
+
+/* Editorial front page: only the five latest items are featured. */
+.shelf-navigation{display:flex;justify-content:flex-end;margin:27px 9px 0}
+.shelf-all-link{
+  display:inline-flex;align-items:center;gap:9px;min-height:42px;
+  padding:8px 0;color:#1e5d78;text-decoration:none;
+  font:600 13px/1.7 var(--sans);border-bottom:1px solid #94c1d0;
+  letter-spacing:.02em;
+}
+.shelf-all-link:hover{color:#0e7899;border-color:#0e7899}
+.shelf-all-link:focus-visible{outline:3px solid #006d96;outline-offset:4px}
+@media(max-width:700px){.shelf-navigation{justify-content:center;margin:19px 0 0}}
 </style>
 </head>
 <body>
@@ -293,7 +305,7 @@
 <div class="hero-aside"><p class="aside-note"><strong><span>はじめてnoteを書く人も</span><span>自己紹介がわりにどうぞ！</span></strong></p><div class="aside-count"><div class="aside-line"></div><div class="aside-label" id="asideMonth">#シロクマ文芸部 の累計記事数</div><div class="aside-number"><span id="asideCount">—</span><small>作品</small></div><div class="aside-foot" id="asideFoot">noteのハッシュタグ登録記事数</div></div></div>
 </div></section>
 <main class="main container">
-<section id="works" aria-labelledby="works-title"><div class="section-head"><div class="section-head-left"><h2 id="works-title">注目記事</h2><p>シロクマ文芸部の参加作品に初めてコメントしてくれた人の作品をご紹介します。</p></div></div><div class="shelf-area"><div id="bookshelf" class="bookshelf"><div class="shelf-empty">本棚の作品を読み込み中です。</div></div></div></section>
+<section id="works" aria-labelledby="works-title"><div class="section-head"><div class="section-head-left"><h2 id="works-title">注目記事</h2><p>シロクマ文芸部の参加作品に初めてコメントしてくれた人の作品をご紹介します。</p></div></div><div class="shelf-area"><div id="bookshelf" class="bookshelf"><div class="shelf-empty">本棚の作品を読み込み中です。</div></div></div><div class="shelf-navigation"><a class="shelf-all-link" href="./articles/">注目記事の一覧を見る <span aria-hidden="true">→</span></a></div></section>
 
 </main>
 <section class="about" id="about"><div class="container about-inner"><div><h2>はじめてのコメントを、<br>次の作品へ繋ぐ。</h2><p>作品への感想は、クリエイターの励みになります。まだコメントのなかった作品に最初のひと言を届けてくれた人の作品を紹介します。</p></div><div class="steps"><div class="step"><b>1</b><strong>参加作品を読む</strong><small>シロクマ文芸部の作品を見つける。</small></div><div class="step"><b>2</b><strong>最初のひと言を届ける</strong><small>作者本人以外からの初コメントが対象。</small></div><div class="step"><b>3</b><strong>その人の作品を紹介</strong><small>運営者が確認してから掲載します。</small></div></div></div></section>
@@ -335,7 +347,7 @@ function updatePublicShelf(){
 function renderShelf(){
  const root=$("bookshelf");root.replaceChildren();
  if(!publicWorks.length){const empty=make("div","shelf-empty");empty.append(make("strong","","掲載作品はまだありません"),make("span","","新しい作品が見つかると、ここに自動で並びます。"));root.append(empty);return}
- for(const w of publicWorks){
+ for(const w of publicWorks.slice(0,5)){
   const creatorName=creatorDisplayName(w),outer=make("article","shelf-item");
   const a=link("",w.url,"cover-link");a.setAttribute("aria-label",w.title+" ／ "+creatorName+" の作品を読む");
   const book=make("div","mini-book"),inside=make("div","mini-book-content");
