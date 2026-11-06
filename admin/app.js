@@ -19,7 +19,7 @@ const safeWork=w=>w&&typeof w==="object"&&/^\d{4}-\d{2}$/.test(w.month)&&
   typeof w.title==="string"&&w.title.trim()&&w.title.length<=300&&
   typeof w.url==="string"&&notePattern.test(w.url)&&
   notePattern.exec(w.url)[1]===w.handle;
-const keyOf=w=>w.month+"|"+w.handle;
+const keyOf=w=>window.shirokumaWeekKey(w);
 function notify(t,error=false){
  $("message").textContent=t;$("message").classList.toggle("error",error);
 }
@@ -29,13 +29,16 @@ function asLink(text,url){
 }
 function uniqWorks(){
  const m=new Map();
- for(const w of published)if(safeWork(w))m.set(keyOf(w),w);
- for(const w of candidates)if(safeWork(w))m.set(keyOf(w),w);
+ for(const w of [...published,...candidates]){
+   if(!safeWork(w))continue;
+   const key=keyOf(w),old=m.get(key);
+   if(!old||String(w.firstCommentAt||"")<String(old.firstCommentAt||""))m.set(key,w);
+ }
  return [...m.values()].sort((a,b)=>String(b.firstCommentAt||"").localeCompare(String(a.firstCommentAt||""))||b.month.localeCompare(a.month));
 }
 function stateOf(w){
  // 候補はデフォルト掲載。過去の保留指定も非掲載として維持する。
- const manual=decisions[keyOf(w)]?.status;
+ const manual=window.shirokumaDecisionStatus(w,decisions);
  return manual==="draft"||manual==="excluded"?"excluded":"approved";
 }
 function make(tag,cl="",text=null){
@@ -62,7 +65,7 @@ function draw(){
  }
  for(const w of visible){
    const item=make("article","card"),state=stateOf(w),head=make("div","card-top");
-   head.append(make("span","status "+state,statusText[state]),make("span","month",w.month.replace("-","年")+"月"));
+   head.append(make("span","status "+state,statusText[state]),make("span","month",window.shirokumaWeekStart(w)+"週（木曜20時〜）"));
    item.append(head);
    item.append(make("h3","",w.title));
    const display=creators[w.handle]?.name;
@@ -167,8 +170,8 @@ async function change(work,next){
  if(stateOf(work)===next){notify("すでに「"+statusText[next]+"」になっています。");return}
  if(!token){
    if(next==="excluded"&&!confirm("「"+work.title+"」を非掲載にしますか？\nあとから掲載に戻すこともできます。"))return;
-   const issueTitle="[シロクマ掲載管理] "+work.month+"|"+work.handle+" "+next;
-   const request={version:1,month:work.month,handle:work.handle,status:next};
+   const issueTitle="[シロクマ掲載管理] "+keyOf(work)+" "+next;
+   const request={version:2,month:work.month,weekStart:window.shirokumaWeekStart(work),handle:work.handle,status:next};
    const issueBody="シロクマ文芸部の掲載管理画面からの申請です。\n内容を確認して「Submit new issue」を押すと反映されます。\n\n"
      +"<!-- shirokuma-review-request\n"+JSON.stringify(request)+"\n-->";
    const link=new URL("https://github.com/"+REPOSITORY+"/issues/new");
