@@ -40,8 +40,13 @@ def get_nickname(handle):
 
 def main():
     works = json.loads(WORKS.read_text(encoding="utf-8"))
+    try:
+        candidates = json.loads((ROOT / "data/candidates.json").read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        candidates = {"works": []}
+    all_works = list(works.get("works", [])) + list(candidates.get("works", []))
     handles = sorted({
-        entry.get("handle") for entry in works.get("works", [])
+        entry.get("handle") for entry in all_works
         if isinstance(entry, dict) and isinstance(entry.get("handle"), str)
         and HANDLE.fullmatch(entry["handle"])
     })
