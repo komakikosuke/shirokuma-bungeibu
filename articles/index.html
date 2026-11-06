@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#5dc0d5">
+<meta name="description" content="シロクマ文芸部の注目記事一覧。参加作品に初めてコメントを届けてくれたクリエイターの作品を紹介します。">
+<link rel="icon" type="image/png" href="../assets/polarbear-icon.png">
+<link rel="stylesheet" href="./style.css?v=1">
+<script defer src="./app.js?v=1"></script>
+<title>注目記事の一覧｜シロクマ文芸部</title>
+</head>
+<body>
+<header class="site-header">
+ <div class="container header-inner">
+  <a class="brand" href="../" aria-label="シロクマ文芸部 トップへ戻る"><img class="brand-icon" src="../assets/polarbear-icon.png" alt="" width="45" height="45"><span>シロクマ文芸部</span></a>
+  <a class="header-back" href="../">トップページへ戻る <span aria-hidden="true">↗</span></a>
+ </div>
+</header>
+<main>
+ <section class="page-hero" aria-labelledby="archive-title">
+  <div class="container">
+   <p class="eyebrow">SHIROKUMA BUNGEIBU</p>
+   <h1 id="archive-title">注目記事の一覧</h1>
+   <p class="page-intro">シロクマ文芸部の参加作品に初めてコメントしてくれた人の作品をご紹介します。</p>
+  </div>
+ </section>
+ <section class="container archive" aria-label="注目記事">
+  <div class="archive-heading">
+    <p class="item-total" id="itemTotal" aria-live="polite">作品を読み込んでいます…</p>
+    <span class="sort-label">新しい順</span>
+  </div>
+  <div id="articleGrid" class="article-grid"><div class="empty">作品を読み込んでいます…</div></div>
+  <div class="load-more-wrap"><button id="loadMore" type="button" hidden>さらに作品を見る <span aria-hidden="true">↓</span></button></div>
+ </section>
+</main>
+<footer class="footer"><div class="container footer-inner"><span>© シロクマ文芸部</span><a href="../">トップページへ戻る ↑</a></div></footer>
+</body>
+</html>
