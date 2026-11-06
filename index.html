@@ -62,6 +62,56 @@
 .hero-book-art{display:block;width:min(100%,370px);height:auto;max-height:495px;object-fit:contain;box-shadow:0 22px 38px rgba(30,82,103,.12);border-radius:3px}
 .hero-book-art[hidden],.hero-book[hidden]{display:none!important}
 @media(max-width:700px){.hero-book-art{width:min(100%,315px);max-height:none}}
+
+/* Shared literary book cover: identical artwork, live title/author/month. */
+.bookshelf{gap:clamp(16px,2.2vw,29px);align-items:end}
+.shelf-item{min-width:0}
+.cover-link{padding:3px 5px 3px 13px}
+.mini-book{
+ height:336px;width:100%;position:relative;overflow:visible;
+ background:linear-gradient(90deg,#dfdbd3 0,#ebe8df 2%,#f7f4ec 6%,#fffdf8 12%,#fffdf8 92%,#f4f1e9 100%);
+ border:1px solid #d3d5ce;border-radius:3px 5px 5px 3px;
+ box-shadow:-8px 7px 9px #214d6038,9px 13px 18px #183e5028,inset 4px 0 7px #9da9a524;
+}
+.mini-book:before{
+ content:"";position:absolute;inset:12px 12px 12px 16px;
+ border:1px solid #90bac8;outline:1px solid #c7dbe1;outline-offset:-6px;
+ background:none;pointer-events:none;
+}
+.mini-book:after{
+ content:"";position:absolute;right:-6px;top:5px;bottom:5px;width:6px;
+ background:repeating-linear-gradient(to bottom,#fffef9 0 2px,#d4d7d4 2px 3px);
+ box-shadow:3px 3px 5px #22465a25;border-radius:0 2px 2px 0;
+ pointer-events:none;
+}
+.mini-book-content{
+ height:100%;padding:32px 24px 23px 30px;position:relative;z-index:1;
+ display:flex;flex-direction:column;color:#173d57
+}
+.mini-type{font:500 11px/1.5 var(--serif);letter-spacing:.05em;color:#496d81}
+.mini-month{font:11px/1.5 var(--serif);letter-spacing:.08em;color:#637f90;margin-top:3px}
+.mini-book h3{
+ font:500 clamp(18px,1.7vw,24px)/1.45 var(--serif);
+ letter-spacing:.04em;overflow-wrap:anywhere;word-break:normal;
+ margin:28px 0 11px;max-height:5.8em;overflow:hidden
+}
+.mini-book h3.mini-title-long{font-size:clamp(16px,1.5vw,20px);margin-top:24px}
+.mini-book h3.mini-title-very-long{font-size:clamp(14px,1.3vw,18px);margin-top:20px;max-height:7.5em}
+.mini-rule{height:1px;background:#b0c9d3;flex:none;margin:0 0 13px}
+.mini-description{font:11px/1.85 var(--serif);color:#68818f;margin:0}
+.mini-seal{display:flex;align-items:center;gap:9px;margin-top:auto;min-width:0}
+.mini-seal-mark{width:34px;height:34px;object-fit:cover;border:1px solid #9cbcca;border-radius:50%;flex:none}
+.mini-author-block{display:flex;flex-direction:column;min-width:0}
+.mini-author{font:11px/1.4 var(--serif);color:#456a80;overflow-wrap:anywhere;margin:0}
+.mini-publisher{font:7px/1.5 var(--serif);letter-spacing:.13em;color:#658799;white-space:nowrap}
+.book-caption{margin:14px 9px 0}
+@media(max-width:700px){
+ .mini-book{height:315px}
+ .mini-book-content{padding:29px 21px 22px 27px}
+ .mini-book h3{font-size:22px}
+ .mini-book h3.mini-title-long{font-size:19px}
+ .mini-book h3.mini-title-very-long{font-size:16px}
+}
 </style>
 </head>
 <body>
@@ -101,8 +151,36 @@ const make=(tag,cls,txt)=>{const el=document.createElement(tag);if(cls)el.classN
 const monthLabel=str=>/^\d{4}-\d{2}$/.test(str)?str.slice(0,4)+"年"+Number(str.slice(5))+"月":str;
 const link=(txt,url,cls)=>{const a=make("a",cls,txt);a.href=url;a.target="_blank";a.rel="noopener noreferrer";return a};
 let publicWorks=[];
-function renderShelf(){const root=$("bookshelf");root.replaceChildren();if(!publicWorks.length){const empty=make("div","shelf-empty");empty.append(make("strong","","紹介作品はまだありません"),make("span","","公開が承認された作品が、ここに少しずつ並びます。"));root.append(empty);return}
-for(const w of publicWorks){const outer=make("article","shelf-item");const a=link("",w.url,"cover-link");const book=make("div","mini-book");const inside=make("div","mini-book-content");inside.append(make("div","mini-type","シロクマ文芸部　／　"+monthLabel(w.month)),make("h3","",w.title),make("p","mini-author",w.handle+" さん"),make("p","mini-description","最初のコメントからつながった、ひとつの物語。"));const stamp=make("div","mini-seal");const seal=make("img","mini-seal-mark");seal.src="./assets/polarbear-icon.png";seal.alt="";stamp.append(seal,make("span","","シロクマ文芸部 文庫"));inside.append(stamp);book.append(inside);a.append(book);outer.append(a);const cap=make("div","book-caption");cap.append(make("span","","@"+w.handle),make("span","caption-badge","紹介中"));outer.append(cap);root.append(outer)}}
+function renderShelf(){
+ const root=$("bookshelf");root.replaceChildren();
+ if(!publicWorks.length){const empty=make("div","shelf-empty");empty.append(make("strong","","紹介作品はまだありません"),make("span","","公開が承認された作品が、ここに少しずつ並びます。"));root.append(empty);return}
+ for(const w of publicWorks){
+   const outer=make("article","shelf-item");
+   const a=link("",w.url,"cover-link");
+   a.setAttribute("aria-label",w.title+" ／ "+w.handle+" さんの作品を読む");
+   const book=make("div","mini-book");
+   const inside=make("div","mini-book-content");
+   const label=make("div","mini-type","シロクマ文芸部の本棚");
+   const mo=make("div","mini-month",monthLabel(w.month)+" 掲載");
+   const title=make("h3","",w.title);
+   const n=[...w.title].length;
+   if(n>39)title.classList.add("mini-title-very-long");
+   else if(n>22)title.classList.add("mini-title-long");
+   const rule=make("div","mini-rule");
+   const desc=make("p","mini-description","最初のひと言から、物語がつながる。");
+   const stamp=make("div","mini-seal");
+   const seal=make("img","mini-seal-mark");
+   seal.src="./assets/polarbear-icon.png";seal.alt="";
+   const author=make("div","mini-author-block");
+   author.append(make("span","mini-author",w.handle+" さん"),make("span","mini-publisher","SHIROKUMA BUNGEIBU"));
+   stamp.append(seal,author);
+   inside.append(label,mo,title,rule,desc,stamp);
+   book.append(inside);a.append(book);outer.append(a);
+   const cap=make("div","book-caption");
+   cap.append(make("span","","@"+w.handle),make("span","caption-badge","紹介作品"));
+   outer.append(cap);root.append(outer);
+ }
+}
 function renderSearch(){const query=$("searchInput").value.trim().normalize("NFKC").toLocaleLowerCase("ja");const mo=$("monthSelect").value;const sort=$("sortSelect").value;let works=publicWorks.filter(w=>(mo==="all"||w.month===mo)&&(!query||(w.title+" "+w.handle).normalize("NFKC").toLocaleLowerCase("ja").includes(query)));works.sort((a,b)=>sort==="old"?String(a.firstCommentAt).localeCompare(String(b.firstCommentAt)):sort==="title"?a.title.localeCompare(b.title,"ja"):String(b.firstCommentAt).localeCompare(String(a.firstCommentAt)));$("resultCount").textContent="検索結果："+formatter.format(works.length)+"作品";const root=$("results");root.replaceChildren();if(!works.length){root.append(make("div","search-empty","該当する紹介作品はありません。"));return}for(const w of works){const a=link("",w.url,"result");a.append(make("strong","",w.title),make("span","",monthLabel(w.month)+"　／　@"+w.handle+"　 ↗"));root.append(a)}}
 function render(data){if(!data||data.version!==1||!Array.isArray(data.months)||!Array.isArray(data.works))throw new Error("公開データの形式が違います");const months=data.months.filter(m=>m&&/^\d{4}-\d{2}$/.test(m.month)&&Number.isInteger(m.participatingWorks)&&m.participatingWorks>=0).sort((a,b)=>b.month.localeCompare(a.month));publicWorks=data.works.filter(w=>w&&/^\d{4}-\d{2}$/.test(w.month)&&typeof w.title==="string"&&typeof w.handle==="string"&&safeUrl(w.url)).map(w=>({...w,url:safeUrl(w.url)})).sort((a,b)=>String(b.firstCommentAt).localeCompare(String(a.firstCommentAt)));const latest=months[0];const useArtwork=latest?.month==="2026-11"&&publicWorks.some(w=>w.month==="2026-11"&&w.handle==="7105hn"&&w.title==="【掌編】快晴前夜");$("heroBookArt").hidden=!useArtwork;$("heroBookFallback").hidden=useArtwork;const total=months.reduce((a,b)=>a+b.participatingWorks,0);$("factWorks").textContent=months.length?formatter.format(total):"—";$("factIntroductions").textContent=formatter.format(publicWorks.length);$("asideCount").textContent=latest?formatter.format(latest.participatingWorks):"—";$("asideMonth").textContent=latest?monthLabel(latest.month)+"の参加作品":"今月の参加作品";$("asideFeatured").textContent=formatter.format(publicWorks.length)+"作品";$("bookMonth").textContent=latest?monthLabel(latest.month):"本棚";if(publicWorks.length){$("bookTitle").textContent=publicWorks[0].title;$("bookDescription").textContent="最初のコメントを届けてくれた、@"+publicWorks[0].handle+" さんの作品。"}const monthsSelect=$("monthSelect");monthsSelect.replaceChildren();const all=make("option","","すべての月");all.value="all";monthsSelect.append(all);for(const m of [...new Set(publicWorks.map(w=>w.month))].sort().reverse()){const option=make("option","",monthLabel(m));option.value=m;monthsSelect.append(option)}renderShelf();renderSearch()}
 $("searchJump").addEventListener("click",()=>{$("finder").scrollIntoView({behavior:window.matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth"});$("searchInput").focus({preventScroll:true})});
