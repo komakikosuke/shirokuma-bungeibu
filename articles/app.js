@@ -38,10 +38,13 @@ function merge(works,candidates,decisions){
    throw Error("掲載データの形式が正しくありません");
  }
  const m=new Map();
- for(const w of works.works)if(safeWork(w))m.set(w.month+"|"+w.handle,w);
- for(const w of candidates.works)if(safeWork(w))m.set(w.month+"|"+w.handle,w);
- for(const [key] of m){
-   if(["draft","excluded"].includes(decisions.decisions[key]?.status))m.delete(key);
+ for(const w of [...works.works,...candidates.works]){
+   if(!safeWork(w))continue;
+   const key=window.shirokumaWeekKey(w),previous=m.get(key);
+   if(!previous||String(w.firstCommentAt||"")<String(previous.firstCommentAt||""))m.set(key,w);
+ }
+ for(const [key,w] of m){
+   if(["draft","excluded"].includes(window.shirokumaDecisionStatus(w,decisions.decisions)))m.delete(key);
  }
  return [...m.values()].sort((a,b)=>String(b.firstCommentAt||"").localeCompare(String(a.firstCommentAt||""))||b.month.localeCompare(a.month));
 }
