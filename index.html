@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#5dc0d5"><link rel="icon" type="image/png" href="./assets/polarbear-icon.png">
 <meta name="description" content="シロクマ文芸部の本棚。言葉を届けた人の物語と、みんなで書く楽しさを集める場所。">
-<title>シロクマ文芸部の本棚｜ことばで、世界が少し、やさしくなる。</title>
+<title>シロクマ文芸部｜クリエイターの変える場所。</title>
 <style>
 :root{--navy:#133e59;--blue:#238bab;--sky:#a3d9e7;--paper:#fffdf7;--muted:#6c8798;--line:#d7e7ee;--sans:-apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;--serif:"Hiragino Mincho ProN","Yu Mincho",YuMincho,"Noto Serif JP",serif}
 *,*:before,*:after{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:#fdfdfa;color:var(--navy);font:15px/1.75 var(--sans)}a{color:inherit}a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #006d96;outline-offset:3px}button,input,select{font:inherit}.container{width:min(1280px,calc(100% - 76px));margin-inline:auto}
@@ -201,20 +201,25 @@
  .mini-book h3.mini-title-long{font-size:clamp(11px,6.25cqw,23px)}
  .mini-book h3.mini-title-very-long{font-size:clamp(10px,5.2cqw,19px)}
 }
+
+/* Simplified editorial layout after removing search and badges */
+.hero-copy p strong{font-weight:700}
+.header-nav{gap:0}
+.book-caption{justify-content:flex-start}
+.section-head{justify-content:flex-start}
 </style>
 </head>
 <body>
 <header class="site-header" id="top">
 <div class="container header-inner">
 <a class="brand" href="#top" aria-label="シロクマ文芸部 ホーム"><span class="logo"><img class="original-icon" src="./assets/polarbear-icon.png" alt=""></span><span class="brand-name">シロクマ文芸部</span></a>
-<span class="tagline">書くことが、もっと楽しくなる場所。</span>
-<nav class="header-nav" aria-label="主要メニュー"><a href="#top" aria-current="page">ホーム</a><a href="#works">紹介作品</a><a href="#finder">作品をさがす</a><a href="#about">文芸部について</a></nav>
-<button class="search-jump" id="searchJump" aria-label="作品検索へ移動"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="6.7"/><path d="m16 16 5.2 5.2"/></svg></button>
+<span class="tagline">クリエイターの帰る場所。</span>
+<nav class="header-nav" aria-label="主要メニュー"><a href="https://note.com/komaki_kousuke/n/n097f169769c3" rel="noopener noreferrer">文芸部について</a></nav>
 </div></header>
 <section class="hero" aria-labelledby="hero-title"><div class="container hero-inner">
 <div class="hero-copy">
-<h1 id="hero-title">ことばで、<br>世界が少し、<br>やさしくなる。</h1>
-<p>シロクマ文芸部は、毎週のお題で<br>みんなの物語が集まる創作のコミュニティです。<br>読む・書く・つながる、その楽しさをここに。</p>
+<h1 id="hero-title">クリエイターの<br>変える場所。</h1>
+<p>noteで創作を楽しむコミュニティです。<br><strong>毎週、みんなで同じ言葉から文章を書きはじめる活動</strong>をしています。</p>
 <a class="outline-link" href="#works">今月の本棚を読む　→</a>
 <div class="hero-facts"><div><strong id="factWorks">—</strong><small>保存済みの参加作品</small></div><div><strong id="factIntroductions">—</strong><small>紹介中の作品</small></div><div><strong>毎週</strong><small>お題を発表</small></div></div>
 </div>
@@ -223,11 +228,11 @@
 <div class="book-mid"><div class="book-title" id="bookTitle">はじめの、<br>ひと言。</div><div class="book-rule"></div><p class="book-description" id="bookDescription">まだ誰もコメントしていなかった作品に、最初の言葉を届ける。<br>そこから次の物語がはじまります。</p></div>
 <div class="book-foot"><span class="book-stamp"><img class="original-icon" src="./assets/polarbear-icon.png" alt=""></span><div><strong>シロクマ文芸部</strong><em>SHIROKUMA BUNGEIBU</em></div></div>
 </div></div></div>
-<div class="hero-aside"><p class="aside-note">どこかで、<br>だれかの物語が、<br>きっと、だれかの心を照らす。</p><div class="aside-count"><div class="aside-line"></div><div class="aside-label" id="asideMonth">今月の参加作品</div><div class="aside-number"><span id="asideCount">—</span><small>作品</small></div><div class="aside-foot">収集できた参加作品数</div></div><div class="aside-secondary">本棚に並ぶ紹介作品<strong id="asideFeatured">—</strong></div><a href="#finder">作品をさがす　→</a></div>
+<div class="hero-aside"><p class="aside-note">どこかで、<br>だれかの物語が、<br>きっと、だれかの心を照らす。</p><div class="aside-count"><div class="aside-line"></div><div class="aside-label" id="asideMonth">今月の参加作品</div><div class="aside-number"><span id="asideCount">—</span><small>作品</small></div><div class="aside-foot">収集できた参加作品数</div></div><div class="aside-secondary">本棚に並ぶ紹介作品<strong id="asideFeatured">—</strong></div></div>
 </div></section>
 <main class="main container">
-<section id="works" aria-labelledby="works-title"><div class="section-head"><div class="section-head-left"><h2 id="works-title">今月の本棚</h2><p>最初のコメントを届けてくれた人の作品を、運営者が確認してご紹介しています。</p></div><a href="#finder">作品をさがす →</a></div><div class="shelf-area"><div id="bookshelf" class="bookshelf"><div class="shelf-empty">本棚の作品を読み込み中です。</div></div><div class="shelf-rule" aria-hidden="true"></div></div></section>
-<section class="finder" id="finder" aria-labelledby="finder-title"><div><h2 id="finder-title">紹介作品をさがす</h2><p>公開中の紹介作品から、タイトルや作者名で探せます。<br>※すべての参加作品の検索にはまだ対応していません。</p></div><div class="finder-search"><label class="searchfield"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="6.7"/><path d="m16 16 5.2 5.2"/></svg><input id="searchInput" type="search" placeholder="作品名・作者名で検索…" aria-label="公開中の紹介作品を検索"></label><div class="search-options"><select id="monthSelect" aria-label="掲載月"><option value="all">すべての月</option></select><select id="sortSelect" aria-label="並び順"><option value="new">新しい紹介順</option><option value="old">古い紹介順</option><option value="title">作品名順</option></select></div><div class="finder-result" id="resultCount" aria-live="polite">紹介作品を読み込み中です。</div><div class="results" id="results"></div></div></section>
+<section id="works" aria-labelledby="works-title"><div class="section-head"><div class="section-head-left"><h2 id="works-title">今月の本棚</h2><p>シロクマ文芸部の参加作品に初めてコメントしてくれた人の作品をご紹介します。</p></div></div><div class="shelf-area"><div id="bookshelf" class="bookshelf"><div class="shelf-empty">本棚の作品を読み込み中です。</div></div><div class="shelf-rule" aria-hidden="true"></div></div></section>
+
 </main>
 <section class="about" id="about"><div class="container about-inner"><div><h2>ひとつのコメントから、<br>次の物語へ。</h2><p>作品を読んだ感想が、作者の励みになることがあります。まだコメントのなかった作品に最初のひと言を届けてくれた人の物語を、この本棚で紹介します。</p></div><div class="steps"><div class="step"><b>1</b><strong>参加作品を読む</strong><small>シロクマ文芸部の作品を見つける。</small></div><div class="step"><b>2</b><strong>最初のひと言を届ける</strong><small>作者本人以外からの初コメントが対象。</small></div><div class="step"><b>3</b><strong>その人の作品を紹介</strong><small>運営者が確認してから掲載します。</small></div></div></div></section>
 <footer class="footer"><div class="container footer-inner"><span>© シロクマ文芸部　ことばを通じて、創作の輪をひろげる。</span><a href="https://note.com/hashtag/%E3%82%B7%E3%83%AD%E3%82%AF%E3%83%9E%E6%96%87%E8%8A%B8%E9%83%A8" rel="noopener noreferrer">noteで参加作品を見る ↗</a></div></footer>
@@ -256,25 +261,22 @@ function renderShelf(){
    if(n>39)title.classList.add("mini-title-very-long");
    else if(n>22)title.classList.add("mini-title-long");
    const rule=make("div","mini-rule");
-   const desc=make("p","mini-description","最初のひと言から、物語がつながる。");
+   
    const stamp=make("div","mini-seal");
    const seal=make("img","mini-seal-mark");
    seal.src="./assets/polarbear-icon.png";seal.alt="";
    const author=make("div","mini-author-block");
-   author.append(make("span","mini-author",w.handle+" さん"),make("span","mini-publisher","SHIROKUMA BUNGEIBU"));
+   author.append(make("span","mini-author",w.handle),make("span","mini-publisher","SHIROKUMA BUNGEIBU"));
    stamp.append(seal,author);
-   inside.append(label,mo,title,rule,desc,stamp);
+   inside.append(label,mo,title,rule,stamp);
    book.append(inside);a.append(book);outer.append(a);
    const cap=make("div","book-caption");
-   cap.append(make("span","","@"+w.handle),make("span","caption-badge","紹介作品"));
+   cap.append(make("span","","@"+w.handle));
    outer.append(cap);root.append(outer);
  }
 }
-function renderSearch(){const query=$("searchInput").value.trim().normalize("NFKC").toLocaleLowerCase("ja");const mo=$("monthSelect").value;const sort=$("sortSelect").value;let works=publicWorks.filter(w=>(mo==="all"||w.month===mo)&&(!query||(w.title+" "+w.handle).normalize("NFKC").toLocaleLowerCase("ja").includes(query)));works.sort((a,b)=>sort==="old"?String(a.firstCommentAt).localeCompare(String(b.firstCommentAt)):sort==="title"?a.title.localeCompare(b.title,"ja"):String(b.firstCommentAt).localeCompare(String(a.firstCommentAt)));$("resultCount").textContent="検索結果："+formatter.format(works.length)+"作品";const root=$("results");root.replaceChildren();if(!works.length){root.append(make("div","search-empty","該当する紹介作品はありません。"));return}for(const w of works){const a=link("",w.url,"result");a.append(make("strong","",w.title),make("span","",monthLabel(w.month)+"　／　@"+w.handle+"　 ↗"));root.append(a)}}
-function render(data){if(!data||data.version!==1||!Array.isArray(data.months)||!Array.isArray(data.works))throw new Error("公開データの形式が違います");const months=data.months.filter(m=>m&&/^\d{4}-\d{2}$/.test(m.month)&&Number.isInteger(m.participatingWorks)&&m.participatingWorks>=0).sort((a,b)=>b.month.localeCompare(a.month));publicWorks=data.works.filter(w=>w&&/^\d{4}-\d{2}$/.test(w.month)&&typeof w.title==="string"&&typeof w.handle==="string"&&safeUrl(w.url)).map(w=>({...w,url:safeUrl(w.url)})).sort((a,b)=>String(b.firstCommentAt).localeCompare(String(a.firstCommentAt)));const latest=months[0];const useArtwork=latest?.month==="2026-11"&&publicWorks.some(w=>w.month==="2026-11"&&w.handle==="7105hn"&&w.title==="【掌編】快晴前夜");$("heroBookArt").hidden=!useArtwork;$("heroBookFallback").hidden=useArtwork;const total=months.reduce((a,b)=>a+b.participatingWorks,0);$("factWorks").textContent=months.length?formatter.format(total):"—";$("factIntroductions").textContent=formatter.format(publicWorks.length);$("asideCount").textContent=latest?formatter.format(latest.participatingWorks):"—";$("asideMonth").textContent=latest?monthLabel(latest.month)+"の参加作品":"今月の参加作品";$("asideFeatured").textContent=formatter.format(publicWorks.length)+"作品";$("bookMonth").textContent=latest?monthLabel(latest.month):"本棚";if(publicWorks.length){$("bookTitle").textContent=publicWorks[0].title;$("bookDescription").textContent="最初のコメントを届けてくれた、@"+publicWorks[0].handle+" さんの作品。"}const monthsSelect=$("monthSelect");monthsSelect.replaceChildren();const all=make("option","","すべての月");all.value="all";monthsSelect.append(all);for(const m of [...new Set(publicWorks.map(w=>w.month))].sort().reverse()){const option=make("option","",monthLabel(m));option.value=m;monthsSelect.append(option)}renderShelf();renderSearch()}
-$("searchJump").addEventListener("click",()=>{$("finder").scrollIntoView({behavior:window.matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth"});$("searchInput").focus({preventScroll:true})});
-$("searchInput").addEventListener("input",renderSearch);$("monthSelect").addEventListener("change",renderSearch);$("sortSelect").addEventListener("change",renderSearch);
-(async()=>{try{const resp=await fetch("./data/works.json?v="+Date.now(),{cache:"no-store"});if(!resp.ok)throw Error("HTTP "+resp.status);render(await resp.json())}catch(err){console.error("掲載データの読み込みに失敗しました",err);$("bookshelf").replaceChildren(make("div","shelf-empty","掲載データを取得できませんでした。ページを再読み込みしてください。"));$("resultCount").textContent="掲載データを取得できませんでした。"}})();
+function render(data){if(!data||data.version!==1||!Array.isArray(data.months)||!Array.isArray(data.works))throw new Error("公開データの形式が違います");const months=data.months.filter(m=>m&&/^\d{4}-\d{2}$/.test(m.month)&&Number.isInteger(m.participatingWorks)&&m.participatingWorks>=0).sort((a,b)=>b.month.localeCompare(a.month));publicWorks=data.works.filter(w=>w&&/^\d{4}-\d{2}$/.test(w.month)&&typeof w.title==="string"&&typeof w.handle==="string"&&safeUrl(w.url)).map(w=>({...w,url:safeUrl(w.url)})).sort((a,b)=>String(b.firstCommentAt).localeCompare(String(a.firstCommentAt)));const latest=months[0];const useArtwork=latest?.month==="2026-11"&&publicWorks.some(w=>w.month==="2026-11"&&w.handle==="7105hn"&&w.title==="【掌編】快晴前夜");$("heroBookArt").hidden=!useArtwork;$("heroBookFallback").hidden=useArtwork;const total=months.reduce((a,b)=>a+b.participatingWorks,0);$("factWorks").textContent=months.length?formatter.format(total):"—";$("factIntroductions").textContent=formatter.format(publicWorks.length);$("asideCount").textContent=latest?formatter.format(latest.participatingWorks):"—";$("asideMonth").textContent=latest?monthLabel(latest.month)+"の参加作品":"今月の参加作品";$("asideFeatured").textContent=formatter.format(publicWorks.length)+"作品";$("bookMonth").textContent=latest?monthLabel(latest.month):"本棚";if(publicWorks.length){$("bookTitle").textContent=publicWorks[0].title}renderShelf()}
+(async()=>{try{const resp=await fetch("./data/works.json?v="+Date.now(),{cache:"no-store"});if(!resp.ok)throw Error("HTTP "+resp.status);render(await resp.json())}catch(err){console.error("掲載データの読み込みに失敗しました",err);$("bookshelf").replaceChildren(make("div","shelf-empty","掲載データを取得できませんでした。ページを再読み込みしてください。"))}})();
 </script>
 </body>
 </html>
