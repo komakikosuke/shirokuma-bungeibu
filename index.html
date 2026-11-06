@@ -357,6 +357,10 @@
 @media(max-width:700px){
   .shelf-navigation{margin-top:10px}
 }
+
+/* Keep both halves of the editorial headline balanced instead of orphaning the final syllable. */
+.about h2 .about-headline-line{display:block;white-space:nowrap;letter-spacing:0}
+@media(max-width:700px){.about h2{font-size:clamp(20px,6.8vw,25px)}}
 </style>
 </head>
 <body>
@@ -392,7 +396,7 @@
 <section id="works" aria-labelledby="works-title"><div class="section-head"><div class="section-head-left"><h2 id="works-title">注目記事</h2><p>シロクマ文芸部の参加作品に初めてコメントしてくれた人の作品をご紹介します。</p></div></div><div class="shelf-area"><div id="bookshelf" class="bookshelf"><div class="shelf-empty">本棚の作品を読み込み中です。</div></div></div><div class="shelf-navigation"><a class="shelf-all-link" href="./articles/">注目記事の一覧を見る <span aria-hidden="true">→</span></a></div></section>
 
 </main>
-<section class="about" id="about"><div class="container about-inner"><div><h2>はじめてのコメントが、次の作品に繋がる。</h2><p>作品への感想はクリエイターの励みになります。<span class="about-nowrap">まだコメントのない作品に</span>最初のひと言を届けた人の作品を紹介します。</p></div><div class="steps"><div class="step"><b>1</b><strong>参加作品を読む</strong><small>noteで文芸部の作品を読む</small></div><div class="step"><b>2</b><strong>最初のひと言を届ける</strong><small>記事への初コメントが対象</small></div><div class="step"><b>3</b><strong>その人の作品を紹介</strong><small>このサイトに載る</small></div></div></div></section>
+<section class="about" id="about"><div class="container about-inner"><div><h2><span class="about-headline-line">はじめてのコメントが、</span><span class="about-headline-line">次の作品に繋がる。</span></h2><p>作品への感想はクリエイターの励みになります。<span class="about-nowrap">まだコメントのない作品に</span>最初のひと言を届けた人の作品を紹介します。</p></div><div class="steps"><div class="step"><b>1</b><strong>参加作品を読む</strong><small>noteで文芸部の作品を読む</small></div><div class="step"><b>2</b><strong>最初のひと言を届ける</strong><small>記事への初コメントが対象</small></div><div class="step"><b>3</b><strong>その人の作品を紹介</strong><small>このサイトに載る</small></div></div></div></section>
 <footer class="footer"><div class="container footer-inner"><span>© シロクマ文芸部</span><a href="https://note.com/hashtag/%E3%82%B7%E3%83%AD%E3%82%AF%E3%83%9E%E6%96%87%E8%8A%B8%E9%83%A8" rel="noopener noreferrer">noteで参加作品を見る ↗</a></div></footer>
 <script src="./assets/fit-cover-text.js?v=1"></script>
 <script>
