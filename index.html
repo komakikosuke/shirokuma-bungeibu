@@ -103,6 +103,19 @@
 .aside-number{font-variant-numeric:lining-nums tabular-nums}
 .aside-number small{font-size:clamp(13px,1.4vw,18px)}
 .aside-count .aside-label{font-size:clamp(12px,1.3vw,15px);line-height:1.5}
+
+/* Weekly prompt is the lead metric; no saved/introduction counters on hero. */
+.hero-facts{margin-top:22px;gap:0}
+.hero-facts>div{display:flex;align-items:baseline;gap:11px;border:0!important;padding:0!important}
+.hero-facts strong{font:600 clamp(23px,2vw,30px)/1.3 var(--serif)}
+.hero-facts small{font:600 12px/1.6 var(--serif);color:#426e83}
+.weekly-topic{margin-top:15px;max-width:410px;padding:16px 0 13px;border-top:1px solid #6eb2c3}
+.weekly-topic-heading{font:600 14px/1.5 var(--serif);letter-spacing:.08em}
+.weekly-topic-word{font:600 clamp(29px,3vw,41px)/1.45 var(--serif);letter-spacing:.06em;color:#103c58;margin:4px 0 6px;overflow-wrap:anywhere}
+.weekly-topic-link{display:inline-block;text-decoration:none;border-bottom:1px solid #467f95;padding-bottom:2px;font:600 12px/1.8 var(--sans);color:#2c657c}
+.weekly-topic-link:hover{color:#0c4b66}
+.weekly-topic-link[hidden]{display:none!important}
+@media(max-width:700px){.weekly-topic{margin-top:14px;padding-top:14px}.weekly-topic-word{font-size:29px}}
 </style>
 </head>
 <body>
@@ -116,7 +129,12 @@
 <div class="hero-copy">
 <h1 id="hero-title">クリエイターの<br>帰る場所。</h1>
 <p>noteで創作を楽しむコミュニティです。<br><strong>毎週、みんなで同じ言葉から文章を書く活動</strong>をしています。</p>
-<div class="hero-facts"><div><strong id="factWorks">—</strong><small>保存済みの参加作品</small></div><div><strong id="factIntroductions">—</strong><small>紹介中の作品</small></div><div><strong>毎週</strong><small>お題を発表</small></div></div>
+<div class="hero-facts"><div><strong>毎週</strong><small>お題を発表</small></div></div>
+<div class="weekly-topic" aria-labelledby="weeklyTopicHeading">
+<div class="weekly-topic-heading" id="weeklyTopicHeading">今週のお題</div>
+<div class="weekly-topic-word" id="weeklyTopicWord" aria-live="polite">読み込み中…</div>
+<a class="weekly-topic-link" id="weeklyTopicLink" rel="noopener noreferrer" target="_blank" hidden>お題の記事を読む　→</a>
+</div>
 </div>
 <div class="hero-book-stage"><img id="heroBookArt" class="hero-book-art" src="./assets/hero-book-2026-11.jpg" alt="シロクマ文芸部の本棚。2026年11月の紹介作品『【掌編】快晴前夜』の書籍風表紙。" width="750" height="938" decoding="async" hidden><div class="hero-book" id="heroBookFallback"><div class="book-border">
 <div class="book-topline"><small>シロクマ文芸部の本棚</small><span id="bookMonth">—</span></div>
@@ -170,7 +188,29 @@ function renderShelf(){
    outer.append(cap);root.append(outer);
  }
 }
-function render(data){if(!data||data.version!==1||!Array.isArray(data.months)||!Array.isArray(data.works))throw new Error("公開データの形式が違います");const months=data.months.filter(m=>m&&/^\d{4}-\d{2}$/.test(m.month)&&Number.isInteger(m.participatingWorks)&&m.participatingWorks>=0).sort((a,b)=>b.month.localeCompare(a.month));publicWorks=data.works.filter(w=>w&&/^\d{4}-\d{2}$/.test(w.month)&&typeof w.title==="string"&&typeof w.handle==="string"&&safeUrl(w.url)).map(w=>({...w,url:safeUrl(w.url)})).sort((a,b)=>String(b.firstCommentAt).localeCompare(String(a.firstCommentAt)));const latest=months[0];const useArtwork=latest?.month==="2026-11"&&publicWorks.some(w=>w.month==="2026-11"&&w.handle==="7105hn"&&w.title==="【掌編】快晴前夜");$("heroBookArt").hidden=!useArtwork;$("heroBookFallback").hidden=useArtwork;const total=months.reduce((a,b)=>a+b.participatingWorks,0);$("factWorks").textContent=months.length?formatter.format(total):"—";$("factIntroductions").textContent=formatter.format(publicWorks.length);$("asideFeatured").textContent=formatter.format(publicWorks.length)+"作品";$("bookMonth").textContent=latest?monthLabel(latest.month):"本棚";if(publicWorks.length){$("bookTitle").textContent=publicWorks[0].title}renderShelf()}
+function render(data){if(!data||data.version!==1||!Array.isArray(data.months)||!Array.isArray(data.works))throw new Error("公開データの形式が違います");const months=data.months.filter(m=>m&&/^\d{4}-\d{2}$/.test(m.month)&&Number.isInteger(m.participatingWorks)&&m.participatingWorks>=0).sort((a,b)=>b.month.localeCompare(a.month));publicWorks=data.works.filter(w=>w&&/^\d{4}-\d{2}$/.test(w.month)&&typeof w.title==="string"&&typeof w.handle==="string"&&safeUrl(w.url)).map(w=>({...w,url:safeUrl(w.url)})).sort((a,b)=>String(b.firstCommentAt).localeCompare(String(a.firstCommentAt)));const latest=months[0];const useArtwork=latest?.month==="2026-11"&&publicWorks.some(w=>w.month==="2026-11"&&w.handle==="7105hn"&&w.title==="【掌編】快晴前夜");$("heroBookArt").hidden=!useArtwork;$("heroBookFallback").hidden=useArtwork;const total=months.reduce((a,b)=>a+b.participatingWorks,0);$("asideFeatured").textContent=formatter.format(publicWorks.length)+"作品";$("bookMonth").textContent=latest?monthLabel(latest.month):"本棚";if(publicWorks.length){$("bookTitle").textContent=publicWorks[0].title}renderShelf()}
+
+
+async function loadWeeklyTopic(){
+ const word=$("weeklyTopicWord");
+ const anchor=$("weeklyTopicLink");
+ try{
+   const r=await fetch("./data/weekly-topic.json?v="+Date.now(),{cache:"no-store"});
+   if(!r.ok)throw Error("HTTP "+r.status);
+   const item=await r.json();
+   if(typeof item.topic!=="string"||item.topic.length<1||item.topic.length>80||typeof item.url!=="string")throw Error("Invalid weekly topic");
+   const u=new URL(item.url);
+   if(u.protocol!=="https:"||u.hostname!=="note.com"||!/^\/komaki_kousuke\/n\/n[a-zA-Z0-9]+\/?$/.test(u.pathname))throw Error("Unexpected article link");
+   word.textContent="「"+item.topic+"」";
+   anchor.href=u.href;
+   anchor.hidden=false;
+ }catch(err){
+   console.warn("最新のお題を読み込めませんでした",err);
+   word.textContent="お題を確認中";
+   anchor.hidden=true;
+ }
+}
+loadWeeklyTopic();
 
 async function loadHashtagCount(){
  const urls=[
