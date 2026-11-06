@@ -314,15 +314,13 @@ let publicCreatorNames={};
 const creatorDisplayName=w=>{const n=publicCreatorNames[w.handle];return typeof n==="string"&&n.trim()?n.trim():"クリエイター名を確認中";};
 const validFeaturedWork=w=>w&&/^\d{4}-\d{2}$/.test(w.month)&&typeof w.title==="string"&&typeof w.handle==="string"&&safeUrl(w.url);
 function updatePublicShelf(){
+ // 自動掲載が基本。手動で明示された非掲載・保留だけ除外する。
  const works=new Map();
  const keyOf=w=>w.month+"|"+w.handle;
- for(const w of originalPublished){
-   if(!["draft","excluded"].includes(editorialDecisions[keyOf(w)]?.status))works.set(keyOf(w),w);
- }
- for(const w of discoveredCandidates){
-   const status=editorialDecisions[keyOf(w)]?.status;
-   if(status==="approved")works.set(keyOf(w),w);
-   else if(status==="draft"||status==="excluded")works.delete(keyOf(w));
+ for(const w of originalPublished)works.set(keyOf(w),w);
+ for(const w of discoveredCandidates)works.set(keyOf(w),w);
+ for(const [key] of works){
+   if(["draft","excluded"].includes(editorialDecisions[key]?.status))works.delete(key);
  }
  publicWorks=[...works.values()].sort((a,b)=>String(b.firstCommentAt||"").localeCompare(String(a.firstCommentAt||"")));
  const lead=publicWorks[0];
@@ -336,7 +334,7 @@ function updatePublicShelf(){
 }
 function renderShelf(){
  const root=$("bookshelf");root.replaceChildren();
- if(!publicWorks.length){const empty=make("div","shelf-empty");empty.append(make("strong","","紹介作品はまだありません"),make("span","","公開が承認された作品が、ここに少しずつ並びます。"));root.append(empty);return}
+ if(!publicWorks.length){const empty=make("div","shelf-empty");empty.append(make("strong","","掲載作品はまだありません"),make("span","","新しい作品が見つかると、ここに自動で並びます。"));root.append(empty);return}
  for(const w of publicWorks){
   const creatorName=creatorDisplayName(w),outer=make("article","shelf-item");
   const a=link("",w.url,"cover-link");a.setAttribute("aria-label",w.title+" ／ "+creatorName+" の作品を読む");
@@ -372,7 +370,7 @@ async function loadEditorialState(){
    discoveredCandidates=candidateData.works.filter(validFeaturedWork).map(w=>({...w,url:safeUrl(w.url)}));
    editorialDecisions=decisionData.decisions;
    updatePublicShelf();
- }catch(err){console.info("従来の承認済み作品のみを表示します",err)}
+ }catch(err){console.info("追加候補を取得できないため、保存済みの掲載作品だけ表示します",err)}
 }
 loadEditorialState();
 async function loadCreatorNames(){
