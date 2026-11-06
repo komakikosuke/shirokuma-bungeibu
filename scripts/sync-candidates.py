@@ -2,11 +2,11 @@
 """Collect first-comment featured candidates from public note APIs.
 
 Matches the existing Safari collector's rules:
- - hashtag シロクマ文芸部, current Japanese month
+ - hashtag シロクマ文芸部, current Japanese month (and previous month when the current weekly window crosses a month)
  - oldest comment on a participation article
  - first commenter must be someone other than that article's author
- - their latest same-month participation article published before the comment
- - one candidate per commenter per month (earliest first-comment opportunity)
+ - their latest participation article published in the same calendar month as the comment, before it
+ - one candidate per commenter per JST Thursday 20:00 week (earliest first-comment opportunity)
 Approval decisions are NEVER modified by this collector.
 """
 import datetime as dt
@@ -22,7 +22,29 @@ ROOT = pathlib.Path(__file__).resolve().parents[1]
 CACHE_FILE = ROOT / "data/candidate-discovery-cache.json"
 OUT_FILE = ROOT / "data/candidates.json"
 TZ = dt.timezone(dt.timedelta(hours=9))
-MONTH = dt.datetime.now(TZ).strftime("%Y-%m")
+NOW_JST = dt.datetime.now(TZ)
+MONTH = NOW_JST.strftime("%Y-%m")
+MONTH_START = NOW_JST.replace(day=1,hour=0,minute=0,second=0,microsecond=0)
+
+def week_start(value):
+    """JST Thursday 20:00 start for the window containing value."""
+    local = value.astimezone(TZ)
+    days = (local.weekday() - 3) % 7  # Python Thursday = 3
+    start = (local - dt.timedelta(days=days)).replace(hour=20,minute=0,second=0,microsecond=0)
+    return start if local >= start else start - dt.timedelta(days=7)
+
+SCAN_START = min(MONTH_START,week_start(NOW_JST))
+EARLIEST_MONTH = SCAN_START.strftime("%Y-%m")
+
+def week_key(timestamp):
+    try:
+        parsed = dt.datetime.fromisoformat(str(timestamp).replace("Z","+00:00"))
+        if parsed.tzinfo is None:
+            parsed = parsed.replace(tzinfo=TZ)
+        return week_start(parsed).date().isoformat()
+    except (ValueError,TypeError):
+        return None
+
 TAG = "シロクマ文芸部"
 MAX_PAGES = 20
 URL = "https://note.com"
@@ -84,9 +106,14 @@ def to_time(s):
 def scan():
     old = read_json(CACHE_FILE, {})
     cache = old.get("months", {}) if isinstance(old.get("months"), dict) else {}
-    month_cache = cache.get(MONTH, {}) if isinstance(cache.get(MONTH), dict) else {}
-    prior_notes = month_cache.get("notes", {}) if isinstance(month_cache.get("notes"), dict) else {}
-    prior_comments = month_cache.get("comments", {}) if isinstance(month_cache.get("comments"), dict) else {}
+    prior_notes = {}
+    prior_comments = {}
+    for month in sorted({MONTH, EARLIEST_MONTH}):
+        month_cache = cache.get(month,{}) if isinstance(cache.get(month),dict) else {}
+        if isinstance(month_cache.get("notes"),dict):
+            prior_notes.update(month_cache["notes"])
+        if isinstance(month_cache.get("comments"),dict):
+            prior_comments.update(month_cache["comments"])
     notes = dict(prior_notes)
     comments = dict(prior_comments)
 
@@ -105,10 +132,10 @@ def scan():
                 continue
             published = str(row.get("publish_at") or "")
             month = published[:7]
-            if month < MONTH:
+            if month < EARLIEST_MONTH:
                 seen_boundary = True
                 break
-            if month != MONTH:
+            if to_time(published) < SCAN_START.timestamp():
                 continue
             key = row.get("key")
             handle = (row.get("user") or {}).get("urlname") if isinstance(row.get("user"), dict) else None
@@ -127,7 +154,7 @@ def scan():
         time.sleep(.2)
     if not seen_boundary:
         raise RuntimeError("Reached hashtag API 20-page limit; preserving previous candidate data")
-    print(f"Month {MONTH}, pages {page_count}, notes {len(notes)}", flush=True)
+    print(f"Window scan since {SCAN_START.isoformat()}, pages {page_count}, notes {len(notes)}", flush=True)
 
     now = dt.datetime.now(dt.timezone.utc)
     count_checked, failed = 0, []
@@ -172,20 +199,20 @@ def scan():
         r = comments.get(note["key"]) or {}
         first = r.get("firstCommenter")
         when = r.get("firstCommentAt")
-        if not is_handle(first) or first==note["handle"] or not isinstance(when,str) or when[:7]!=MONTH:
+        if not is_handle(first) or first==note["handle"] or not isinstance(when,str) or to_time(when)<SCAN_START.timestamp():
             continue
-        prior = [n for n in notes_by_author.get(first,[]) if to_time(n["publishedAt"])<=to_time(when)]
+        prior = [n for n in notes_by_author.get(first,[]) if n["publishedAt"][:7]==dt.datetime.fromtimestamp(to_time(when),TZ).strftime("%Y-%m") and to_time(n["publishedAt"])<=to_time(when)]
         if not prior:
             continue
         work=prior[0]
         discovered.append({
-            "month":MONTH,"handle":first,"title":work["title"],"url":work["url"],
+            "month":dt.datetime.fromtimestamp(to_time(when),TZ).strftime("%Y-%m"),"weekStart":week_key(when),"handle":first,"title":work["title"],"url":work["url"],
             "firstCommentAt":when,"commentedNoteUrl":note["url"]
         })
     discovered.sort(key=lambda w:to_time(w["firstCommentAt"]))
     first_per_author={}
     for w in discovered:
-        first_per_author.setdefault(w["handle"],w)
+        first_per_author.setdefault(w["weekStart"]+"|"+w["handle"],w)
 
     # Do not remove any previously discovered candidates if a public API yields partial results.
     prev_out=read_json(OUT_FILE,{})
@@ -193,20 +220,31 @@ def scan():
     candidates={}
     for w in old_works:
         if isinstance(w,dict) and isinstance(w.get("month"),str) and is_handle(w.get("handle")):
-            candidates[w["month"]+"|"+w["handle"]]=w
+            period=w.get("weekStart") or week_key(w.get("firstCommentAt"))
+            if period:
+                candidates.setdefault(period+"|"+w["handle"],{**w,"weekStart":period})
     for w in first_per_author.values():
-        candidates.setdefault(w["month"]+"|"+w["handle"],w)
+        candidates.setdefault(w["weekStart"]+"|"+w["handle"],w)
 
-    cache[MONTH]={"notes":notes,"comments":comments}
+    for note in notes.values():
+        period_month=note["publishedAt"][:7]
+        if period_month==MONTH:
+            month_store=cache.setdefault(MONTH,{"notes":{},"comments":{}})
+        else:
+            month_store=cache.setdefault(period_month,{"notes":{},"comments":{}})
+        month_store.setdefault("notes",{})[note["key"]]=note
+        if note["key"] in comments:
+            month_store.setdefault("comments",{})[note["key"]]=comments[note["key"]]
+    # Preserve older months in the cache, but keep new monthly notes separated.
     CACHE_FILE.parent.mkdir(parents=True,exist_ok=True)
     CACHE_FILE.write_text(json.dumps({"version":1,"months":cache},ensure_ascii=False,separators=(",",":"))+"\n",encoding="utf-8")
     out={
         "version":1,
         "generatedAt":now.isoformat(timespec="seconds").replace("+00:00","Z"),
-        "works":sorted(candidates.values(),key=lambda w:(w["month"],w.get("firstCommentAt","")),reverse=True)
+        "works":sorted(candidates.values(),key=lambda w:w.get("firstCommentAt",""),reverse=True)
     }
     OUT_FILE.write_text(json.dumps(out,ensure_ascii=False,separators=(",",":"))+"\n",encoding="utf-8")
-    print(f"Currently discovered for {MONTH}: {len(first_per_author)}. Total stored: {len(out['works'])}",flush=True)
+    print(f"Weekly candidates newly discovered in scan: {len(first_per_author)}. Total stored: {len(out['works'])}",flush=True)
     if failed:
         print("Some comment checks failed. Previous data was preserved.",flush=True)
         for x in failed[:5]:
