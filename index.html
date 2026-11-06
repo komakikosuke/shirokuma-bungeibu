@@ -274,6 +274,25 @@
 .shelf-all-link:hover{color:#0e7899;border-color:#0e7899}
 .shelf-all-link:focus-visible{outline:3px solid #006d96;outline-offset:4px}
 @media(max-width:700px){.shelf-navigation{justify-content:center;margin:19px 0 0}}
+
+/* Display complete cover titles and creator names, including long Japanese titles. */
+.mini-book h3,.mini-book h3.mini-title-long,.mini-book h3.mini-title-very-long {
+  top:17.5%;left:18.5%;width:67%;height:40.5%;max-height:none;
+  margin:0;padding:0;display:flex;align-items:center;
+  font:500 clamp(16px,8.2cqw,30px)/1.27 var(--serif);
+  letter-spacing:.005em;overflow-wrap:anywhere;overflow:hidden;
+}
+.mini-book .mini-rule{top:59%;left:18.5%;width:64%}
+.mini-book .mini-creator,.mini-book .mini-creator.mini-creator-long{
+  top:61.5%;left:18.5%;width:65%;height:14%;max-height:none;
+  margin:0;padding:0;display:flex;align-items:center;
+  font:500 clamp(10px,5.2cqw,17px)/1.35 var(--serif);
+  overflow:hidden;overflow-wrap:anywhere;
+}
+.mini-book .cover-fit-text{
+  display:block;width:100%;max-width:100%;
+  white-space:normal;overflow-wrap:anywhere;word-break:normal;
+}
 </style>
 </head>
 <body>
@@ -310,6 +329,7 @@
 </main>
 <section class="about" id="about"><div class="container about-inner"><div><h2>はじめてのコメントを、<br>次の作品へ繋ぐ。</h2><p>作品への感想は、クリエイターの励みになります。まだコメントのなかった作品に最初のひと言を届けてくれた人の作品を紹介します。</p></div><div class="steps"><div class="step"><b>1</b><strong>参加作品を読む</strong><small>シロクマ文芸部の作品を見つける。</small></div><div class="step"><b>2</b><strong>最初のひと言を届ける</strong><small>作者本人以外からの初コメントが対象。</small></div><div class="step"><b>3</b><strong>その人の作品を紹介</strong><small>運営者が確認してから掲載します。</small></div></div></div></section>
 <footer class="footer"><div class="container footer-inner"><span>© シロクマ文芸部</span><a href="https://note.com/hashtag/%E3%82%B7%E3%83%AD%E3%82%AF%E3%83%9E%E6%96%87%E8%8A%B8%E9%83%A8" rel="noopener noreferrer">noteで参加作品を見る ↗</a></div></footer>
+<script src="./assets/fit-cover-text.js?v=1"></script>
 <script>
 "use strict";
 const $=id=>document.getElementById(id);
@@ -351,9 +371,11 @@ function renderShelf(){
   const creatorName=creatorDisplayName(w),outer=make("article","shelf-item");
   const a=link("",w.url,"cover-link");a.setAttribute("aria-label",w.title+" ／ "+creatorName+" の作品を読む");
   const book=make("div","mini-book"),inside=make("div","mini-book-content");
-  const title=make("h3","",w.title),n=[...w.title].length;
+  const title=make("h3","cover-fit"),n=[...w.title].length;
+  title.append(make("span","cover-fit-text",w.title));
   if(n>39)title.classList.add("mini-title-very-long");else if(n>22)title.classList.add("mini-title-long");
-  const rule=make("div","mini-rule"),byline=make("p","mini-creator",creatorName);
+  const rule=make("div","mini-rule"),byline=make("p","mini-creator cover-fit");
+  byline.append(make("span","cover-fit-text",creatorName));
   if([...creatorName].length>17)byline.classList.add("mini-creator-long");
   const stamp=make("div","mini-seal"),publisher=make("div","mini-author-block");
   publisher.append(make("span","mini-author","シロクマ文芸部"),make("span","mini-publisher","SHIROKUMA BUNGEIBU"));
@@ -363,6 +385,7 @@ function renderShelf(){
   outer.append(read);
   root.append(outer);
  }
+ window.shirokumaFitCovers?.();
 }
 function render(data){
  if(!data||data.version!==1||!Array.isArray(data.months)||!Array.isArray(data.works))throw new Error("公開データの形式が違います");
