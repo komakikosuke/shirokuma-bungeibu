@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light">
+<meta name="robots" content="noindex,nofollow,noarchive">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'none'; form-action 'none'; script-src 'self'; style-src 'self'; img-src 'self'; connect-src 'self' https://api.github.com; upgrade-insecure-requests">
+<title>掲載管理｜シロクマ文芸部</title>
+<link rel="icon" type="image/png" href="../assets/polarbear-icon.png">
+<link rel="stylesheet" href="./style.css">
+<script defer src="./app.js"></script>
+</head>
+<body>
+<header class="header"><div class="wrap head">
+  <div class="logo"><img src="../assets/polarbear-icon.png" alt="" width="45" height="45"><div><strong>シロクマ文芸部</strong><span>掲載管理</span></div></div>
+  <a href="../" target="_blank" rel="noopener noreferrer" class="site">公開サイトを見る ↗</a>
+</div></header>
+<main class="wrap">
+  <div class="hero"><div class="eyebrow">EDITOR'S ROOM</div><h1>注目記事の掲載管理</h1>
+    <p>初コメントから見つかった作品を確認し、「承認・保留・除外」を選べます。承認すると公式サイトの注目記事に掲載されます。</p>
+    <div class="summary" aria-live="polite"><div><b id="count-total">—</b><span>候補</span></div><div><b id="count-draft">—</b><span>保留</span></div><div><b id="count-approved">—</b><span>承認済み</span></div><div><b id="count-excluded">—</b><span>除外</span></div></div>
+  </div>
+  <section class="auth" aria-labelledby="auth-title">
+    <div class="auth-top"><div><h2 id="auth-title">GitHubと接続</h2><p>掲載状態を書き込むときだけ使用します。トークンはサイトに送られず、ブラウザからGitHubに直接送信されます。</p></div><span id="auth-status" class="auth-status">未接続</span></div>
+    <div class="auth-controls">
+      <label for="token">GitHubアクセストークン</label>
+      <div class="auth-row"><input id="token" type="password" spellcheck="false" autocomplete="off" placeholder="github_pat_... / ghp_..."><button id="connect" type="button" class="primary">接続する</button><button id="disconnect" type="button" class="quiet" hidden>切断</button></div>
+      <label class="remember"><input type="checkbox" id="remember"> このタブを閉じるまで接続情報を保持</label>
+    </div>
+    <details><summary>必要なトークンの権限と作り方</summary><p>GitHubの「Fine-grained personal access token」で、対象リポジトリ <code>komakikosuke/shirokuma-bungeibu</code> だけを選び、<strong>Contents: Read and write</strong> を付けます。アカウント全体の権限は不要です。</p><p><a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener noreferrer">GitHubでトークンを作成 ↗</a></p></details>
+    <p id="message" role="status" aria-live="polite"></p>
+  </section>
+  <section class="records" aria-labelledby="records-title">
+    <div class="tools"><div><h2 id="records-title">紹介候補</h2><p id="updated" class="muted">データを取得しています…</p></div>
+      <button id="refresh" type="button" class="quiet">一覧を更新</button></div>
+    <div class="filter-row" aria-label="候補一覧の絞り込み">
+      <div class="tabs" role="group" aria-label="状態"><button class="selected" data-filter="all" type="button">すべて</button><button data-filter="draft" type="button">保留</button><button data-filter="approved" type="button">承認済み</button><button data-filter="excluded" type="button">除外</button></div>
+      <label class="search-label">作品・作者を検索<input id="search" type="search" placeholder="タイトル・作者名・ID"></label>
+    </div>
+    <div id="items" class="cards" aria-live="polite"><div class="empty">候補を読み込んでいます…</div></div>
+  </section>
+  <footer><p>このページへの入口は公開サイトには設置していません。<strong>ただしURL自体は公開</strong>されています。変更操作にはGitHub認証が必要です。</p></footer>
+</main>
+</body>
+</html>
