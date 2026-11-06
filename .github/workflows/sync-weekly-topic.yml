@@ -1,0 +1,41 @@
+name: Sync current Shirokuma writing prompt
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - ".github/workflows/sync-weekly-topic.yml"
+      - "scripts/sync-weekly-topic.py"
+  schedule:
+    # GitHub uses UTC. Thursday 20:20 / 21:20 in JST.
+    - cron: "20 11,12 * * 4"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: shirokuma-weekly-topic
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - name: Read the newest public weekly prompt
+        run: python3 scripts/sync-weekly-topic.py
+      - name: Save only validated changes
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if [ -f data/weekly-topic.json ]; then
+            git add data/weekly-topic.json
+          fi
+          if git diff --cached --quiet; then
+            echo "Weekly prompt unchanged."
+          else
+            git commit -m "Refresh the current weekly Shirokuma writing prompt"
+            git push
+          fi
