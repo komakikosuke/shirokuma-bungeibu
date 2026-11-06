@@ -398,6 +398,7 @@
 </main>
 <section class="about" id="about"><div class="container about-inner"><div><h2><span class="about-headline-line">はじめてのコメントが、</span><span class="about-headline-line">次の作品に繋がる。</span></h2><p>作品への感想はクリエイターの励みになります。<span class="about-nowrap">まだコメントのない作品に</span>最初のひと言を届けた人の作品を紹介します。</p></div><div class="steps"><div class="step"><b>1</b><strong>参加作品を読む</strong><small>noteで文芸部の作品を読む</small></div><div class="step"><b>2</b><strong>最初のひと言を届ける</strong><small>記事への初コメントが対象</small></div><div class="step"><b>3</b><strong>その人の作品を紹介</strong><small>このサイトに載る</small></div></div></div></section>
 <footer class="footer"><div class="container footer-inner"><span>© シロクマ文芸部</span><a href="https://note.com/hashtag/%E3%82%B7%E3%83%AD%E3%82%AF%E3%83%9E%E6%96%87%E8%8A%B8%E9%83%A8" rel="noopener noreferrer">noteで参加作品を見る ↗</a></div></footer>
+<script src="./assets/featured-week.js?v=1"></script>
 <script src="./assets/fit-cover-text.js?v=1"></script>
 <script>
 "use strict";
@@ -417,11 +418,12 @@ const validFeaturedWork=w=>w&&/^\d{4}-\d{2}$/.test(w.month)&&typeof w.title==="s
 function updatePublicShelf(){
  // 自動掲載が基本。手動で明示された非掲載・保留だけ除外する。
  const works=new Map();
- const keyOf=w=>w.month+"|"+w.handle;
- for(const w of originalPublished)works.set(keyOf(w),w);
- for(const w of discoveredCandidates)works.set(keyOf(w),w);
- for(const [key] of works){
-   if(["draft","excluded"].includes(editorialDecisions[key]?.status))works.delete(key);
+ for(const w of [...originalPublished,...discoveredCandidates]){
+   const key=window.shirokumaWeekKey(w),previous=works.get(key);
+   if(!previous||String(w.firstCommentAt||"")<String(previous.firstCommentAt||""))works.set(key,w);
+ }
+ for(const [key,w] of works){
+   if(["draft","excluded"].includes(window.shirokumaDecisionStatus(w,editorialDecisions)))works.delete(key);
  }
  publicWorks=[...works.values()].sort((a,b)=>String(b.firstCommentAt||"").localeCompare(String(a.firstCommentAt||"")));
  const lead=publicWorks[0];
