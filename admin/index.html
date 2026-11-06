@@ -22,7 +22,7 @@
     <div class="summary" aria-live="polite"><div><b id="count-total">—</b><span>候補</span></div><div><b id="count-draft">—</b><span>保留</span></div><div><b id="count-approved">—</b><span>承認済み</span></div><div><b id="count-excluded">—</b><span>除外</span></div></div>
   </div>
   <section class="auth" aria-labelledby="auth-title">
-    <div class="auth-top"><div><h2 id="auth-title">GitHubと接続</h2><p>掲載状態を書き込むときだけ使用します。トークンはサイトに送られず、ブラウザからGitHubに直接送信されます。</p></div><span id="auth-status" class="auth-status">未接続</span></div>
+    <div class="auth-top"><div><h2 id="auth-title">GitHubと接続（任意）</h2><p><strong>接続しなくても承認できます。</strong> 各作品の「承認・保留・除外」からGitHubの確認画面を開き、「Submit new issue」で確定してください。直接ワンクリックで保存したい場合だけ、以下のトークン接続を利用します。</p></div><span id="auth-status" class="auth-status">未接続</span></div>
     <div class="auth-controls">
       <label for="token">GitHubアクセストークン</label>
       <div class="auth-row"><input id="token" type="password" spellcheck="false" autocomplete="off" placeholder="github_pat_... / ghp_..."><button id="connect" type="button" class="primary">接続する</button><button id="disconnect" type="button" class="quiet" hidden>切断</button></div>
@@ -40,7 +40,7 @@
     </div>
     <div id="items" class="cards" aria-live="polite"><div class="empty">候補を読み込んでいます…</div></div>
   </section>
-  <footer><p>このページへの入口は公開サイトには設置していません。<strong>ただしURL自体は公開</strong>されています。変更操作にはGitHub認証が必要です。</p></footer>
+  <footer><p>このページへの入口は公開サイトには設置していません。<strong>ただしURL自体は公開</strong>されています。掲載状態を変更できるのは、GitHubのリポジトリ所有者だけです。</p></footer>
 </main>
 </body>
 </html>
