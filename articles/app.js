@@ -52,7 +52,8 @@ function articleCard(w){
  coverLink.setAttribute("aria-label",name+"「"+w.title+"」を読む");
  const book=element("div","mini-book");
  const content=element("div","mini-content");
- const title=element("h2","mini-title cover-fit");
+ const title=element("h2","mini-title");
+ title.title=w.title;
  title.append(element("span","cover-fit-text",w.title));
  const n=[...w.title].length;
  if(n>39)title.classList.add("very-long");
