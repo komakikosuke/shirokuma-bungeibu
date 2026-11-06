@@ -218,9 +218,8 @@
 </div></header>
 <section class="hero" aria-labelledby="hero-title"><div class="container hero-inner">
 <div class="hero-copy">
-<h1 id="hero-title">クリエイターの<br>変える場所。</h1>
+<h1 id="hero-title">クリエイターの<br>帰る場所。</h1>
 <p>noteで創作を楽しむコミュニティです。<br><strong>毎週、みんなで同じ言葉から文章を書きはじめる活動</strong>をしています。</p>
-<a class="outline-link" href="#works">今月の本棚を読む　→</a>
 <div class="hero-facts"><div><strong id="factWorks">—</strong><small>保存済みの参加作品</small></div><div><strong id="factIntroductions">—</strong><small>紹介中の作品</small></div><div><strong>毎週</strong><small>お題を発表</small></div></div>
 </div>
 <div class="hero-book-stage"><img id="heroBookArt" class="hero-book-art" src="./assets/hero-book-2026-11.jpg" alt="シロクマ文芸部の本棚。2026年11月の紹介作品『【掌編】快晴前夜』の書籍風表紙。" width="750" height="938" decoding="async" hidden><div class="hero-book" id="heroBookFallback"><div class="book-border">
@@ -231,7 +230,7 @@
 <div class="hero-aside"><p class="aside-note">どこかで、<br>だれかの物語が、<br>きっと、だれかの心を照らす。</p><div class="aside-count"><div class="aside-line"></div><div class="aside-label" id="asideMonth">今月の参加作品</div><div class="aside-number"><span id="asideCount">—</span><small>作品</small></div><div class="aside-foot">収集できた参加作品数</div></div><div class="aside-secondary">本棚に並ぶ紹介作品<strong id="asideFeatured">—</strong></div></div>
 </div></section>
 <main class="main container">
-<section id="works" aria-labelledby="works-title"><div class="section-head"><div class="section-head-left"><h2 id="works-title">今月の本棚</h2><p>シロクマ文芸部の参加作品に初めてコメントしてくれた人の作品をご紹介します。</p></div></div><div class="shelf-area"><div id="bookshelf" class="bookshelf"><div class="shelf-empty">本棚の作品を読み込み中です。</div></div><div class="shelf-rule" aria-hidden="true"></div></div></section>
+<section id="works" aria-labelledby="works-title"><div class="section-head"><div class="section-head-left"><h2 id="works-title">今月の本棚</h2><p>シロクマ文芸部の参加作品に初めてコメントしてくれた人の作品をご紹介します。</p></div></div><div class="shelf-area"><div id="bookshelf" class="bookshelf"><div class="shelf-empty">本棚の作品を読み込み中です。</div></div></div></section>
 
 </main>
 <section class="about" id="about"><div class="container about-inner"><div><h2>ひとつのコメントから、<br>次の物語へ。</h2><p>作品を読んだ感想が、作者の励みになることがあります。まだコメントのなかった作品に最初のひと言を届けてくれた人の物語を、この本棚で紹介します。</p></div><div class="steps"><div class="step"><b>1</b><strong>参加作品を読む</strong><small>シロクマ文芸部の作品を見つける。</small></div><div class="step"><b>2</b><strong>最初のひと言を届ける</strong><small>作者本人以外からの初コメントが対象。</small></div><div class="step"><b>3</b><strong>その人の作品を紹介</strong><small>運営者が確認してから掲載します。</small></div></div></div></section>
@@ -251,7 +250,7 @@ function renderShelf(){
  for(const w of publicWorks){
    const outer=make("article","shelf-item");
    const a=link("",w.url,"cover-link");
-   a.setAttribute("aria-label",w.title+" ／ "+w.handle+" さんの作品を読む");
+   a.setAttribute("aria-label",w.title+" ／ "+w.handle);
    const book=make("div","mini-book");
    const inside=make("div","mini-book-content");
    const label=make("div","mini-type","シロクマ文芸部の本棚");
