@@ -306,7 +306,34 @@ const safeUrl=value=>{try{const u=new URL(value);return u.protocol==="https:"&&u
 const make=(tag,cls,txt)=>{const el=document.createElement(tag);if(cls)el.className=cls;if(txt!==undefined)el.textContent=String(txt);return el};
 const monthLabel=str=>/^\d{4}-\d{2}$/.test(str)?str.slice(0,4)+"年"+Number(str.slice(5))+"月":str;
 const link=(txt,url,cls)=>{const a=make("a",cls,txt);a.href=url;a.target="_blank";a.rel="noopener noreferrer";return a};
-let publicWorks=[];let publicCreatorNames={};const creatorDisplayName=w=>{const n=publicCreatorNames[w.handle];return typeof n==="string"&&n.trim()?n.trim():"クリエイター名を確認中";};
+let publicWorks=[];
+let originalPublished=[];
+let discoveredCandidates=[];
+let editorialDecisions={};
+let publicCreatorNames={};
+const creatorDisplayName=w=>{const n=publicCreatorNames[w.handle];return typeof n==="string"&&n.trim()?n.trim():"クリエイター名を確認中";};
+const validFeaturedWork=w=>w&&/^\d{4}-\d{2}$/.test(w.month)&&typeof w.title==="string"&&typeof w.handle==="string"&&safeUrl(w.url);
+function updatePublicShelf(){
+ const works=new Map();
+ const keyOf=w=>w.month+"|"+w.handle;
+ for(const w of originalPublished){
+   if(!["draft","excluded"].includes(editorialDecisions[keyOf(w)]?.status))works.set(keyOf(w),w);
+ }
+ for(const w of discoveredCandidates){
+   const status=editorialDecisions[keyOf(w)]?.status;
+   if(status==="approved")works.set(keyOf(w),w);
+   else if(status==="draft"||status==="excluded")works.delete(keyOf(w));
+ }
+ publicWorks=[...works.values()].sort((a,b)=>String(b.firstCommentAt||"").localeCompare(String(a.firstCommentAt||"")));
+ const lead=publicWorks[0];
+ $("heroBookTitle").textContent=lead?.title||"物語を、ここから。";
+ $("heroBookShell").setAttribute("aria-label",lead?"シロクマ文芸部の注目記事「"+lead.title+"」の書籍風表紙":"シロクマ文芸部の書籍風表紙");
+ const heroCta=$("heroBookCta");
+ heroCta.hidden=!lead;
+ if(lead){heroCta.href=lead.url;heroCta.setAttribute("aria-label",lead.title+"を読む")}
+ else{heroCta.removeAttribute("href")}
+ renderShelf();
+}
 function renderShelf(){
  const root=$("bookshelf");root.replaceChildren();
  if(!publicWorks.length){const empty=make("div","shelf-empty");empty.append(make("strong","","紹介作品はまだありません"),make("span","","公開が承認された作品が、ここに少しずつ並びます。"));root.append(empty);return}
@@ -329,16 +356,25 @@ function renderShelf(){
 }
 function render(data){
  if(!data||data.version!==1||!Array.isArray(data.months)||!Array.isArray(data.works))throw new Error("公開データの形式が違います");
- publicWorks=data.works.filter(w=>w&&/^\d{4}-\d{2}$/.test(w.month)&&typeof w.title==="string"&&typeof w.handle==="string"&&safeUrl(w.url)).map(w=>({...w,url:safeUrl(w.url)})).sort((a,b)=>String(b.firstCommentAt).localeCompare(String(a.firstCommentAt)));
- const lead=publicWorks[0];
- $("heroBookTitle").textContent=lead?.title||"物語を、ここから。";
- $("heroBookShell").setAttribute("aria-label",lead?"シロクマ文芸部の注目記事「"+lead.title+"」の書籍風表紙":"シロクマ文芸部の書籍風表紙");
- const heroCta=$("heroBookCta");
- heroCta.hidden=!lead;
- if(lead){heroCta.href=lead.url;heroCta.setAttribute("aria-label",lead.title+"を読む")}
- else{heroCta.removeAttribute("href")}
- renderShelf();
+ originalPublished=data.works.filter(validFeaturedWork).map(w=>({...w,url:safeUrl(w.url)}));
+ updatePublicShelf();
 }
+async function loadEditorialState(){
+ try{
+   const [candidatesResponse,decisionsResponse]=await Promise.all([
+     fetch("./data/candidates.json?v="+Date.now(),{cache:"no-store"}),
+     fetch("./data/admin-decisions.json?v="+Date.now(),{cache:"no-store"})
+   ]);
+   if(!candidatesResponse.ok||!decisionsResponse.ok)throw Error("Review metadata unavailable");
+   const [candidateData,decisionData]=await Promise.all([candidatesResponse.json(),decisionsResponse.json()]);
+   if(candidateData.version!==1||!Array.isArray(candidateData.works)||decisionData.version!==1||!decisionData.decisions||typeof decisionData.decisions!=="object")
+     throw Error("Review metadata format mismatch");
+   discoveredCandidates=candidateData.works.filter(validFeaturedWork).map(w=>({...w,url:safeUrl(w.url)}));
+   editorialDecisions=decisionData.decisions;
+   updatePublicShelf();
+ }catch(err){console.info("従来の承認済み作品のみを表示します",err)}
+}
+loadEditorialState();
 async function loadCreatorNames(){
  try{
   const resp=await fetch("./data/creators.json?v="+Date.now(),{cache:"no-store"});
