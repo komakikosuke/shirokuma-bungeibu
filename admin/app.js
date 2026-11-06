@@ -166,8 +166,16 @@ function fromBase64(s){
 async function change(work,next){
  if(saving)return;
  if(!token){
-   notify("変更するには、まずGitHubに接続してください。",true);
-   $("token").focus();$("auth-status").scrollIntoView({behavior:"smooth",block:"center"});
+   if(next==="excluded"&&!confirm("「"+work.title+"」を除外するためGitHubの確認画面を開きます。よろしいですか？"))return;
+   const issueTitle="[シロクマ掲載管理] "+work.month+"|"+work.handle+" "+next;
+   const request={version:1,month:work.month,handle:work.handle,status:next};
+   const issueBody="シロクマ文芸部の掲載管理画面からの申請です。\n内容を確認して「Submit new issue」を押すと反映されます。\n\n"
+     +"<!-- shirokuma-review-request\n"+JSON.stringify(request)+"\n-->";
+   const link=new URL("https://github.com/"+REPOSITORY+"/issues/new");
+   link.searchParams.set("title",issueTitle);
+   link.searchParams.set("body",issueBody);
+   window.open(link.href,"_blank","noopener,noreferrer");
+   notify("GitHubの確認画面を開きました。GitHubで「Submit new issue」を押すと変更が確定し、自動で公式サイトに反映されます。");
    return;
  }
  if(stateOf(work)===next){notify("すでに「"+statusText[next]+"」になっています。");return}
