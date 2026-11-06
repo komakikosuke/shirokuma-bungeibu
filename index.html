@@ -293,6 +293,31 @@
   display:block;width:100%;max-width:100%;
   white-space:normal;overflow-wrap:anywhere;word-break:normal;
 }
+
+/* Hero's real-time book typesetting: smaller title, same fit as featured books. */
+.hero-bookshell{container-type:inline-size}
+.hero-shell-title{
+  position:absolute;top:18.5%;left:18.5%;width:67%;height:39%;
+  max-height:none;margin:0;padding:0;display:flex;align-items:center;
+  font:500 clamp(19px,7.0cqw,28px)/1.32 var(--serif);
+  letter-spacing:.005em;color:#113f5a;
+  overflow:hidden;overflow-wrap:anywhere;
+}
+.hero-shell-rule{top:59%;left:18.5%;width:64%}
+.hero-shell-creator{
+  position:absolute;top:61.5%;left:18.5%;width:65%;height:13%;
+  display:flex;align-items:center;margin:0;padding:0;
+  font:500 clamp(12px,4.3cqw,17px)/1.35 var(--serif);
+  color:#365b73;overflow:hidden;overflow-wrap:anywhere;
+}
+.hero-bookshell .cover-fit-text{
+  display:block;width:100%;max-width:100%;white-space:normal;
+  overflow-wrap:anywhere;word-break:normal;
+}
+@media(max-width:700px){
+  .hero-shell-title{font-size:clamp(19px,7cqw,28px)}
+  .hero-shell-creator{font-size:clamp(12px,4.3cqw,17px)}
+}
 </style>
 </head>
 <body>
@@ -317,8 +342,9 @@
 </div>
 <div class="hero-book-stage">
 <div class="hero-bookshell" id="heroBookShell" role="img" aria-label="シロクマ文芸部の書籍風表紙">
-<div class="hero-shell-title" id="heroBookTitle">【掌編】快晴前夜</div>
+<div class="hero-shell-title cover-fit" id="heroBookTitle"><span class="cover-fit-text" id="heroBookTitleText">【掌編】快晴前夜</span></div>
 <div class="hero-shell-rule" aria-hidden="true"></div>
+<div class="hero-shell-creator cover-fit" id="heroBookCreator"><span class="cover-fit-text" id="heroBookCreatorText">クリエイター名を確認中</span></div>
 <div class="hero-shell-footer"><strong>シロクマ文芸部</strong><small>SHIROKUMA BUNGEIBU</small></div>
 </div><a class="hero-book-cta" id="heroBookCta" hidden rel="noopener noreferrer" aria-label="注目記事を読む">作品を読む <span aria-hidden="true">→</span></a></div>
 <div class="hero-aside"><p class="aside-note"><strong><span>はじめてnoteを書く人も</span><span>自己紹介がわりにどうぞ！</span></strong></p><div class="aside-count"><div class="aside-line"></div><div class="aside-label" id="asideMonth">#シロクマ文芸部 の累計記事数</div><div class="aside-number"><span id="asideCount">—</span><small>作品</small></div><div class="aside-foot" id="asideFoot">noteのハッシュタグ登録記事数</div></div></div>
@@ -356,8 +382,9 @@ function updatePublicShelf(){
  }
  publicWorks=[...works.values()].sort((a,b)=>String(b.firstCommentAt||"").localeCompare(String(a.firstCommentAt||"")));
  const lead=publicWorks[0];
- $("heroBookTitle").textContent=lead?.title||"物語を、ここから。";
- $("heroBookShell").setAttribute("aria-label",lead?"シロクマ文芸部の注目記事「"+lead.title+"」の書籍風表紙":"シロクマ文芸部の書籍風表紙");
+ $("heroBookTitleText").textContent=lead?.title||"物語を、ここから。";
+ $("heroBookCreatorText").textContent=lead?creatorDisplayName(lead):"シロクマ文芸部";
+ $("heroBookShell").setAttribute("aria-label",lead?"シロクマ文芸部の注目記事「"+lead.title+"」、"+creatorDisplayName(lead)+"の書籍風表紙":"シロクマ文芸部の書籍風表紙");
  const heroCta=$("heroBookCta");
  heroCta.hidden=!lead;
  if(lead){heroCta.href=lead.url;heroCta.setAttribute("aria-label",lead.title+"を読む")}
@@ -421,7 +448,7 @@ async function loadCreatorNames(){
     if(typeof name==="string"&&name.trim()&&name.trim().length<=100)next[handle]=name.trim();
   }
   publicCreatorNames=next;
-  if(publicWorks.length)renderShelf();
+  if(publicWorks.length)updatePublicShelf();
  }catch(err){console.warn("クリエイター名を取得できませんでした",err)}
 }
 loadCreatorNames();
