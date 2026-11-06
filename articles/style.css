@@ -71,3 +71,23 @@ a:focus-visible,button:focus-visible{outline:3px solid #006d96;outline-offset:4p
  .mini-title,.mini-title.long,.mini-title.very-long{font-size:clamp(19px,8.2cqw,30px)}
  .mini-creator,.mini-creator.long{font-size:clamp(12px,5.2cqw,17px)}
 }
+
+
+/* Consistent three-line literary cover titles, preserving their natural size. */
+.mini-title,.mini-title.long,.mini-title.very-long{
+ font:500 clamp(16px,7.75cqw,25px)/1.35 var(--serif);
+ letter-spacing:.005em;
+}
+.mini-title .cover-fit-text{
+ display:-webkit-box;
+ -webkit-box-orient:vertical;
+ -webkit-line-clamp:3;
+ line-clamp:3;
+ max-height:4.05em;
+ overflow:hidden;
+ overflow-wrap:anywhere;
+ word-break:normal;
+}
+@media(max-width:425px){
+ .mini-title,.mini-title.long,.mini-title.very-long{font-size:clamp(19px,7.75cqw,25px)}
+}
