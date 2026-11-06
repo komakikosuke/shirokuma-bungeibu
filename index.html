@@ -183,6 +183,85 @@
 /* Cover alone identifies the work and its creator; remove the redundant footer space. */
 .shelf-area .cover-link{padding-bottom:0}
 .shelf-area .shelf-item{display:flex;flex-direction:column}
+
+/* Editorial hierarchy / reading accessibility / link affordance — 2026-11-07.
+   Deliberately limited to priorities 3–5. Earlier design is saved on backup branch. */
+.hero-copy h1{margin-bottom:0;line-height:1.45}
+.hero-copy .hero-intro{
+  margin-top:22px;
+  max-width:445px;
+  padding:2px 0 2px 17px;
+  border-left-color:rgba(22,77,102,.42);
+}
+.hero-copy .hero-intro .hero-intro-lead{
+  font-size:clamp(14px,1.2vw,16px);
+  line-height:1.9;
+  color:#1e4c65;
+}
+.hero-copy .hero-intro .hero-intro-detail{
+  font-size:clamp(14px,1.13vw,15px);
+  line-height:1.9;
+  color:#365d72;
+  margin-top:9px;
+}
+.weekly-topic{
+  max-width:460px;
+  margin-top:27px;
+  padding-top:17px;
+  border-top:1px solid rgba(26,100,126,.35);
+}
+.weekly-topic-meta{display:flex;align-items:baseline;justify-content:space-between;gap:7px 18px;flex-wrap:wrap}
+.weekly-topic-heading{font:600 15px/1.65 var(--serif);color:#153e58;letter-spacing:.055em}
+.weekly-topic-schedule{display:flex;align-items:baseline;gap:7px;flex-wrap:wrap;color:#315c72}
+.weekly-topic-schedule strong{font:600 12px/1.6 var(--sans);letter-spacing:.01em}
+.weekly-topic-schedule small{font:500 11px/1.6 var(--sans)}
+.weekly-topic-word{margin:9px 0 7px;font-size:clamp(30px,3.15vw,43px);line-height:1.33}
+.weekly-topic-link{font-size:13px;line-height:1.8;font-weight:600;border-bottom-color:#387c94}
+.hero-book-stage{flex-direction:column;gap:7px}
+.hero-book-cta,.book-read-link{
+  color:#174f6a;
+  font:600 13px/1.7 var(--sans);
+  letter-spacing:.02em;
+  text-decoration:none;
+  border-bottom:1px solid rgba(29,100,126,.45);
+  padding:4px 3px 3px;
+  transition:color .2s,border-color .2s;
+  align-self:center;
+}
+.hero-book-cta:hover,.book-read-link:hover{color:#08799c;border-bottom-color:#08799c}
+.hero-book-cta:focus-visible,.book-read-link:focus-visible{outline:3px solid #006d96;outline-offset:4px}
+.hero-book-cta[hidden]{display:none}
+.book-read-link{margin:8px 9px 0;align-self:flex-start;padding:3px 1px}
+.shelf-area .shelf-item{gap:0}
+.section-head p{color:#506e7f;font-size:14px;line-height:1.85}
+.about p{color:#456d7e;font-size:14px;line-height:1.95}
+.step strong{font-size:14px;line-height:1.65}
+.step small{font-size:12.5px;line-height:1.8;color:#527483}
+.aside-foot{color:#355e72;font-size:12.5px}
+.aside-label{color:#254f64}
+.footer-inner{font-size:12px}
+@media(max-width:1100px){
+ .weekly-topic{margin-top:23px}
+ .hero-book-stage{padding-top:18px;padding-bottom:18px}
+}
+@media(max-width:700px){
+ .hero-copy h1{line-height:1.43}
+ .hero-copy .hero-intro{margin-top:18px}
+ .hero-copy .hero-intro .hero-intro-lead{font-size:14px}
+ .hero-copy .hero-intro .hero-intro-detail{font-size:14px}
+ .weekly-topic{margin-top:20px;padding-top:13px}
+ .weekly-topic-heading{font-size:14px}
+ .weekly-topic-schedule strong{font-size:12px}
+ .weekly-topic-schedule small{font-size:11px}
+ .weekly-topic-word{font-size:32px;margin-top:7px}
+ .section-head p{font-size:13px}
+ .about p{font-size:14px}
+ .step small{font-size:12.5px}
+ .book-read-link{font-size:13px}
+}
+@media(prefers-reduced-motion:reduce){
+ .hero-book-cta,.book-read-link{transition:none}
+}
 </style>
 </head>
 <body>
@@ -196,9 +275,11 @@
 <div class="hero-copy">
 <h1 id="hero-title">クリエイターの<br>帰る場所。</h1>
 <div class="hero-intro"><p class="hero-intro-lead">noteで創作を楽しむコミュニティです。</p><p class="hero-intro-detail"><strong>毎週、みんなで同じ言葉から文章を書く活動</strong>をしています。</p></div>
-<div class="hero-facts"><div><strong>毎週木曜よる８時</strong><small>お題を発表</small></div></div>
 <div class="weekly-topic" aria-labelledby="weeklyTopicHeading">
+<div class="weekly-topic-meta">
 <div class="weekly-topic-heading" id="weeklyTopicHeading">今週のお題</div>
+<div class="weekly-topic-schedule"><strong>毎週木曜よる８時</strong><small>お題を発表</small></div>
+</div>
 <div class="weekly-topic-word" id="weeklyTopicWord" aria-live="polite">読み込み中…</div>
 <a class="weekly-topic-link" id="weeklyTopicLink" rel="noopener noreferrer" target="_blank" hidden>お題の記事を読む　→</a>
 </div>
@@ -208,7 +289,7 @@
 <div class="hero-shell-title" id="heroBookTitle">【掌編】快晴前夜</div>
 <div class="hero-shell-rule" aria-hidden="true"></div>
 <div class="hero-shell-footer"><strong>シロクマ文芸部</strong><small>SHIROKUMA BUNGEIBU</small></div>
-</div></div>
+</div><a class="hero-book-cta" id="heroBookCta" hidden rel="noopener noreferrer" aria-label="注目記事を読む">作品を読む <span aria-hidden="true">→</span></a></div>
 <div class="hero-aside"><p class="aside-note"><strong><span>はじめてnoteを書く人も</span><span>自己紹介がわりにどうぞ！</span></strong></p><div class="aside-count"><div class="aside-line"></div><div class="aside-label" id="asideMonth">#シロクマ文芸部 の累計記事数</div><div class="aside-number"><span id="asideCount">—</span><small>作品</small></div><div class="aside-foot" id="asideFoot">noteのハッシュタグ登録記事数</div></div></div>
 </div></section>
 <main class="main container">
@@ -240,6 +321,9 @@ function renderShelf(){
   const stamp=make("div","mini-seal"),publisher=make("div","mini-author-block");
   publisher.append(make("span","mini-author","シロクマ文芸部"),make("span","mini-publisher","SHIROKUMA BUNGEIBU"));
   stamp.append(publisher);inside.append(title,rule,byline,stamp);book.append(inside);a.append(book);outer.append(a);
+  const read=link("作品を読む　→",w.url,"book-read-link");
+  read.setAttribute("aria-label",creatorName+"「"+w.title+"」を読む");
+  outer.append(read);
   root.append(outer);
  }
 }
@@ -249,6 +333,10 @@ function render(data){
  const lead=publicWorks[0];
  $("heroBookTitle").textContent=lead?.title||"物語を、ここから。";
  $("heroBookShell").setAttribute("aria-label",lead?"シロクマ文芸部の注目記事「"+lead.title+"」の書籍風表紙":"シロクマ文芸部の書籍風表紙");
+ const heroCta=$("heroBookCta");
+ heroCta.hidden=!lead;
+ if(lead){heroCta.href=lead.url;heroCta.setAttribute("aria-label",lead.title+"を読む")}
+ else{heroCta.removeAttribute("href")}
  renderShelf();
 }
 async function loadCreatorNames(){
