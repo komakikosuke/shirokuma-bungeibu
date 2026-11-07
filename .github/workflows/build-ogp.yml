@@ -1,12 +1,8 @@
 name: Build OGP preview image
 
+# OGP preview is finalized; regenerate only when explicitly requested.
 on:
   workflow_dispatch:
-  push:
-    paths:
-      - "scripts/build-ogp.py"
-      - ".github/workflows/build-ogp.yml"
-      - "assets/ogp-user-bear.png"
 
 permissions:
   contents: write
