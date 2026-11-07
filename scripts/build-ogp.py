@@ -1,19 +1,28 @@
 #!/usr/bin/env python3
-"""Use the exact cropped community logo supplied by the owner in the social preview."""
+"""Create a robust RGB/JPEG social preview from the owner's polar bear artwork."""
 from pathlib import Path
 from PIL import Image
 
-ROOT=Path(__file__).resolve().parents[1]
-SOURCE=ROOT/"assets/ogp-logo-crop.png"
-TARGET=ROOT/"assets/ogp-card.jpg"
-W,H=1200,630
-logo=Image.open(SOURCE).convert("RGB")
-target_width=740
-target_height=round(logo.height*target_width/logo.width)
-logo=logo.resize((target_width,target_height),Image.Resampling.LANCZOS)
-card=Image.new("RGB",(W,H),"white")
-card.paste(logo,((W-target_width)//2,(H-target_height)//2))
-TARGET.parent.mkdir(parents=True,exist_ok=True)
-card.save(TARGET,"JPEG",quality=92,optimize=True,subsampling=0)
-assert Image.open(TARGET).size==(W,H)
-print(f"Created {TARGET} from cropped owner-supplied logo ({TARGET.stat().st_size} bytes)")
+root=Path(__file__).resolve().parents[1]
+source=root/"assets/ogp-user-bear.png"
+dest=root/"assets/ogp-bear-preview-20261108.jpg"
+
+with Image.open(source) as image:
+    image.load()  # Force full decoding, not just header parsing.
+    if image.size != (1200,630):
+        raise ValueError(f"Unexpected original OGP image size: {image.size}")
+    image=image.convert("RGB")
+    # The center must show the pale/white polar bear, not the blue background.
+    white=sum(1 for y in range(190,460,5) for x in range(400,800,5)
+              if min(image.getpixel((x,y))) > 230)
+    cyan=sum(1 for y in range(0,140,10) for x in range(0,1200,20)
+             if image.getpixel((x,y))[2] > image.getpixel((x,y))[0]+35)
+    if white<500 or cyan<300:
+        raise ValueError(f"OGP image content mismatch (bear pixels={white}, background pixels={cyan})")
+    image.save(dest,"JPEG",quality=93,optimize=True,subsampling=0)
+
+with Image.open(dest) as verify:
+    verify.load()
+    if verify.size != (1200,630) or verify.mode != "RGB":
+        raise ValueError("New JPG preview failed validation")
+print(f"Validated {dest.name}: {dest.stat().st_size} bytes, bear pixels={white}, cyan pixels={cyan}")
