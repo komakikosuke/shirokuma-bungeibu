@@ -5,6 +5,10 @@
       "name": "納豆ご飯",
       "checkedAt": "2026-11-06T07:24:00Z"
     },
+    "aide_tsumugu": {
+      "name": "藍出 紡",
+      "checkedAt": "2026-11-07T22:13:24Z"
+    },
     "clear_sable4587": {
       "name": "一緒♡懸命",
       "checkedAt": "2026-11-06T19:55:33Z"
@@ -36,6 +40,10 @@
     "himeshara5": {
       "name": "ヒメシャラ",
       "checkedAt": "2026-11-06T19:55:33Z"
+    },
+    "kagulog": {
+      "name": "カグー",
+      "checkedAt": "2026-11-07T22:13:24Z"
     },
     "light_badger1508": {
       "name": "三州 連環",
@@ -70,5 +78,5 @@
       "checkedAt": "2026-11-06T19:55:33Z"
     }
   },
-  "updatedAt": "2026-11-07T04:28:06Z"
+  "updatedAt": "2026-11-07T22:13:24Z"
 }
