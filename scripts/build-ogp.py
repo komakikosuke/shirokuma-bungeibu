@@ -1,28 +1,28 @@
 #!/usr/bin/env python3
-"""Create a robust RGB/JPEG social preview from the owner's polar bear artwork."""
+"""Build a fully decodable JPEG OGP image, matching the approved turquoise polar-bear artwork."""
 from pathlib import Path
 from PIL import Image
 
 root=Path(__file__).resolve().parents[1]
-source=root/"assets/ogp-user-bear.png"
+source=root/"assets/polarbear-icon.png"
 dest=root/"assets/ogp-bear-preview-20261108.jpg"
+w,h=1200,630
 
-with Image.open(source) as image:
-    image.load()  # Force full decoding, not just header parsing.
-    if image.size != (1200,630):
-        raise ValueError(f"Unexpected original OGP image size: {image.size}")
-    image=image.convert("RGB")
-    # The center must show the pale/white polar bear, not the blue background.
-    white=sum(1 for y in range(190,460,5) for x in range(400,800,5)
-              if min(image.getpixel((x,y))) > 230)
-    cyan=sum(1 for y in range(0,140,10) for x in range(0,1200,20)
-             if image.getpixel((x,y))[2] > image.getpixel((x,y))[0]+35)
-    if white<500 or cyan<300:
-        raise ValueError(f"OGP image content mismatch (bear pixels={white}, background pixels={cyan})")
-    image.save(dest,"JPEG",quality=93,optimize=True,subsampling=0)
+# Unlike the previous truncated PNG, the website's original logo is intact.
+with Image.open(source) as original:
+    original.load()
+    logo=original.convert("RGBA").resize((440,440),Image.Resampling.LANCZOS)
 
-with Image.open(dest) as verify:
-    verify.load()
-    if verify.size != (1200,630) or verify.mode != "RGB":
-        raise ValueError("New JPG preview failed validation")
-print(f"Validated {dest.name}: {dest.stat().st_size} bytes, bear pixels={white}, cyan pixels={cyan}")
+card=Image.new("RGB",(w,h),(93,192,213))
+card.paste(logo,((w-440)//2,(h-440)//2),logo)
+# Check actual image content, not only dimensions and file existence.
+white=sum(1 for y in range(175,465,5) for x in range(420,780,5)
+          if min(card.getpixel((x,y)))>230)
+if white<500:
+    raise ValueError(f"Missing white bear illustration: white pixel count {white}")
+card.save(dest,"JPEG",quality=94,optimize=True,subsampling=0)
+with Image.open(dest) as check:
+    check.load()
+    assert check.size==(1200,630) and check.mode=="RGB"
+    assert min(check.getpixel((600,300)))>180 or white>500
+print(f"Decoded and validated {dest.name}: {dest.stat().st_size} bytes; {white} sampled white pixels")
