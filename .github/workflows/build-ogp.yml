@@ -1,0 +1,47 @@
+name: Build OGP preview image
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "scripts/build-ogp.py"
+      - ".github/workflows/build-ogp.yml"
+      - "assets/book-shell-from-top.jpg"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: shirokuma-ogp-preview
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install image tooling and Japanese font
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y fonts-noto-cjk
+          python3 -m pip install --break-system-packages Pillow
+      - name: Render full-book horizontal OGP card
+        run: python3 scripts/build-ogp.py
+      - name: Commit OGP image
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add assets/ogp-card.jpg
+          if git diff --cached --quiet; then
+            echo "OGP preview unchanged"
+          else
+            git commit -m "Render uncropped horizontal OGP preview"
+            for attempt in 1 2 3; do
+              if git push origin HEAD:main; then exit 0; fi
+              git pull --rebase origin main
+              sleep 2
+            done
+            exit 1
+          fi
