@@ -1,6 +1,10 @@
 {
   "version": 1,
   "creators": {
+    "417pz": {
+      "name": "椎名ピザ",
+      "checkedAt": "2026-11-11T04:32:30Z"
+    },
     "7105hn": {
       "name": "納豆ご飯",
       "checkedAt": "2026-11-09T10:26:06Z"
@@ -15,7 +19,7 @@
     },
     "arare1235": {
       "name": "あられ",
-      "checkedAt": "2026-11-08T04:29:33Z"
+      "checkedAt": "2026-11-11T04:32:30Z"
     },
     "b3hyu": {
       "name": "おおきないぬ",
@@ -136,7 +140,11 @@
     "witty_duck145": {
       "name": "DK保留中",
       "checkedAt": "2026-11-09T22:21:59Z"
+    },
+    "yukihiran": {
+      "name": "雪花*",
+      "checkedAt": "2026-11-11T04:32:30Z"
     }
   },
-  "updatedAt": "2026-11-10T22:17:20Z"
+  "updatedAt": "2026-11-11T04:32:30Z"
 }
