@@ -396,7 +396,10 @@
 .writing-room-entry-cta:focus-visible{outline:3px solid #006d96;outline-offset:4px}
 @media(max-width:700px){.writing-room-entry{display:grid;grid-template-columns:42px minmax(0,1fr);gap:15px;padding:22px 20px;margin-bottom:32px}.writing-room-entry-icon{width:42px;height:42px}.writing-room-entry-copy h2{font-size:20px}.writing-room-entry-copy p{font-size:11px}.writing-room-entry-cta{grid-column:1/-1;justify-self:start;margin-top:3px;font-size:11px;min-height:43px;padding:9px 22px}}
 .header-nav .room-nav-link{display:inline-flex;align-items:center;gap:8px}
-.room-activity{display:inline-flex;align-items:center;white-space:nowrap;padding:2px 8px;border:1px solid #b5d8e4;border-radius:99px;background:#f5fcfd;color:#238bab;font:600 10px/1.6 -apple-system,BlinkMacSystemFont,"Yu Gothic",Meiryo,sans-serif}
+.room-activity{display:inline-flex;align-items:center;gap:5px;white-space:nowrap;padding:2px 8px;border:1px solid #b5d8e4;border-radius:99px;background:#f5fcfd;color:#238bab;font:600 10px/1.6 -apple-system,BlinkMacSystemFont,"Yu Gothic",Meiryo,sans-serif}
+.room-activity::before{content:"";width:5px;height:5px;flex:none;border-radius:50%;background:#5dc0d5;opacity:.7;animation:room-activity-breathe 4s ease-in-out infinite}
+@keyframes room-activity-breathe{0%,100%{opacity:.45}50%{opacity:1}}
+@media(prefers-reduced-motion:reduce){.room-activity::before{animation:none;opacity:.85}}
 .room-activity[hidden]{display:none!important}
 .writing-room-entry-cta .room-activity{border-color:#afd6e1;background:#fff}
 @media(max-width:700px){.header-nav .room-nav-link{flex-direction:column;align-items:flex-end;gap:2px;line-height:1.4}.header-nav .room-activity{font-size:9px;padding:1px 6px}.writing-room-entry-cta{gap:12px}}
