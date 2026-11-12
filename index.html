@@ -385,24 +385,46 @@
 /* Keep both halves of the editorial headline balanced instead of orphaning the final syllable. */
 .about h2 .about-headline-line{display:block;white-space:nowrap;letter-spacing:0}
 @media(max-width:700px){.about h2{font-size:clamp(20px,6.8vw,25px)}}
-/* Insert the entrance fragment before #works inside the official page's <main>. */
-.writing-room-entry{display:flex;align-items:center;gap:22px;padding:25px 29px;margin:0 0 42px;border:1px solid #c9e2ea;background:#eaf7f9;color:#133e59}
-.writing-room-entry-icon{width:55px;height:55px;border-radius:50%;flex:none}
-.writing-room-entry-copy{min-width:0;flex:1}
-.writing-room-entry-copy h2{font:500 24px/1.5 "Hiragino Mincho ProN","Yu Mincho",YuMincho,serif;letter-spacing:.08em;margin:0 0 6px}
-.writing-room-entry-copy p{font:12px/1.9 -apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;color:#52768b;margin:0}
-.writing-room-entry-cta{display:inline-flex;align-items:center;justify-content:center;gap:25px;border:1px solid #133e59;border-radius:99px;min-height:45px;padding:10px 23px;white-space:nowrap;text-decoration:none;font-size:12px;font-weight:600;transition:background .2s,color .2s}
-.writing-room-entry-cta:hover{background:#133e59;color:#fff}
+/* Place the entrance at the end of .hero-aside, directly after .aside-count. */
+.hero-aside{grid-column:3;grid-row:1;min-width:0}
+.hero-book-stage{grid-column:2;grid-row:1}
+.hero-aside .aside-note{margin-bottom:20px}
+.writing-room-entry{margin:24px 0 0;padding:20px 0 0;border:0;border-top:1px solid rgba(26,100,126,.35);background:transparent;color:#133e59}
+.writing-room-entry-heading{display:flex;align-items:center;gap:10px}
+.writing-room-entry-icon{width:32px;height:32px;border-radius:50%;flex:none}
+.writing-room-entry h2{font:500 20px/1.5 "Hiragino Mincho ProN","Yu Mincho",YuMincho,serif;letter-spacing:.06em;margin:0}
+.writing-room-entry-copy{font:12px/1.85 -apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;color:#355e72;margin:10px 0 14px}
+.hero-aside .writing-room-entry-cta{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;min-height:44px;margin:0;padding:10px 12px;border:1px solid #133e59;border-radius:99px;background:rgba(255,255,255,.5);white-space:nowrap;text-decoration:none;font:600 12px/1.7 -apple-system,BlinkMacSystemFont,"Yu Gothic",Meiryo,sans-serif;transition:background .2s,color .2s}
+.hero-aside .writing-room-entry-cta:hover{background:#133e59;color:#fff}
 .writing-room-entry-cta:focus-visible{outline:3px solid #006d96;outline-offset:4px}
-@media(max-width:700px){.writing-room-entry{display:grid;grid-template-columns:42px minmax(0,1fr);gap:15px;padding:22px 20px;margin-bottom:32px}.writing-room-entry-icon{width:42px;height:42px}.writing-room-entry-copy h2{font-size:20px}.writing-room-entry-copy p{font-size:11px}.writing-room-entry-cta{grid-column:1/-1;justify-self:start;margin-top:3px;font-size:11px;min-height:43px;padding:9px 22px}}
+.writing-room-entry-cta>span[aria-hidden]{margin-left:auto}
+.header-nav{gap:28px}
 .header-nav .room-nav-link{display:inline-flex;align-items:center;gap:8px}
 .room-activity{display:inline-flex;align-items:center;gap:5px;white-space:nowrap;padding:2px 8px;border:1px solid #b5d8e4;border-radius:99px;background:#f5fcfd;color:#238bab;font:600 10px/1.6 -apple-system,BlinkMacSystemFont,"Yu Gothic",Meiryo,sans-serif}
 .room-activity::before{content:"";width:7px;height:7px;flex:none;border-radius:50%;background:#238bab;opacity:.8;animation:room-activity-breathe 2s ease-in-out infinite}
 @keyframes room-activity-breathe{0%,100%{opacity:.25;box-shadow:0 0 0 0 #5dc0d500}50%{opacity:1;box-shadow:0 0 0 3px #5dc0d52e}}
-@media(prefers-reduced-motion:reduce){.room-activity::before{animation:none;opacity:.9;box-shadow:none}}
 .room-activity[hidden]{display:none!important}
 .writing-room-entry-cta .room-activity{border-color:#afd6e1;background:#fff}
-@media(max-width:700px){.header-nav .room-nav-link{flex-direction:column;align-items:flex-end;gap:2px;line-height:1.4}.header-nav .room-activity{font-size:9px;padding:1px 6px}.writing-room-entry-cta{gap:12px}}
+@media(min-width:701px) and (max-width:1100px){
+  .hero-inner{grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);column-gap:32px;row-gap:0;align-items:start}
+  .hero-copy{grid-column:1;grid-row:1}
+  .hero-aside{grid-column:1;grid-row:2;display:block;padding:22px 0 0}
+  .hero-book-stage{grid-column:2;grid-row:1/span 2;align-self:center}
+}
+@media(max-width:700px){
+  .header-nav .room-nav-link{flex-direction:column;align-items:flex-end;gap:2px;line-height:1.4}
+  .header-nav .room-activity{font-size:9px;padding:1px 6px}
+  .hero-inner{grid-template-columns:minmax(0,1fr);gap:0}
+  .hero-copy{grid-column:1;grid-row:1}
+  .hero-aside{grid-column:1;grid-row:2;display:block;border-top:1px solid #69b4c9;margin-top:22px;padding:20px 0 0}
+  .aside-number{font-size:58px;line-height:1.25}
+  .hero-book-stage{grid-column:1;grid-row:3;padding-top:32px;padding-bottom:0}
+  .writing-room-entry{margin-top:20px;padding-top:18px}
+}
+@media(prefers-reduced-motion:reduce){
+  .room-activity::before{animation:none;opacity:.9;box-shadow:none}
+  .hero-aside .writing-room-entry-cta{transition:none}
+}
 </style>
 </head>
 <body>
@@ -425,6 +447,13 @@
 <a class="weekly-topic-link" id="weeklyTopicLink" rel="noopener noreferrer" target="_blank" hidden>お題の記事を読む　→</a>
 </div>
 </div>
+<div class="hero-aside"><p class="aside-note"><strong><span>はじめてnoteを書く人も</span><span>自己紹介がわりに！</span></strong></p><div class="aside-count"><div class="aside-line"></div><div class="aside-label" id="asideMonth">#シロクマ文芸部 の累計記事数</div><div class="aside-number"><span id="asideCount">—</span><small>作品</small></div><div class="aside-foot" id="asideFoot">noteのハッシュタグ登録記事数</div></div>
+<section class="writing-room-entry" aria-labelledby="writing-room-entry-title">
+  <div class="writing-room-entry-heading"><img class="writing-room-entry-icon" src="./assets/polarbear-icon.png" width="32" height="32" alt=""><h2 id="writing-room-entry-title">みんなの部室</h2></div>
+  <p class="writing-room-entry-copy">ひとり時間を、ゆるく一緒に。<br>書く人も、読む人も。同じ部室で。</p>
+  <a class="writing-room-entry-cta" href="https://shirokuma-writing-room.claska.chatgpt.site" rel="nofollow" data-room-label="部室に入る">部室に入る <span class="room-activity" data-room-activity hidden aria-live="polite" aria-atomic="true"></span><span aria-hidden="true">→</span></a>
+</section>
+</div>
 <div class="hero-book-stage">
 <div class="hero-bookshell" id="heroBookShell" role="img" aria-label="シロクマ文芸部の書籍風表紙">
 <div class="hero-shell-title" id="heroBookTitle"><span class="cover-fit-text" id="heroBookTitleText">【掌編】快晴前夜</span></div>
@@ -432,14 +461,8 @@
 <div class="hero-shell-creator cover-fit" id="heroBookCreator"><span class="cover-fit-text" id="heroBookCreatorText">クリエイター名を確認中</span></div>
 <div class="hero-shell-footer"><strong>シロクマ文芸部</strong><small>SHIROKUMA BUNGEIBU</small></div>
 </div><a class="hero-book-cta" id="heroBookCta" hidden rel="noopener noreferrer" aria-label="注目記事を読む">読む <span aria-hidden="true">→</span></a></div>
-<div class="hero-aside"><p class="aside-note"><strong><span>はじめてnoteを書く人も</span><span>自己紹介がわりに！</span></strong></p><div class="aside-count"><div class="aside-line"></div><div class="aside-label" id="asideMonth">#シロクマ文芸部 の累計記事数</div><div class="aside-number"><span id="asideCount">—</span><small>作品</small></div><div class="aside-foot" id="asideFoot">noteのハッシュタグ登録記事数</div></div></div>
 </div></section>
 <main class="main container">
-<section class="writing-room-entry" aria-labelledby="writing-room-entry-title">
-  <img class="writing-room-entry-icon" src="./assets/polarbear-icon.png" width="55" height="55" alt="">
-  <div class="writing-room-entry-copy"><h2 id="writing-room-entry-title">みんなの部室</h2><p>ひとり時間を、ゆるく一緒に。<br>書く人も、読む人も。同じ部室で。</p></div>
-  <a class="writing-room-entry-cta" href="https://shirokuma-writing-room.claska.chatgpt.site" rel="nofollow" data-room-label="部室に入る">部室に入る <span class="room-activity" data-room-activity hidden aria-live="polite" aria-atomic="true"></span><span aria-hidden="true">→</span></a>
-</section>
 <section id="works" aria-labelledby="works-title"><div class="section-head"><div class="section-head-left"><h2 id="works-title">注目記事</h2><p>コメントのない文芸部作品に初めてコメントしてくれた人の作品をご紹介。</p></div></div><div class="shelf-area"><div id="bookshelf" class="bookshelf"><div class="shelf-empty">本棚の作品を読み込み中です。</div></div></div><div class="shelf-navigation"><a class="shelf-all-link" href="./articles/">注目記事の一覧を見る <span aria-hidden="true">→</span></a></div></section>
 
 </main>
