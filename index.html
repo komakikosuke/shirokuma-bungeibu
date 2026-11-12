@@ -385,6 +385,17 @@
 /* Keep both halves of the editorial headline balanced instead of orphaning the final syllable. */
 .about h2 .about-headline-line{display:block;white-space:nowrap;letter-spacing:0}
 @media(max-width:700px){.about h2{font-size:clamp(20px,6.8vw,25px)}}
+/* Insert the entrance fragment before #works inside the official page's <main>. */
+.writing-room-entry{display:flex;align-items:center;gap:22px;padding:25px 29px;margin:0 0 42px;border:1px solid #c9e2ea;background:#eaf7f9;color:#133e59}
+.writing-room-entry-icon{width:55px;height:55px;border-radius:50%;flex:none}
+.writing-room-entry-copy{min-width:0;flex:1}
+.writing-room-entry-copy h2{font:500 24px/1.5 "Hiragino Mincho ProN","Yu Mincho",YuMincho,serif;letter-spacing:.08em;margin:0 0 6px}
+.writing-room-entry-copy p{font:12px/1.9 -apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;color:#52768b;margin:0}
+.writing-room-entry-copy small{display:block;font-size:10px;margin-top:6px;color:#6c8798}
+.writing-room-entry-cta{display:inline-flex;align-items:center;justify-content:center;gap:25px;border:1px solid #133e59;border-radius:99px;min-height:45px;padding:10px 23px;white-space:nowrap;text-decoration:none;font-size:12px;font-weight:600;transition:background .2s,color .2s}
+.writing-room-entry-cta:hover{background:#133e59;color:#fff}
+.writing-room-entry-cta:focus-visible{outline:3px solid #006d96;outline-offset:4px}
+@media(max-width:700px){.writing-room-entry{display:grid;grid-template-columns:42px minmax(0,1fr);gap:15px;padding:22px 20px;margin-bottom:32px}.writing-room-entry-icon{width:42px;height:42px}.writing-room-entry-copy h2{font-size:20px}.writing-room-entry-copy p{font-size:11px}.writing-room-entry-cta{grid-column:1/-1;justify-self:start;margin-top:3px;font-size:11px;min-height:43px;padding:9px 22px}}
 </style>
 </head>
 <body>
@@ -392,7 +403,7 @@
 <div class="container header-inner">
 <a class="brand" href="#top" aria-label="シロクマ文芸部 ホーム"><span class="logo"><img class="original-icon" src="./assets/polarbear-icon.png" alt=""></span><span class="brand-name">シロクマ文芸部</span></a>
 <span class="tagline">クリエイターの帰る場所。</span>
-<nav class="header-nav" aria-label="主要メニュー"><a href="https://note.com/komaki_kousuke/n/n097f169769c3" rel="noopener noreferrer">シロクマ文芸部について</a></nav>
+<nav class="header-nav" aria-label="主要メニュー"><a href="https://shirokuma-writing-room.claska.chatgpt.site" rel="nofollow">みんなの部室</a><a href="https://note.com/komaki_kousuke/n/n097f169769c3" rel="noopener noreferrer">シロクマ文芸部について</a></nav>
 </div></header>
 <section class="hero" aria-labelledby="hero-title"><div class="container hero-inner">
 <div class="hero-copy">
@@ -417,6 +428,11 @@
 <div class="hero-aside"><p class="aside-note"><strong><span>はじめてnoteを書く人も</span><span>自己紹介がわりに！</span></strong></p><div class="aside-count"><div class="aside-line"></div><div class="aside-label" id="asideMonth">#シロクマ文芸部 の累計記事数</div><div class="aside-number"><span id="asideCount">—</span><small>作品</small></div><div class="aside-foot" id="asideFoot">noteのハッシュタグ登録記事数</div></div></div>
 </div></section>
 <main class="main container">
+<section class="writing-room-entry" aria-labelledby="writing-room-entry-title">
+  <img class="writing-room-entry-icon" src="./assets/polarbear-icon.png" width="55" height="55" alt="">
+  <div class="writing-room-entry-copy"><h2 id="writing-room-entry-title">みんなの部室</h2><p>ひとり時間を、ゆるく一緒に。<br>書く人も、読む人も。同じ部室で。<small>ご利用にはアクセスパスワードが必要です。</small></p></div>
+  <a class="writing-room-entry-cta" href="https://shirokuma-writing-room.claska.chatgpt.site" rel="nofollow">部室に入る <span aria-hidden="true">→</span></a>
+</section>
 <section id="works" aria-labelledby="works-title"><div class="section-head"><div class="section-head-left"><h2 id="works-title">注目記事</h2><p>コメントのない文芸部作品に初めてコメントしてくれた人の作品をご紹介。</p></div></div><div class="shelf-area"><div id="bookshelf" class="bookshelf"><div class="shelf-empty">本棚の作品を読み込み中です。</div></div></div><div class="shelf-navigation"><a class="shelf-all-link" href="./articles/">注目記事の一覧を見る <span aria-hidden="true">→</span></a></div></section>
 
 </main>
