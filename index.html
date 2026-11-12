@@ -119,7 +119,7 @@
 .mini-publisher{font:clamp(6px,2.65cqw,10px)/1.3 var(--serif);letter-spacing:.08em;color:#436c82;white-space:nowrap}
 .book-caption{margin:10px 9px 0;justify-content:flex-start}
 .hero-copy p strong{font-weight:700}
-.header-nav{gap:0}
+.header-nav{gap:28px}
 .section-head{justify-content:flex-start}
 @media(max-width:700px){.bookshelf{gap:15px}.shelf-item{min-width:205px;width:205px}}
 
@@ -395,6 +395,11 @@
 .writing-room-entry-cta:hover{background:#133e59;color:#fff}
 .writing-room-entry-cta:focus-visible{outline:3px solid #006d96;outline-offset:4px}
 @media(max-width:700px){.writing-room-entry{display:grid;grid-template-columns:42px minmax(0,1fr);gap:15px;padding:22px 20px;margin-bottom:32px}.writing-room-entry-icon{width:42px;height:42px}.writing-room-entry-copy h2{font-size:20px}.writing-room-entry-copy p{font-size:11px}.writing-room-entry-cta{grid-column:1/-1;justify-self:start;margin-top:3px;font-size:11px;min-height:43px;padding:9px 22px}}
+.header-nav .room-nav-link{display:inline-flex;align-items:center;gap:8px}
+.room-activity{display:inline-flex;align-items:center;white-space:nowrap;padding:2px 8px;border:1px solid #b5d8e4;border-radius:99px;background:#f5fcfd;color:#238bab;font:600 10px/1.6 -apple-system,BlinkMacSystemFont,"Yu Gothic",Meiryo,sans-serif}
+.room-activity[hidden]{display:none!important}
+.writing-room-entry-cta .room-activity{border-color:#afd6e1;background:#fff}
+@media(max-width:700px){.header-nav .room-nav-link{flex-direction:column;align-items:flex-end;gap:2px;line-height:1.4}.header-nav .room-activity{font-size:9px;padding:1px 6px}.writing-room-entry-cta{gap:12px}}
 </style>
 </head>
 <body>
@@ -402,7 +407,7 @@
 <div class="container header-inner">
 <a class="brand" href="#top" aria-label="シロクマ文芸部 ホーム"><span class="logo"><img class="original-icon" src="./assets/polarbear-icon.png" alt=""></span><span class="brand-name">シロクマ文芸部</span></a>
 <span class="tagline">クリエイターの帰る場所。</span>
-<nav class="header-nav" aria-label="主要メニュー"><a href="https://shirokuma-writing-room.claska.chatgpt.site" rel="nofollow">みんなの部室</a><a href="https://note.com/komaki_kousuke/n/n097f169769c3" rel="noopener noreferrer">シロクマ文芸部について</a></nav>
+<nav class="header-nav" aria-label="主要メニュー"><a class="room-nav-link" href="https://shirokuma-writing-room.claska.chatgpt.site" rel="nofollow" data-room-label="みんなの部室">みんなの部室 <span class="room-activity" data-room-activity hidden aria-live="polite" aria-atomic="true"></span></a><a href="https://note.com/komaki_kousuke/n/n097f169769c3" rel="noopener noreferrer">シロクマ文芸部について</a></nav>
 </div></header>
 <section class="hero" aria-labelledby="hero-title"><div class="container hero-inner">
 <div class="hero-copy">
@@ -430,7 +435,7 @@
 <section class="writing-room-entry" aria-labelledby="writing-room-entry-title">
   <img class="writing-room-entry-icon" src="./assets/polarbear-icon.png" width="55" height="55" alt="">
   <div class="writing-room-entry-copy"><h2 id="writing-room-entry-title">みんなの部室</h2><p>ひとり時間を、ゆるく一緒に。<br>書く人も、読む人も。同じ部室で。</p></div>
-  <a class="writing-room-entry-cta" href="https://shirokuma-writing-room.claska.chatgpt.site" rel="nofollow">部室に入る <span aria-hidden="true">→</span></a>
+  <a class="writing-room-entry-cta" href="https://shirokuma-writing-room.claska.chatgpt.site" rel="nofollow" data-room-label="部室に入る">部室に入る <span class="room-activity" data-room-activity hidden aria-live="polite" aria-atomic="true"></span><span aria-hidden="true">→</span></a>
 </section>
 <section id="works" aria-labelledby="works-title"><div class="section-head"><div class="section-head-left"><h2 id="works-title">注目記事</h2><p>コメントのない文芸部作品に初めてコメントしてくれた人の作品をご紹介。</p></div></div><div class="shelf-area"><div id="bookshelf" class="bookshelf"><div class="shelf-empty">本棚の作品を読み込み中です。</div></div></div><div class="shelf-navigation"><a class="shelf-all-link" href="./articles/">注目記事の一覧を見る <span aria-hidden="true">→</span></a></div></section>
 
@@ -583,6 +588,43 @@ async function loadHashtagCount(){
 }
 loadHashtagCount();
 (async()=>{try{const resp=await fetch("./data/works.json?v="+Date.now(),{cache:"no-store"});if(!resp.ok)throw Error("HTTP "+resp.status);render(await resp.json())}catch(err){console.error("掲載データの読み込みに失敗しました",err);$("bookshelf").replaceChildren(make("div","shelf-empty","掲載データを取得できませんでした。ページを再読み込みしてください。"))}})();
+</script>
+<script data-room-activity-script>
+(() => {
+  "use strict";
+  const badges = Array.from(document.querySelectorAll("[data-room-activity]"));
+  if (!badges.length) return;
+  let pending = false;
+  function show(count) {
+    const label = count > 0 ? `${count.toLocaleString("ja-JP")}人が活動中` : "";
+    for (const badge of badges) {
+      if (badge.textContent !== label) badge.textContent = label;
+      badge.hidden = !label;
+      const link = badge.closest("a[data-room-label]");
+      if (link) link.setAttribute("aria-label", link.dataset.roomLabel + (label ? `（${label}）` : ""));
+    }
+  }
+  async function update() {
+    if (document.hidden || pending) return;
+    pending = true;
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 8000);
+    try {
+      const response = await fetch("https://shirokuma-writing-room.claska.chatgpt.site/api/room/activity", {
+        credentials: "omit", mode: "cors", cache: "no-store", signal: controller.signal,
+      });
+      if (!response.ok) throw new Error("Activity unavailable");
+      const data = await response.json();
+      if (!Number.isSafeInteger(data.count) || data.count < 0) throw new Error("Invalid activity count");
+      show(data.count);
+    } catch { show(0); }
+    finally { clearTimeout(timeout); pending = false; }
+  }
+  void update();
+  setInterval(update, 30000);
+  window.addEventListener("pageshow", update);
+  document.addEventListener("visibilitychange", () => { if (!document.hidden) void update(); });
+})();
 </script>
 </body>
 </html>
