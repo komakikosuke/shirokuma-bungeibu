@@ -394,10 +394,11 @@
 .writing-room-entry-icon{width:32px;height:32px;border-radius:50%;flex:none}
 .writing-room-entry h2{font:500 20px/1.5 "Hiragino Mincho ProN","Yu Mincho",YuMincho,serif;letter-spacing:.06em;margin:0}
 .writing-room-entry-copy{font:12px/1.85 -apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;color:#355e72;margin:10px 0 14px}
-.hero-aside .writing-room-entry-cta{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;min-height:44px;margin:0;padding:10px 12px;border:1px solid #133e59;border-radius:99px;background:rgba(255,255,255,.5);white-space:nowrap;text-decoration:none;font:600 12px/1.7 -apple-system,BlinkMacSystemFont,"Yu Gothic",Meiryo,sans-serif;transition:background .2s,color .2s}
+.hero-aside .writing-room-entry-cta{position:relative;display:flex;align-items:center;justify-content:center;gap:8px;width:100%;min-height:44px;margin:0;padding:10px 28px;border:1px solid #133e59;border-radius:99px;background:rgba(255,255,255,.5);white-space:nowrap;text-decoration:none;font:600 12px/1.7 -apple-system,BlinkMacSystemFont,"Yu Gothic",Meiryo,sans-serif;transition:background .2s,color .2s}
 .hero-aside .writing-room-entry-cta:hover{background:#133e59;color:#fff}
 .writing-room-entry-cta:focus-visible{outline:3px solid #006d96;outline-offset:4px}
-.writing-room-entry-cta>span[aria-hidden]{margin-left:auto}
+.writing-room-entry-content{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:4px 8px;min-width:0}
+.writing-room-entry-cta>span[aria-hidden]{position:absolute;right:12px;top:50%;transform:translateY(-50%)}
 .header-nav{gap:28px}
 .header-nav .room-nav-link{display:inline-flex;align-items:center;gap:8px}
 .room-activity{display:inline-flex;align-items:center;gap:5px;white-space:nowrap;padding:2px 8px;border:1px solid #b5d8e4;border-radius:99px;background:#f5fcfd;color:#238bab;font:600 10px/1.6 -apple-system,BlinkMacSystemFont,"Yu Gothic",Meiryo,sans-serif}
@@ -451,7 +452,7 @@
 <section class="writing-room-entry" aria-labelledby="writing-room-entry-title">
   <div class="writing-room-entry-heading"><img class="writing-room-entry-icon" src="./assets/polarbear-icon.png" width="32" height="32" alt=""><h2 id="writing-room-entry-title">みんなの部室</h2></div>
   <p class="writing-room-entry-copy">ひとり時間を、ゆるく一緒に。<br>書く人も、読む人も。同じ部室で。</p>
-  <a class="writing-room-entry-cta" href="https://shirokuma-writing-room.claska.chatgpt.site" rel="nofollow" data-room-label="部室に入る">部室に入る <span class="room-activity" data-room-activity hidden aria-live="polite" aria-atomic="true"></span><span aria-hidden="true">→</span></a>
+  <a class="writing-room-entry-cta" href="https://shirokuma-writing-room.claska.chatgpt.site" rel="nofollow" data-room-label="部室に入る"><span class="writing-room-entry-content">部室に入る <span class="room-activity" data-room-activity hidden aria-live="polite" aria-atomic="true"></span></span><span aria-hidden="true">→</span></a>
 </section>
 </div>
 <div class="hero-book-stage">
