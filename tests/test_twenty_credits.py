@@ -44,6 +44,11 @@ class TwentyCreditsTests(unittest.TestCase):
         self.assertIn("node.textContent = text", self.js)
         self.assertNotIn("innerHTML", self.js)
 
+    def test_credit_roll_does_not_link_out_to_note(self):
+        self.assertNotIn("source-link", self.index)
+        self.assertNotIn("source-link", self.js)
+        self.assertNotIn('element("a"', self.js)
+
 
 if __name__ == "__main__":
     unittest.main()
