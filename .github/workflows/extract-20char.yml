@@ -8,6 +8,8 @@ on:
       - "scripts/requirements-20char.txt"
       - "scripts/sync-candidates.py"
       - "tests/test_twenty_char.py"
+      - "tests/test_twenty_credits.py"
+      - "twenty-credits/**"
       - ".github/workflows/extract-20char.yml"
   workflow_dispatch:
     inputs:

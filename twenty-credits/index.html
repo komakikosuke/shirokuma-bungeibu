@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#248fae">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <meta name="description" content="シロクマ文芸部「20字小説」の試写ページ。20字の物語と作者名が、映画のスタッフクレジットのように流れます。">
+  <link rel="icon" type="image/png" href="../assets/polarbear-icon.png">
+  <link rel="stylesheet" href="./style.css">
+  <title>20字小説｜シロクマ文芸部</title>
+</head>
+<body>
+  <main class="experience is-loading" id="experience">
+    <div class="ambient" aria-hidden="true">
+      <span class="aurora aurora-one"></span>
+      <span class="aurora aurora-two"></span>
+      <span class="star-field"></span>
+    </div>
+
+    <header class="screen-header">
+      <div class="screen-brand">
+        <img src="../assets/polarbear-icon.png" alt="" width="34" height="34">
+        <div>
+          <strong>シロクマ文芸部</strong>
+          <span>SHIROKUMA LITERARY CLUB</span>
+        </div>
+      </div>
+      <div class="screening-badge" aria-label="試写版">PRIVATE SCREENING</div>
+    </header>
+
+    <h1 class="sr-only">シロクマ文芸部 20字小説</h1>
+    <section class="credits-window" aria-label="20字小説スタッフクレジット">
+      <div class="credits-track" id="creditsTrack"></div>
+      <p class="loading-message" id="loadingMessage" role="status">作品を読み込んでいます</p>
+    </section>
+
+    <div class="timeline" aria-hidden="true"><span id="timelineFill"></span></div>
+
+    <nav class="controls" aria-label="クレジット再生操作">
+      <button type="button" class="control-button" id="toggleButton" disabled>
+        <svg class="icon-pause" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 6v12M16 6v12"/></svg>
+        <svg class="icon-play" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 9 6-9 6Z"/></svg>
+        <span id="toggleLabel">一時停止</span>
+      </button>
+      <button type="button" class="control-button control-icon" id="restartButton" disabled aria-label="最初から見る">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 8V4m0 0h4M5 4l3 3a7 7 0 1 1-2 8"/></svg>
+      </button>
+    </nav>
+
+    <p class="keyboard-hint" aria-hidden="true"><kbd>Space</kbd> 一時停止</p>
+    <noscript><p class="error-message">このページの表示にはJavaScriptが必要です。</p></noscript>
+  </main>
+  <script src="./app.js" defer></script>
+</body>
+</html>
