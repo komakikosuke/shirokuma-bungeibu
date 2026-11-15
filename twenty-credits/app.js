@@ -29,16 +29,6 @@
     return node;
   };
 
-  const externalIcon = () => {
-    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-    svg.setAttribute("viewBox", "0 0 16 16");
-    svg.setAttribute("aria-hidden", "true");
-    const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-    path.setAttribute("d", "M6 3H3v10h10v-3M8 2h6v6M14 2 7 9");
-    svg.append(path);
-    return svg;
-  };
-
   const intro = () => {
     const scene = element("article", "credit-scene credits-intro");
     scene.append(image("intro-mark"));
@@ -54,20 +44,12 @@
     const number = String(index + 1).padStart(2, "0");
     scene.append(element("p", "credit-number", `SHORT STORY ${number} / ${String(total).padStart(2, "0")}`));
     scene.append(element("p", "story-text", work.text));
+    scene.append(element("span", "credit-rule"));
 
     const byline = element("div", "credit-byline");
     byline.append(element("span", "credit-byline-label", "WRITTEN BY"));
     byline.append(element("strong", "credit-author", work.authorName));
-    byline.append(element("span", "credit-handle", `@${work.handle}`));
     scene.append(byline);
-
-    const link = element("a", "source-link", "noteで作品を読む");
-    link.href = work.url;
-    link.target = "_blank";
-    link.rel = "noopener noreferrer";
-    link.setAttribute("aria-label", `${work.title}をnoteで読む（新しいタブ）`);
-    link.append(externalIcon());
-    scene.append(link);
     return scene;
   };
 
