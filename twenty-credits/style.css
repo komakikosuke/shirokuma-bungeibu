@@ -166,6 +166,7 @@ button:focus-visible, a:focus-visible {
 }
 
 .credit-work { min-height: 25.6vh; }
+.credit-work--club { min-height: 20.48vh; }
 .story-text {
   max-width: 1080px;
   margin: 0;
@@ -197,17 +198,40 @@ button:focus-visible, a:focus-visible {
   letter-spacing: .13em;
 }
 
-.credits-interlude { min-height: 48vh; }
-.interlude-en {
-  margin: 0 0 17px;
-  font: 600 9px/1.4 var(--sans);
-  letter-spacing: .35em;
-  color: rgba(242,252,255,.56);
+.credit-work--club .story-text {
+  font-size: clamp(13px, 1.35vw, 18px);
+  letter-spacing: .075em;
 }
-.interlude-copy {
+.credit-work--club .credit-rule {
+  width: clamp(72px, 10vw, 132px);
+  margin-top: 25px;
+  opacity: .78;
+}
+.credit-work--club .credit-byline { margin-top: 18px; }
+.credit-work--club .credit-byline-label { font-size: 7px; }
+.credit-work--club .credit-author {
+  margin-top: 6px;
+  font-size: clamp(12px, 1.25vw, 16px);
+}
+
+.credits-group-heading { min-height: 42vh; }
+.group-kicker {
+  margin: 0 0 15px;
+  font: 600 8px/1.4 var(--sans);
+  letter-spacing: .38em;
+  color: rgba(242,252,255,.58);
+}
+.group-title {
   margin: 0;
-  font: 500 clamp(22px, 2.7vw, 34px)/1.8 var(--serif);
-  letter-spacing: .12em;
+  font: 500 clamp(17px, 2vw, 25px)/1.65 var(--serif);
+  letter-spacing: .25em;
+  text-indent: .25em;
+}
+.group-rule {
+  width: 42px;
+  height: 1px;
+  margin-top: 23px;
+  background: rgba(255,255,255,.58);
 }
 
 .credits-outro { min-height: 92vh; }
@@ -356,7 +380,8 @@ html[data-motion="reduced"] .credits-track {
 }
 html[data-motion="reduced"] .credit-scene { min-height: 70svh; }
 html[data-motion="reduced"] .credit-work { min-height: 25.6svh; }
-html[data-motion="reduced"] .credits-interlude { min-height: 45svh; }
+html[data-motion="reduced"] .credit-work--club { min-height: 20.48svh; }
+html[data-motion="reduced"] .credits-group-heading { min-height: 42svh; }
 html[data-motion="reduced"] .timeline,
 html[data-motion="reduced"] .keyboard-hint { display: none; }
 html[data-motion="reduced"] .screen-header,
@@ -371,10 +396,15 @@ html[data-motion="reduced"] .controls { position: fixed; }
   .screening-badge { font-size: 6px; letter-spacing: .24em; }
   .credit-scene { min-height: 72vh; padding-inline: 24px; }
   .credit-work { min-height: 25.6vh; }
+  .credit-work--club { min-height: 20.48vh; }
+  .credits-group-heading { min-height: 38vh; }
   .credits-intro { min-height: 86vh; }
   .credits-outro { min-height: 92vh; }
   .credits-intro h2 { font-size: clamp(43px, 14vw, 66px); }
   .story-text { max-width: 33em; font-size: clamp(14px, 3.68vw, 16.8px); line-height: 1.9; letter-spacing: .045em; }
+  .credit-work--club .story-text { font-size: clamp(11.5px, 2.94vw, 13.4px); line-height: 1.9; }
+  .credit-work--club .credit-author { font-size: clamp(10.5px, 2.8vw, 13px); }
+  .group-title { font-size: clamp(15px, 4.2vw, 19px); letter-spacing: .2em; text-indent: .2em; }
   .credit-rule { margin-top: 28px; }
   .credit-byline { margin-top: 20px; }
   .controls { right: 15px; bottom: max(16px, env(safe-area-inset-bottom)); }
