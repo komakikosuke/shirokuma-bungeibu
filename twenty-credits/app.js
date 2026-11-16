@@ -13,6 +13,11 @@
   let isReduced = reducedMotion.matches || autoplayDisabled;
   let resumeAfterVisibility = false;
 
+  const creditGroups = [
+    { key: "membership", label: "MEMBERSHIP MEMBERS" },
+    { key: "club", label: "CLUB MEMBERS" },
+  ];
+
   const element = (tag, className, text) => {
     const node = document.createElement(tag);
     if (className) node.className = className;
@@ -39,8 +44,16 @@
     return scene;
   };
 
-  const workScene = (work) => {
-    const scene = element("article", "credit-scene credit-work");
+  const groupScene = (group) => {
+    const scene = element("article", `credit-scene credits-group-heading credits-group-heading--${group.key}`);
+    scene.append(element("p", "group-kicker", "SHIROKUMA LITERARY CLUB"));
+    scene.append(element("h2", "group-title", group.label));
+    scene.append(element("span", "group-rule"));
+    return scene;
+  };
+
+  const workScene = (work, groupKey) => {
+    const scene = element("article", `credit-scene credit-work credit-work--${groupKey}`);
     scene.append(element("p", "story-text", work.text));
     scene.append(element("span", "credit-rule"));
 
@@ -48,13 +61,6 @@
     byline.append(element("span", "credit-byline-label", "WRITTEN BY"));
     byline.append(element("strong", "credit-author", work.authorName));
     scene.append(byline);
-    return scene;
-  };
-
-  const interlude = () => {
-    const scene = element("article", "credit-scene credits-interlude");
-    scene.append(element("p", "interlude-en", "TWENTY CHARACTERS, A WHOLE WORLD"));
-    scene.append(element("p", "interlude-copy", "二十字の向こうに、物語はつづく。"));
     return scene;
   };
 
@@ -102,15 +108,23 @@
     }
 
     const fragment = document.createDocumentFragment();
+    const groupedWorks = data.works.map((work) => ({
+      ...work,
+      creditGroup: work.creditGroup === "membership" ? "membership" : "club",
+    }));
     fragment.append(intro());
-    data.works.forEach((work, index) => {
-      fragment.append(workScene(work));
-      if (index === Math.ceil(data.works.length / 2) - 1) fragment.append(interlude());
+    let renderedGroupCount = 0;
+    creditGroups.forEach((group) => {
+      const works = groupedWorks.filter((work) => work.creditGroup === group.key);
+      if (works.length === 0) return;
+      renderedGroupCount += 1;
+      fragment.append(groupScene(group));
+      works.forEach((work) => fragment.append(workScene(work, group.key)));
     });
     fragment.append(outro());
     track.replaceChildren(fragment);
 
-    const duration = Math.max(66, 24 + data.works.length * 9);
+    const duration = Math.max(76, 24 + groupedWorks.length * 8 + renderedGroupCount * 7);
     document.documentElement.style.setProperty("--duration", `${duration}s`);
     experience.classList.remove("is-loading");
     toggleButton.disabled = false;
