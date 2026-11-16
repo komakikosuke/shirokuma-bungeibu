@@ -398,6 +398,17 @@
 .writing-room-entry-cta:focus-visible{outline:3px solid #006d96;outline-offset:4px}
 .writing-room-entry-content{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:4px 8px;min-width:0}
 .writing-room-entry-cta>span[aria-hidden]{position:absolute;right:12px;top:50%;transform:translateY(-50%)}
+.endroll-entry{margin:20px 0 0;padding:18px 0 0;border-top:1px solid rgba(26,100,126,.35);color:#133e59}
+.endroll-entry-heading{display:flex;align-items:center;gap:11px}
+.endroll-entry-mark{width:32px;height:32px;display:grid;place-items:center;flex:none;border:1px solid rgba(19,62,89,.45);border-radius:50%;font:600 12px/1 var(--serif);letter-spacing:.04em}
+.endroll-entry-kicker{display:block;margin-bottom:2px;color:#55798b;font:600 7px/1.35 var(--sans);letter-spacing:.22em}
+.endroll-entry h2{margin:0;font:500 20px/1.35 var(--serif);letter-spacing:.08em}
+.endroll-entry-copy{margin:9px 0 12px;color:#355e72;font:12px/1.75 var(--sans)}
+.hero-aside .endroll-entry-cta{position:relative;display:flex;align-items:center;justify-content:center;width:100%;min-height:42px;margin:0;padding:9px 28px;border:1px solid #133e59;border-radius:99px;background:rgba(255,255,255,.5);white-space:nowrap;text-decoration:none;font:600 12px/1.7 var(--sans);transition:background .2s,color .2s}
+.hero-aside .endroll-entry-cta:not([aria-disabled=true]):hover{background:#133e59;color:#fff}
+.endroll-entry-cta[aria-disabled=true]{border-color:rgba(19,62,89,.36);background:rgba(255,255,255,.24);color:rgba(19,62,89,.56);cursor:default}
+.endroll-entry-cta>span[aria-hidden]{position:absolute;right:12px;top:50%;transform:translateY(-50%)}
+.endroll-entry-status{margin:7px 0 0;color:#55798b;font:10px/1.6 var(--sans);letter-spacing:.02em;text-align:center}
 .header-nav{gap:28px}
 .header-nav .room-nav-link{display:inline-flex;align-items:center;gap:8px}
 .room-activity{display:inline-flex;align-items:center;gap:5px;white-space:nowrap;padding:2px 8px;border:1px solid #b5d8e4;border-radius:99px;background:#f5fcfd;color:#238bab;font:600 10px/1.6 -apple-system,BlinkMacSystemFont,"Yu Gothic",Meiryo,sans-serif}
@@ -420,10 +431,11 @@
   .aside-number{font-size:58px;line-height:1.25}
   .hero-book-stage{grid-column:1;grid-row:3;padding-top:32px;padding-bottom:0}
   .writing-room-entry{margin-top:20px;padding-top:18px}
+  .endroll-entry{margin-top:18px;padding-top:17px}
 }
 @media(prefers-reduced-motion:reduce){
   .room-activity::before{animation:none;opacity:.9;box-shadow:none}
-  .hero-aside .writing-room-entry-cta{transition:none}
+  .hero-aside .writing-room-entry-cta,.hero-aside .endroll-entry-cta{transition:none}
 }
 </style>
 </head>
@@ -452,6 +464,12 @@
   <div class="writing-room-entry-heading"><img class="writing-room-entry-icon" src="./assets/polarbear-icon.png" width="32" height="32" alt=""><h2 id="writing-room-entry-title">みんなの部室</h2></div>
   <p class="writing-room-entry-copy">ひとり時間を、ゆるく一緒に。<br>書く人も、読む人も。同じ部室で。</p>
   <a class="writing-room-entry-cta" href="https://shirokuma-writing-room.claska.chatgpt.site" rel="nofollow" data-room-label="部室に入る"><span class="writing-room-entry-content">部室に入る <span class="room-activity" data-room-activity hidden aria-live="polite" aria-atomic="true"></span></span><span aria-hidden="true">→</span></a>
+</section>
+<section class="endroll-entry" aria-labelledby="endroll-entry-title">
+  <div class="endroll-entry-heading"><span class="endroll-entry-mark" aria-hidden="true">20</span><div><span class="endroll-entry-kicker">20-CHARACTER STORIES</span><h2 id="endroll-entry-title">エンドロール</h2></div></div>
+  <p class="endroll-entry-copy">20字の物語と作者名が、映画のクレジットのように流れます。</p>
+  <a class="endroll-entry-cta" id="endrollEntry" aria-disabled="true" tabindex="-1"><span id="endrollEntryLabel">準備中</span><span aria-hidden="true">→</span></a>
+  <p class="endroll-entry-status" id="endrollEntryStatus" aria-live="polite">毎週火曜21時に更新</p>
 </section>
 </div>
 <div class="hero-book-stage">
@@ -590,6 +608,28 @@ async function loadWeeklyTopic(){
  }
 }
 loadWeeklyTopic();
+
+async function loadEndrollStatus(){
+ const entry=$("endrollEntry"),label=$("endrollEntryLabel"),statusText=$("endrollEntryStatus");
+ try{
+   const response=await fetch("./data/twenty-char-status.json?v="+Date.now(),{cache:"no-store"});
+   if(!response.ok)throw Error("HTTP "+response.status);
+   const data=await response.json();
+   if(data.version!==1||typeof data.status!=="string"||!Number.isSafeInteger(data.workCount)||data.workCount<0)throw Error("Invalid end-roll status");
+   const date=/^\d{4}-\d{2}-\d{2}$/.test(data.eventDate||"")?new Intl.DateTimeFormat("ja-JP",{timeZone:"Asia/Tokyo",month:"numeric",day:"numeric"}).format(new Date(data.eventDate+"T12:00:00+09:00")):null;
+   if(data.status==="ready"&&data.workCount>0){
+     entry.href="./twenty-credits/";
+     entry.removeAttribute("aria-disabled");
+     entry.removeAttribute("tabindex");
+     label.textContent="エンドロールを見る";
+     statusText.textContent=(date?date+" · ":"")+data.workCount.toLocaleString("ja-JP")+"作品";
+     return;
+   }
+   label.textContent=data.status==="empty"?"対象作品なし":"準備中";
+   statusText.textContent=(date?date+" · ":"")+"毎週火曜21時に更新";
+ }catch(err){console.info("エンドロールの公開状況を取得できませんでした",err)}
+}
+loadEndrollStatus();
 
 async function loadHashtagCount(){
  const urls=[
