@@ -81,6 +81,9 @@ class TwentyCreditsTests(unittest.TestCase):
         self.assertIn("すぐ書ける。すぐ読める。", self.js)
         self.assertNotIn("一行目から、ひとつの世界へ。", self.js)
         self.assertIn("min-height: 12.8vh", self.css)
+        self.assertIn("padding-block: clamp(10px, 1.6vh, 16px)", self.css)
+        self.assertIn("margin-top: clamp(14px, 2vh, 18px)", self.css)
+        self.assertIn("margin-top: clamp(10px, 1.4vh, 13px)", self.css)
 
 
 if __name__ == "__main__":
