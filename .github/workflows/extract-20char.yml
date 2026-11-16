@@ -1,0 +1,121 @@
+name: Build weekly 20-character end roll
+
+on:
+  schedule:
+    # GitHub Actions uses UTC. 12:00 UTC = Tuesday 21:00 JST.
+    - cron: "0 12 * * 2"
+  pull_request:
+    paths:
+      - "scripts/extract-20char.py"
+      - "scripts/twenty_char.py"
+      - "scripts/build_twenty_credits.py"
+      - "scripts/requirements-20char.txt"
+      - "scripts/sync-candidates.py"
+      - "tests/test_twenty_char.py"
+      - "tests/test_endroll_builder.py"
+      - "twenty-credits/**"
+      - "data/twenty-char-members.json"
+      - "data/twenty-char-status.json"
+      - ".github/workflows/extract-20char.yml"
+  workflow_dispatch:
+    inputs:
+      event_date:
+        description: "対象の火曜日（YYYY-MM-DD、空欄なら日本時間の当日）"
+        type: string
+      publish:
+        description: "結果を公開データへ反映する"
+        required: true
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install isolated extraction dependency
+        run: python -m pip install -r scripts/requirements-20char.txt
+      - name: Run offline tests
+        run: python -m unittest discover -s tests -v
+
+  extract-and-build:
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    needs: test
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install isolated extraction dependency
+        run: python -m pip install -r scripts/requirements-20char.txt
+      - name: Set Tuesday 19:00–21:00 JST window
+        id: window
+        env:
+          REQUESTED_DATE: ${{ inputs.event_date }}
+        shell: bash
+        run: |
+          event_date="$REQUESTED_DATE"
+          if [[ -z "$event_date" ]]; then event_date="$(TZ=Asia/Tokyo date +%F)"; fi
+          if [[ ! "$event_date" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ ]] || [[ "$(date -d "$event_date" +%u)" != "2" ]]; then
+            echo "event_date must be a Tuesday in YYYY-MM-DD format" >&2
+            exit 2
+          fi
+          echo "event_date=$event_date" >> "$GITHUB_OUTPUT"
+          echo "since=${event_date}T19:00:00+09:00" >> "$GITHUB_OUTPUT"
+          echo "until=${event_date}T21:00:00+09:00" >> "$GITHUB_OUTPUT"
+      - name: Extract #20字小説 candidates
+        run: >-
+          python scripts/extract-20char.py
+          --hashtag "20字小説"
+          --since "${{ steps.window.outputs.since }}"
+          --until "${{ steps.window.outputs.until }}"
+          --limit 200
+          --max-pages 10
+          --output var/twenty-char/results.json
+          --log var/twenty-char/events.jsonl
+      - name: Build end-roll data
+        run: >-
+          python scripts/build_twenty_credits.py
+          --input var/twenty-char/results.json
+          --members data/twenty-char-members.json
+          --event-date "${{ steps.window.outputs.event_date }}"
+          --output twenty-credits/data/works.json
+          --status data/twenty-char-status.json
+          --archive-dir twenty-credits/data/archive
+      - name: Save extraction evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: twenty-char-${{ steps.window.outputs.event_date }}-${{ github.run_id }}
+          path: |
+            var/twenty-char/
+            twenty-credits/data/works.json
+            data/twenty-char-status.json
+          if-no-files-found: warn
+          retention-days: 30
+      - name: Publish latest end roll
+        if: github.event_name == 'schedule' || inputs.publish
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/twenty-char-status.json twenty-credits/data/works.json twenty-credits/data/archive/
+          if git diff --cached --quiet; then
+            echo "End-roll data is already current."
+            exit 0
+          fi
+          git commit -m "Update 20字小説 end roll for ${{ steps.window.outputs.event_date }}"
+          git push
