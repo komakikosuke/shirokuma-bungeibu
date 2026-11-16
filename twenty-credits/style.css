@@ -166,7 +166,10 @@ button:focus-visible, a:focus-visible {
 }
 
 .credit-work { min-height: 25.6vh; }
-.credit-work--club { min-height: 20.48vh; }
+.credit-work--club {
+  min-height: 10.24vh;
+  padding-block: 2.5vh;
+}
 .story-text {
   max-width: 1080px;
   margin: 0;
@@ -380,7 +383,7 @@ html[data-motion="reduced"] .credits-track {
 }
 html[data-motion="reduced"] .credit-scene { min-height: 70svh; }
 html[data-motion="reduced"] .credit-work { min-height: 25.6svh; }
-html[data-motion="reduced"] .credit-work--club { min-height: 20.48svh; }
+html[data-motion="reduced"] .credit-work--club { min-height: 10.24svh; }
 html[data-motion="reduced"] .credits-group-heading { min-height: 42svh; }
 html[data-motion="reduced"] .timeline,
 html[data-motion="reduced"] .keyboard-hint { display: none; }
@@ -396,7 +399,7 @@ html[data-motion="reduced"] .controls { position: fixed; }
   .screening-badge { font-size: 6px; letter-spacing: .24em; }
   .credit-scene { min-height: 72vh; padding-inline: 24px; }
   .credit-work { min-height: 25.6vh; }
-  .credit-work--club { min-height: 20.48vh; }
+  .credit-work--club { min-height: 10.24vh; }
   .credits-group-heading { min-height: 38vh; }
   .credits-intro { min-height: 86vh; }
   .credits-outro { min-height: 92vh; }
