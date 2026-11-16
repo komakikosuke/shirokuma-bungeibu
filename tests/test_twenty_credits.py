@@ -75,6 +75,7 @@ class TwentyCreditsTests(unittest.TestCase):
         self.assertIn("MEMBERSHIP MEMBERS", self.js)
         self.assertIn("CLUB MEMBERS", self.js)
         self.assertIn("credit-work--club", self.js)
+        self.assertIn('if (groupKey === "membership")', self.js)
         self.assertIn(".credit-work--club .story-text", self.css)
         self.assertIn(".credits-group-heading", self.css)
 
