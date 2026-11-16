@@ -58,7 +58,9 @@
     scene.append(element("span", "credit-rule"));
 
     const byline = element("div", "credit-byline");
-    byline.append(element("span", "credit-byline-label", "WRITTEN BY"));
+    if (groupKey === "membership") {
+      byline.append(element("span", "credit-byline-label", "WRITTEN BY"));
+    }
     byline.append(element("strong", "credit-author", work.authorName));
     scene.append(byline);
     return scene;
