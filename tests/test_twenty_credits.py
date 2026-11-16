@@ -19,15 +19,29 @@ class TwentyCreditsTests(unittest.TestCase):
 
     def test_six_real_extracted_works_keep_author_pairing(self):
         works = self.data["works"]
+        extracted = [work for work in works if work["sourceType"] == "extracted"]
+        samples = [work for work in works if work["sourceType"] == "sample"]
+
         self.assertEqual(self.data["sourceSummary"], {"checked": 20, "extracted": 6})
-        self.assertEqual(len(works), 6)
-        self.assertEqual(len({work["key"] for work in works}), 6)
+        self.assertEqual(len(works), 9)
+        self.assertEqual(len(extracted), 6)
+        self.assertEqual(len(samples), 3)
+        self.assertEqual(len({work["key"] for work in works}), 9)
+
         for work in works:
             with self.subTest(key=work["key"]):
                 self.assertEqual(count_characters(work["text"]), 20)
                 self.assertEqual(work["charCount"], 20)
-                self.assertRegex(work["url"], rf"^https://note\.com/{re.escape(work['handle'])}/n/{work['key']}$")
                 self.assertTrue(work["authorName"].strip())
+
+        for work in extracted:
+            with self.subTest(key=work["key"]):
+                self.assertRegex(work["url"], rf"^https://note\.com/{re.escape(work['handle'])}/n/{work['key']}$")
+
+        for work in samples:
+            with self.subTest(key=work["key"]):
+                self.assertIsNone(work["url"])
+                self.assertIsNone(work["handle"])
 
     def test_page_is_unindexed_and_homepage_has_no_route_to_it(self):
         self.assertIn('name="robots" content="noindex,nofollow,noarchive"', self.index)
@@ -53,6 +67,16 @@ class TwentyCreditsTests(unittest.TestCase):
         self.assertNotIn("SHORT STORY", self.js)
         self.assertNotIn("credit-number", self.js)
         self.assertNotIn("credit-number", self.css)
+
+    def test_membership_and_club_credits_have_distinct_hierarchy(self):
+        works = self.data["works"]
+        self.assertEqual(sum(work["creditGroup"] == "membership" for work in works), 5)
+        self.assertEqual(sum(work["creditGroup"] == "club" for work in works), 4)
+        self.assertIn("MEMBERSHIP MEMBERS", self.js)
+        self.assertIn("CLUB MEMBERS", self.js)
+        self.assertIn("credit-work--club", self.js)
+        self.assertIn(".credit-work--club .story-text", self.css)
+        self.assertIn(".credits-group-heading", self.css)
 
 
 if __name__ == "__main__":
