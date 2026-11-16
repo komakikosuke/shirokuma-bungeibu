@@ -49,6 +49,11 @@ class TwentyCreditsTests(unittest.TestCase):
         self.assertNotIn("source-link", self.js)
         self.assertNotIn('element("a"', self.js)
 
+    def test_credit_roll_omits_story_numbering(self):
+        self.assertNotIn("SHORT STORY", self.js)
+        self.assertNotIn("credit-number", self.js)
+        self.assertNotIn("credit-number", self.css)
+
 
 if __name__ == "__main__":
     unittest.main()
