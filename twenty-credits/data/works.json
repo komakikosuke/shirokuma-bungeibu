@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "pageStatus": "scheduled",
+  "sourceHashtag": "20字小説",
+  "eventDate": null,
+  "sourceWindow": null,
+  "generatedAt": null,
+  "countRule": "extended-grapheme-clusters:regex-2024.11.6:unicode-16.0",
+  "sourceSummary": {
+    "checked": 0,
+    "extracted": 0
+  },
+  "works": []
+}
