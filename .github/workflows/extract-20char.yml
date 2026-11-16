@@ -1,0 +1,78 @@
+name: Test and extract 20-character stories
+
+on:
+  pull_request:
+    paths:
+      - "scripts/extract-20char.py"
+      - "scripts/twenty_char.py"
+      - "scripts/requirements-20char.txt"
+      - "scripts/sync-candidates.py"
+      - "tests/test_twenty_char.py"
+      - "tests/test_twenty_credits.py"
+      - "twenty-credits/**"
+      - ".github/workflows/extract-20char.yml"
+  workflow_dispatch:
+    inputs:
+      hashtag:
+        description: "収集するハッシュタグ（先頭の # は不要）"
+        required: true
+        default: "20字小説"
+        type: string
+      limit:
+        description: "抽出する記事数の上限"
+        required: true
+        default: "20"
+        type: string
+      max_pages:
+        description: "ハッシュタグAPIの最大ページ数"
+        required: true
+        default: "5"
+        type: string
+      since:
+        description: "開始日時（含む、未指定なら最新から。タイムゾーンなしは日本時間）"
+        type: string
+      until:
+        description: "終了日時（含まない、未指定なら上限なし）"
+        type: string
+
+# No schedules, repository writes, deployment or publication approval.
+permissions:
+  contents: read
+
+jobs:
+  test-and-extract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install isolated extraction dependency
+        run: python -m pip install -r scripts/requirements-20char.txt
+      - name: Run offline extraction tests
+        run: python -m unittest discover -s tests -v
+      - name: Extract public hashtag articles for review
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          EXTRACT_HASHTAG: ${{ inputs.hashtag }}
+          EXTRACT_LIMIT: ${{ inputs.limit }}
+          EXTRACT_MAX_PAGES: ${{ inputs.max_pages }}
+          EXTRACT_SINCE: ${{ inputs.since }}
+          EXTRACT_UNTIL: ${{ inputs.until }}
+        shell: bash
+        run: |
+          args=(--hashtag "$EXTRACT_HASHTAG" --limit "$EXTRACT_LIMIT" --max-pages "$EXTRACT_MAX_PAGES")
+          if [[ -n "$EXTRACT_SINCE" ]]; then args+=(--since "$EXTRACT_SINCE"); fi
+          if [[ -n "$EXTRACT_UNTIL" ]]; then args+=(--until "$EXTRACT_UNTIL"); fi
+          python scripts/extract-20char.py "${args[@]}"
+      - name: Save review results and per-article logs
+        if: always() && github.event_name == 'workflow_dispatch'
+        uses: actions/upload-artifact@v4
+        with:
+          name: twenty-char-review-${{ github.run_id }}
+          path: var/twenty-char/
+          if-no-files-found: warn
+          retention-days: 14
