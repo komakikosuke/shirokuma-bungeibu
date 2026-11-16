@@ -78,6 +78,9 @@ class TwentyCreditsTests(unittest.TestCase):
         self.assertIn('if (groupKey === "membership")', self.js)
         self.assertIn(".credit-work--club .story-text", self.css)
         self.assertIn(".credits-group-heading", self.css)
+        self.assertIn("すぐ書ける。すぐ読める。", self.js)
+        self.assertNotIn("一行目から、ひとつの世界へ。", self.js)
+        self.assertIn("min-height: 12.8vh", self.css)
 
 
 if __name__ == "__main__":
