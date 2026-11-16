@@ -13,6 +13,8 @@
       "charCount": 20,
       "authorName": "青豆ノノ",
       "handle": "aomame_nono",
+      "creditGroup": "membership",
+      "sourceType": "extracted",
       "title": "20字小説｜迷い猫のこと②",
       "url": "https://note.com/aomame_nono/n/n628abbc3dd76"
     },
@@ -22,6 +24,8 @@
       "charCount": 20,
       "authorName": "タダノツカサ",
       "handle": "tsukasa_tadano",
+      "creditGroup": "membership",
+      "sourceType": "extracted",
       "title": "見せしめ | 20字小説",
       "url": "https://note.com/tsukasa_tadano/n/nf40f1d946126"
     },
@@ -31,6 +35,8 @@
       "charCount": 20,
       "authorName": "ゆうちん",
       "handle": "fooglebird",
+      "creditGroup": "club",
+      "sourceType": "extracted",
       "title": "情報漏洩の恐怖。(20字小説)",
       "url": "https://note.com/fooglebird/n/neb34fac54181"
     },
@@ -40,6 +46,8 @@
       "charCount": 20,
       "authorName": "青豆ノノ",
       "handle": "aomame_nono",
+      "creditGroup": "membership",
+      "sourceType": "extracted",
       "title": "20字小説｜彼ごはん",
       "url": "https://note.com/aomame_nono/n/n815e0b2f10fb"
     },
@@ -49,6 +57,8 @@
       "charCount": 20,
       "authorName": "タダノツカサ",
       "handle": "tsukasa_tadano",
+      "creditGroup": "membership",
+      "sourceType": "extracted",
       "title": "参謀役の嘆き | 20字小説",
       "url": "https://note.com/tsukasa_tadano/n/n50785580ad86"
     },
@@ -58,8 +68,43 @@
       "charCount": 20,
       "authorName": "タダノツカサ",
       "handle": "tsukasa_tadano",
+      "creditGroup": "membership",
+      "sourceType": "extracted",
       "title": "たわしの野望 | 20字小説",
       "url": "https://note.com/tsukasa_tadano/n/nd6e559ae1835"
+    },
+    {
+      "key": "sample-yoake-reizouko",
+      "text": "夜明け前、冷蔵庫だけが未来を知っていた。",
+      "charCount": 20,
+      "authorName": "北風ミナト",
+      "handle": null,
+      "creditGroup": "club",
+      "sourceType": "sample",
+      "title": "試写用サンプル",
+      "url": null
+    },
+    {
+      "key": "sample-yukidaruma",
+      "text": "雪だるまの心臓で、春が小さく脈を打った。",
+      "charCount": 20,
+      "authorName": "白瀬ことり",
+      "handle": null,
+      "creditGroup": "club",
+      "sourceType": "sample",
+      "title": "試写用サンプル",
+      "url": null
+    },
+    {
+      "key": "sample-henshin",
+      "text": "返信のない星へ、今日も手紙を投げている。",
+      "charCount": 20,
+      "authorName": "凪野ふゆ",
+      "handle": null,
+      "creditGroup": "club",
+      "sourceType": "sample",
+      "title": "試写用サンプル",
+      "url": null
     }
   ]
 }
