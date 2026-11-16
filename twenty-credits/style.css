@@ -213,7 +213,7 @@ button:focus-visible, a:focus-visible {
 .credit-work--club .credit-byline { margin-top: 18px; }
 .credit-work--club .credit-byline-label { font-size: 7px; }
 .credit-work--club .credit-author {
-  margin-top: 6px;
+  margin-top: 0;
   font-size: clamp(12px, 1.25vw, 16px);
 }
 
