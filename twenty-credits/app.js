@@ -40,7 +40,7 @@
     scene.append(element("p", "intro-present", "SHIROKUMA LITERARY CLUB PRESENTS"));
     scene.append(element("h2", "", "20字小説"));
     scene.append(element("span", "intro-rule"));
-    scene.append(element("p", "intro-copy", "一行目から、ひとつの世界へ。"));
+    scene.append(element("p", "intro-copy", "すぐ書ける。すぐ読める。"));
     return scene;
   };
 
