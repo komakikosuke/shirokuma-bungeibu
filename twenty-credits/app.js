@@ -39,10 +39,8 @@
     return scene;
   };
 
-  const workScene = (work, index, total) => {
+  const workScene = (work) => {
     const scene = element("article", "credit-scene credit-work");
-    const number = String(index + 1).padStart(2, "0");
-    scene.append(element("p", "credit-number", `SHORT STORY ${number} / ${String(total).padStart(2, "0")}`));
     scene.append(element("p", "story-text", work.text));
     scene.append(element("span", "credit-rule"));
 
@@ -106,7 +104,7 @@
     const fragment = document.createDocumentFragment();
     fragment.append(intro());
     data.works.forEach((work, index) => {
-      fragment.append(workScene(work, index, data.works.length));
+      fragment.append(workScene(work));
       if (index === Math.ceil(data.works.length / 2) - 1) fragment.append(interlude());
     });
     fragment.append(outro());
