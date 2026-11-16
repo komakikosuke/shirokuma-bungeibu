@@ -170,11 +170,11 @@ button:focus-visible, a:focus-visible {
 
 .credit-work {
   min-height: 12.8vh;
-  padding-block: 0;
+  padding-block: clamp(10px, 1.6vh, 16px);
 }
 .credit-work--club {
   min-height: 10.24vh;
-  padding-block: 2.5vh;
+  padding-block: clamp(22px, 3.8vh, 30px);
 }
 .story-text {
   max-width: 1080px;
@@ -185,16 +185,16 @@ button:focus-visible, a:focus-visible {
   text-shadow: 0 4px 18px rgba(25, 105, 125, .11);
 }
 .credit-rule {
-  width: clamp(88px, 13vw, 174px);
+  width: clamp(76px, 10vw, 132px);
   height: 1px;
-  margin-top: 34px;
-  background: rgba(255,255,255,.68);
+  margin-top: clamp(14px, 2vh, 18px);
+  background: rgba(255,255,255,.62);
 }
 .credit-byline {
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-top: 24px;
+  margin-top: clamp(10px, 1.5vh, 14px);
 }
 .credit-byline-label {
   font: 500 9px/1.4 var(--serif);
@@ -202,7 +202,7 @@ button:focus-visible, a:focus-visible {
   color: rgba(255,255,255,.76);
 }
 .credit-author {
-  margin-top: 8px;
+  margin-top: 5px;
   font: 500 clamp(16px, 1.65vw, 22px)/1.65 var(--serif);
   letter-spacing: .13em;
 }
@@ -212,11 +212,11 @@ button:focus-visible, a:focus-visible {
   letter-spacing: .075em;
 }
 .credit-work--club .credit-rule {
-  width: clamp(72px, 10vw, 132px);
-  margin-top: 25px;
+  width: clamp(58px, 8vw, 104px);
+  margin-top: clamp(10px, 1.4vh, 13px);
   opacity: .78;
 }
-.credit-work--club .credit-byline { margin-top: 18px; }
+.credit-work--club .credit-byline { margin-top: clamp(8px, 1.1vh, 10px); }
 .credit-work--club .credit-byline-label { font-size: 7px; }
 .credit-work--club .credit-author {
   margin-top: 0;
@@ -418,8 +418,6 @@ html[data-motion="reduced"] .controls { position: fixed; }
   .credit-work--club .story-text { font-size: clamp(11.5px, 2.94vw, 13.4px); line-height: 1.9; }
   .credit-work--club .credit-author { font-size: clamp(10.5px, 2.8vw, 13px); }
   .group-title { font-size: clamp(15px, 4.2vw, 19px); letter-spacing: .2em; text-indent: .2em; }
-  .credit-rule { margin-top: 28px; }
-  .credit-byline { margin-top: 20px; }
   .controls { right: 15px; bottom: max(16px, env(safe-area-inset-bottom)); }
   .keyboard-hint { display: none; }
   .control-button { background: rgba(25,111,137,.2); }
