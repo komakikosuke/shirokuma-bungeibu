@@ -7,11 +7,11 @@
     "since": "2026-11-17T19:00:00+09:00",
     "until": "2026-11-17T21:00:00+09:00"
   },
-  "generatedAt": "2026-11-17T20:52:09Z",
+  "generatedAt": "2026-11-17T21:19:34Z",
   "countRule": "extended-grapheme-clusters:regex-2024.11.6:unicode-16.0",
   "sourceSummary": {
     "checked": 119,
-    "extracted": 102
+    "extracted": 112
   },
   "works": [
     {
@@ -109,6 +109,22 @@
       "title": "#シロクマ文芸部 #20字小説　痛いよう",
       "publishedAt": "2026-11-17T20:10:16+09:00",
       "url": "https://note.com/hasoyam/n/nb49c973aff4a"
+    },
+    {
+      "key": "n4e8dbef3ef47",
+      "text": "ヌイ活って案外、 本体より伝わる気がする。",
+      "charCount": 20,
+      "authorName": "deepblue",
+      "handle": "3104deepblue",
+      "creditGroup": "membership",
+      "sourceType": "extracted",
+      "title": "寡黙な相棒は雄弁【シロクマ文芸部:20字小説】",
+      "publishedAt": "2026-11-17T20:13:59+09:00",
+      "url": "https://note.com/3104deepblue/n/n4e8dbef3ef47",
+      "sourceLines": [
+        "ヌイ活って案外、",
+        "本体より伝わる気がする。"
+      ]
     },
     {
       "key": "n950dfbf1e00e",
@@ -447,6 +463,22 @@
       "url": "https://note.com/meina3/n/n292d07244d90"
     },
     {
+      "key": "n8f9829e21078",
+      "text": "振り返る必要もないほど 私は全てを失った。",
+      "charCount": 20,
+      "authorName": "織本 透羽（おりもと とわ）",
+      "handle": "towa_orimo10",
+      "creditGroup": "club",
+      "sourceType": "extracted",
+      "title": "ここから｜シロクマ文芸部　20字小説",
+      "publishedAt": "2026-11-17T20:00:07+09:00",
+      "url": "https://note.com/towa_orimo10/n/n8f9829e21078",
+      "sourceLines": [
+        "振り返る必要もないほど",
+        "私は全てを失った。"
+      ]
+    },
+    {
       "key": "ne1ed69c608ea",
       "text": "竹光たる儀を相知りながら、申し付け候や。",
       "charCount": 20,
@@ -481,6 +513,22 @@
       "title": "シロクマ文芸部20字小説　記憶",
       "publishedAt": "2026-11-17T20:00:08+09:00",
       "url": "https://note.com/rosy_pika19/n/na34583dba40e"
+    },
+    {
+      "key": "n5150115a82ca",
+      "text": "「こう来るか、人生」 吐きすて、顔を上ぐ。",
+      "charCount": 20,
+      "authorName": "とらふぐ子",
+      "handle": "yumenoatosaki25",
+      "creditGroup": "club",
+      "sourceType": "extracted",
+      "title": "青空",
+      "publishedAt": "2026-11-17T20:00:09+09:00",
+      "url": "https://note.com/yumenoatosaki25/n/n5150115a82ca",
+      "sourceLines": [
+        "「こう来るか、人生」",
+        "吐きすて、顔を上ぐ。"
+      ]
     },
     {
       "key": "n868dccc5943f",
@@ -759,6 +807,23 @@
       "url": "https://note.com/tomo5562/n/n676d2f46daf5"
     },
     {
+      "key": "n219bd0ccd6c9",
+      "text": "滑り込みセ〜フ！ あれ？落とし紙… アウト！",
+      "charCount": 20,
+      "authorName": "中之人成",
+      "handle": "akashiba555",
+      "creditGroup": "club",
+      "sourceType": "extracted",
+      "title": "20字小説　「紙一重」　#シロクマ文芸部",
+      "publishedAt": "2026-11-17T20:01:06+09:00",
+      "url": "https://note.com/akashiba555/n/n219bd0ccd6c9",
+      "sourceLines": [
+        "滑り込みセ〜フ！",
+        "あれ？落とし紙…",
+        "アウト！"
+      ]
+    },
+    {
       "key": "n4f95ddd7e2e8",
       "text": "\"Whose 20 letters ?\"",
       "charCount": 20,
@@ -769,6 +834,22 @@
       "title": "ジョン・D・クリストファーロビン・スミス",
       "publishedAt": "2026-11-17T20:01:09+09:00",
       "url": "https://note.com/qz2p6x4s2vr/n/n4f95ddd7e2e8"
+    },
+    {
+      "key": "n79a27baaa84b",
+      "text": "知ってる？暖かいのは 布団じゃ無く貴方よ。",
+      "charCount": 20,
+      "authorName": "ヤマタケマル",
+      "handle": "yamatakemaru_zz",
+      "creditGroup": "club",
+      "sourceType": "extracted",
+      "title": "シロクマ文芸部・20字小説",
+      "publishedAt": "2026-11-17T20:01:18+09:00",
+      "url": "https://note.com/yamatakemaru_zz/n/n79a27baaa84b",
+      "sourceLines": [
+        "知ってる？暖かいのは",
+        "布団じゃ無く貴方よ。"
+      ]
     },
     {
       "key": "n192427ca512a",
@@ -805,6 +886,22 @@
       "title": "夜の小説家｜#20字小説",
       "publishedAt": "2026-11-17T20:04:27+09:00",
       "url": "https://note.com/m_100tone/n/n2f56e7074112"
+    },
+    {
+      "key": "nf6509ca05d63",
+      "text": "ズルいよ、いつだって でも、スキなんだろ？",
+      "charCount": 20,
+      "authorName": "Blue Rose 55",
+      "handle": "clean_auklet416",
+      "creditGroup": "club",
+      "sourceType": "extracted",
+      "title": "ゲームオーバー｜20字小説　シロクマ文芸部",
+      "publishedAt": "2026-11-17T20:04:51+09:00",
+      "url": "https://note.com/clean_auklet416/n/nf6509ca05d63",
+      "sourceLines": [
+        "ズルいよ、いつだって",
+        "でも、スキなんだろ？"
+      ]
     },
     {
       "key": "n33ec80acd0fa",
@@ -1059,6 +1156,22 @@
       "url": "https://note.com/hot_puma4983/n/n59f135e3ad47"
     },
     {
+      "key": "nc89d94004c2a",
+      "text": "禿げ頭に若毛が居たり 大事にせねばならぬ。",
+      "charCount": 20,
+      "authorName": "ボーン",
+      "handle": "yagami12345",
+      "creditGroup": "club",
+      "sourceType": "extracted",
+      "title": "#20字小説　わかげのいたり",
+      "publishedAt": "2026-11-17T20:25:19+09:00",
+      "url": "https://note.com/yagami12345/n/nc89d94004c2a",
+      "sourceLines": [
+        "禿げ頭に若毛が居たり",
+        "大事にせねばならぬ。"
+      ]
+    },
+    {
       "key": "n986d36b14319",
       "text": "明治以外のチョコを買ったら追い出された。",
       "charCount": 20,
@@ -1093,6 +1206,22 @@
       "title": "20字小説｜カウントダウン",
       "publishedAt": "2026-11-17T20:27:27+09:00",
       "url": "https://note.com/serene_yarrow436/n/n24e13c3913be"
+    },
+    {
+      "key": "n5ffd4a9349bb",
+      "text": "雨にも負けず風にも負けず だが嫁には負ける",
+      "charCount": 20,
+      "authorName": "ボーン",
+      "handle": "yagami12345",
+      "creditGroup": "club",
+      "sourceType": "extracted",
+      "title": "丈夫な男#20字の小説",
+      "publishedAt": "2026-11-17T20:27:38+09:00",
+      "url": "https://note.com/yagami12345/n/n5ffd4a9349bb",
+      "sourceLines": [
+        "雨にも負けず風にも負けず",
+        "だが嫁には負ける"
+      ]
     },
     {
       "key": "n9a43c00e2e1b",
@@ -1143,6 +1272,22 @@
       "url": "https://note.com/mfullmoon001/n/ne10bf4a6077e"
     },
     {
+      "key": "nad5f76bcd5ad",
+      "text": "秋と本、いい組み合わせ 飽きた本、私の小説",
+      "charCount": 20,
+      "authorName": "ボーン",
+      "handle": "yagami12345",
+      "creditGroup": "club",
+      "sourceType": "extracted",
+      "title": "読書の秋(20字の小説)",
+      "publishedAt": "2026-11-17T20:34:10+09:00",
+      "url": "https://note.com/yagami12345/n/nad5f76bcd5ad",
+      "sourceLines": [
+        "秋と本、いい組み合わせ",
+        "飽きた本、私の小説"
+      ]
+    },
+    {
       "key": "n05e83380e557",
       "text": "帰ってくる場所になりたい、そういう話。",
       "charCount": 19,
@@ -1153,6 +1298,23 @@
       "title": "【20字小説】来世も恋物語",
       "publishedAt": "2026-11-17T20:34:39+09:00",
       "url": "https://note.com/nico_yu/n/n05e83380e557"
+    },
+    {
+      "key": "nfe980688d8a4",
+      "text": "天上天我唯我独尊 恐れるなかれ 好奇心で進め",
+      "charCount": 20,
+      "authorName": "ふわり日和｜当たり前に「頑張る」あなたへ",
+      "handle": "dear_dahlia6678",
+      "creditGroup": "club",
+      "sourceType": "extracted",
+      "title": "どうせ創造世界なら ┊︎ 20字小説",
+      "publishedAt": "2026-11-17T20:38:57+09:00",
+      "url": "https://note.com/dear_dahlia6678/n/nfe980688d8a4",
+      "sourceLines": [
+        "天上天我唯我独尊",
+        "恐れるなかれ",
+        "好奇心で進め"
+      ]
     },
     {
       "key": "neea05fb642b4",

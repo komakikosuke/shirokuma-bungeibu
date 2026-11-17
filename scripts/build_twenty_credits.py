@@ -118,9 +118,16 @@ def eligible_work(record, since, until, members):
         return None
     if count_characters(text) != char_count:
         return None
-    return {
+    source_lines = record.get("sourceLines")
+    if source_lines is not None and (
+            not isinstance(source_lines, list) or not 2 <= len(source_lines) <= 3
+            or any(not isinstance(line, str) or not line or line != line.strip()
+                   or "\n" in line or "\r" in line for line in source_lines)
+            or "".join(source_lines) != text or count_characters(source_lines[0]) >= 19):
+        return None
+    work = {
         "key": key,
-        "text": text,
+        "text": " ".join(source_lines) if source_lines else text,
         "charCount": char_count,
         "authorName": author.strip(),
         "handle": handle,
@@ -130,6 +137,9 @@ def eligible_work(record, since, until, members):
         "publishedAt": published.isoformat(),
         "url": url,
     }
+    if source_lines:
+        work["sourceLines"] = source_lines
+    return work
 
 
 def build_documents(extraction, members, event_date, generated_at=None):

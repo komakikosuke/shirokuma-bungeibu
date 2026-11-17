@@ -71,11 +71,54 @@ class ExtractionTests(unittest.TestCase):
         row = extract(f"<p>{STORY}<br>ここからは説明です。</p>")
         self.assertEqual((row["text"], row["charCount"]), (STORY, 20))
 
-    def test_do_not_search_later_lines_or_join_split_story(self):
+    def test_do_not_skip_a_preface_but_allow_a_complete_split_opening(self):
         row = extract(f"<p>前書き</p><p>{STORY}</p>")
         self.assertEqual((row["text"], row["charCount"], row["status"]), ("前書き", 3, "failed"))
         row = extract(f"<p>{STORY[:9]}</p><p>{STORY[9:]}</p>")
-        self.assertEqual((row["text"], row["charCount"], row["status"]), (STORY[:9], 9, "failed"))
+        self.assertEqual((row["text"], row["charCount"], row["status"]), (STORY, 20, "success"))
+        self.assertEqual(row["sourceLines"], [STORY[:9], STORY[9:]])
+
+    def test_two_or_three_opening_lines_need_a_complete_boundary(self):
+        parts = [STORY[:7], STORY[7:14], STORY[14:]]
+        bodies = [
+            f"<p>{STORY[:10]}<br>{STORY[10:]}</p>",
+            f"<p>{STORY[:10]}</p>\n<p>{STORY[10:]}</p><p><br></p><p>説明です。</p>",
+            f"<p>{STORY[:10]}<br>{STORY[10:]}</p><img src='x'><p>説明です。</p>",
+            "<p>" + "<br>".join(parts) + "</p><hr><p>説明です。</p>",
+            "\n".join(parts) + "\n\n説明です。",
+        ]
+        for body in bodies:
+            with self.subTest(body=body):
+                row = extract(body)
+                self.assertEqual((row["text"], row["charCount"], row["status"]), (STORY, 20, "success"))
+                self.assertEqual("".join(row["sourceLines"]), STORY)
+
+    def test_multiline_headings_and_allowed_lengths_keep_their_original_text(self):
+        for length in (19, 20, 21):
+            text = "あ" * length
+            row = extract(f"<h3>{text[:8]}</h3><h3>{text[8:]}</h3><p><br></p><p>説明</p>")
+            with self.subTest(length=length):
+                self.assertEqual((row["text"], row["charCount"]), (text, length))
+                self.assertEqual(row["sourceLines"], [text[:8], text[8:]])
+                self.assertIn("first_line_heading", row["reasonCodes"])
+                self.assertTrue(row["isCandidate"])
+
+    def test_multiline_never_skips_blanks_greetings_or_extra_text(self):
+        bodies = [
+            f"<p>{STORY[:10]}</p><p><br></p><p>{STORY[10:]}</p>",
+            f"<p>{STORY[:10]}<br>{STORY[10:]}<br>さらに続く文章。</p>",
+            "<p>あいうえお<br>かきくけこ<br>さしすせそ<br>たちつてと</p>",
+            "<p>こんばんは！<br>" + "あ" * 14 + "</p>",
+            "<p>#20字小説<br>" + "あ" * 14 + "</p>",
+            "<p>前書き</p><p>" + STORY[3:] + "</p>",
+            f"<p>{STORY[:10]}<br><a href='https://example.com'>{STORY[10:]}</a></p>",
+            f"<p>{STORY[:10]}</p><blockquote><p>{STORY[10:]}</p></blockquote>",
+        ]
+        for body in bodies:
+            with self.subTest(body=body):
+                row = extract(body)
+                self.assertEqual(row["status"], "failed")
+                self.assertNotIn("sourceLines", row)
 
     def test_heading_is_pending_even_when_twenty_characters(self):
         row = extract(f"<h3>{STORY}</h3><p>説明</p>")

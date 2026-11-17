@@ -22,6 +22,20 @@ class TwentyCreditPolicyTests(unittest.TestCase):
     def test_twenty_character_heading_is_published(self):
         self.assertIsNotNone(eligible_work(self.record, self.since, self.until, set()))
 
+    def test_multiline_publication_inserts_one_space_per_original_break(self):
+        lines = [self.record["text"][:7], self.record["text"][7:14], self.record["text"][14:]]
+        published = eligible_work({**self.record, "sourceLines": lines}, self.since, self.until, set())
+        self.assertEqual(published["text"], " ".join(lines))
+        self.assertEqual(published["sourceLines"], lines)
+        self.assertEqual(published["charCount"], 20)
+
+    def test_multiline_source_lines_must_match_the_validated_story(self):
+        for lines in ([self.record["text"]], ["あ" * 10, "あ" * 10],
+                      [self.record["text"][:5], self.record["text"][5:10],
+                       self.record["text"][10:15], self.record["text"][15:]]):
+            with self.subTest(lines=lines):
+                self.assertIsNone(eligible_work({**self.record, "sourceLines": lines}, self.since, self.until, set()))
+
     def test_nineteen_to_twenty_one_characters_are_published_with_or_without_headings(self):
         for length in (19, 20, 21):
             for heading in (False, True):
