@@ -45,6 +45,10 @@
       "name": "友紀子",
       "checkedAt": "2026-11-16T05:01:53Z"
     },
+    "aonn001": {
+      "name": "あおん",
+      "checkedAt": "2026-11-17T16:36:34Z"
+    },
     "arare1235": {
       "name": "あられ",
       "checkedAt": "2026-11-17T10:35:30Z"
@@ -75,7 +79,11 @@
     },
     "clever_racoon368": {
       "name": "キンモクスイ",
-      "checkedAt": "2026-11-14T16:15:21Z"
+      "checkedAt": "2026-11-17T16:36:34Z"
+    },
+    "content_log": {
+      "name": "ぽていとぽたあと",
+      "checkedAt": "2026-11-17T16:36:34Z"
     },
     "famous_peony849": {
       "name": "ハーブ小説家・灯森つむぎ ｜植物と心の再生を書く人",
@@ -83,7 +91,7 @@
     },
     "fast_orca1544": {
       "name": "ひぐらしのつぶやき",
-      "checkedAt": "2026-11-14T16:15:21Z"
+      "checkedAt": "2026-11-17T16:36:34Z"
     },
     "frime311": {
       "name": "チズ",
@@ -107,7 +115,7 @@
     },
     "great_flea4521": {
       "name": "ニヒルな羊",
-      "checkedAt": "2026-11-14T16:15:21Z"
+      "checkedAt": "2026-11-17T16:36:34Z"
     },
     "haikamushica": {
       "name": "はいかむしか　日常＋空想",
@@ -128,6 +136,10 @@
     "hon_to_toshokan": {
       "name": "本棚の館長",
       "checkedAt": "2026-11-15T16:15:49Z"
+    },
+    "honest_willet381": {
+      "name": "うららん",
+      "checkedAt": "2026-11-17T16:36:34Z"
     },
     "hot_zephyr144": {
       "name": "モネ | 未来の自分に残すnote",
@@ -189,9 +201,13 @@
       "name": "凪 -nagi-／曖昧な関係の整理ノート",
       "checkedAt": "2026-11-16T05:01:53Z"
     },
+    "lucky_omame": {
+      "name": "豆島  圭",
+      "checkedAt": "2026-11-17T16:36:34Z"
+    },
     "m_restoration": {
       "name": "電車でBo",
-      "checkedAt": "2026-11-14T16:15:21Z"
+      "checkedAt": "2026-11-17T16:36:34Z"
     },
     "machi_honya": {
       "name": "待ち時間の本屋さん",
@@ -205,9 +221,13 @@
       "name": "道のはしっこ＠",
       "checkedAt": "2026-11-16T16:54:18Z"
     },
+    "mei_0520": {
+      "name": "さつき（人生は65歳から）",
+      "checkedAt": "2026-11-17T16:36:34Z"
+    },
     "meina3": {
       "name": "meina",
-      "checkedAt": "2026-11-14T16:15:21Z"
+      "checkedAt": "2026-11-17T16:36:34Z"
     },
     "mio_mizuki": {
       "name": "水生ミヲ",
@@ -220,6 +240,10 @@
     "mitika": {
       "name": "みちか＠絵日記",
       "checkedAt": "2026-11-16T22:24:19Z"
+    },
+    "morion_202609": {
+      "name": "もりおん",
+      "checkedAt": "2026-11-17T16:36:34Z"
     },
     "n_kojuro_k_0829": {
       "name": "kojuro",
@@ -237,6 +261,10 @@
       "name": "二毛猫",
       "checkedAt": "2026-11-15T22:14:04Z"
     },
+    "osunu_note2023": {
+      "name": "おすぬさん",
+      "checkedAt": "2026-11-17T16:36:34Z"
+    },
     "pure_falcon3290": {
       "name": "左利き|親子英検",
       "checkedAt": "2026-11-15T16:15:49Z"
@@ -244,6 +272,14 @@
     "quick_toucan2283": {
       "name": "吹下橙子",
       "checkedAt": "2026-11-16T05:01:53Z"
+    },
+    "rikkogoogoo": {
+      "name": "羽",
+      "checkedAt": "2026-11-17T16:36:34Z"
+    },
+    "ryoku_suikawa": {
+      "name": "翠川 緑（Ryoku Suikawa）",
+      "checkedAt": "2026-11-17T16:36:34Z"
     },
     "sakurasou_novel": {
       "name": "桜草",
@@ -264,6 +300,10 @@
     "sisaku_neko": {
       "name": "猫っぽい何か。",
       "checkedAt": "2026-11-17T04:33:27Z"
+    },
+    "tanya_volkova": {
+      "name": "ターニャ・ヴォルコヴァ",
+      "checkedAt": "2026-11-17T16:36:34Z"
     },
     "tarofukushima": {
       "name": "福島太郎",
@@ -286,5 +326,5 @@
       "checkedAt": "2026-11-17T10:35:30Z"
     }
   },
-  "updatedAt": "2026-11-17T10:35:30Z"
+  "updatedAt": "2026-11-17T16:36:34Z"
 }
