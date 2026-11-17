@@ -77,16 +77,20 @@ class BodyParser(HTMLParser):
     IGNORE = set("script style noscript template head title rt rp".split())
     VOID = set("area base br col embed hr img input link meta param source track wbr".split())
 
-    def __init__(self):
+    def __init__(self, *, skip_leading_hashtags=False, hashtag_names=()):
         super().__init__(convert_charrefs=True)
         self.stack = []
         self.parts = []
         self.kinds = set()
         self.first = None
+        self.skip_leading_hashtags = skip_leading_hashtags
+        self.hashtag_names = hashtag_names
 
     def _flush(self):
         text = "".join(self.parts).strip()
-        if self.first is None and text:
+        skip_tag = (self.skip_leading_hashtags and not (self.kinds - {"heading", "link"})
+                    and hashtag_only_line(text, self.hashtag_names))
+        if self.first is None and text and not skip_tag:
             self.first = FirstLine(text, tuple(sorted(self.kinds)))
         self.parts.clear()
         self.kinds.clear()
@@ -148,8 +152,8 @@ class BodyParser(HTMLParser):
         return self.first
 
 
-def first_body_line(body):
-    parser = BodyParser()
+def first_body_line(body, *, skip_leading_hashtags=False, hashtag_names=()):
+    parser = BodyParser(skip_leading_hashtags=skip_leading_hashtags, hashtag_names=hashtag_names)
     parser.feed(body)
     return parser.result()
 
@@ -159,8 +163,8 @@ class OpeningBodyParser(BodyParser):
 
     BLANK_BLOCKS = {"p", "div", "h1", "h2", "h3", "h4", "h5", "h6"}
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, *, skip_leading_hashtags=False, hashtag_names=()):
+        super().__init__(skip_leading_hashtags=skip_leading_hashtags, hashtag_names=hashtag_names)
         self.lines = []
         self.markers = []
         self.visible = 0
@@ -171,6 +175,14 @@ class OpeningBodyParser(BodyParser):
         if self.done:
             return
         text = "".join(self.parts).strip()
+        tag_line = (self.skip_leading_hashtags and not (self.kinds - {"heading", "link"})
+                    and hashtag_only_line(text, self.hashtag_names))
+        if tag_line:
+            self.parts.clear()
+            self.kinds.clear()
+            if self.lines:
+                self.bounded = self.done = True
+            return
         if text:
             self.lines.append(FirstLine(text, tuple(sorted(self.kinds))))
             if len(self.lines) > 3:
@@ -369,11 +381,21 @@ def explanatory_line(text):
     return bool(INTRO.search(normalized) or GREETING_ONLY.fullmatch(normalized))
 
 
-def opening_story_lines(body):
-    first = first_body_line(body)
+def hashtag_only_line(text, hashtag_names=()):
+    normalized = unicodedata.normalize("NFKC", text).strip()
+    tokens = normalized.split()
+    if len(tokens) > 1 and tokens[-1] in {"様", "さん"}:
+        tokens = tokens[:-1]
+    known = {"#" + unicodedata.normalize("NFKC", name).lstrip("#＃") for name in hashtag_names}
+    return bool(tokens) and all(token in known or regex.fullmatch(r"(?:#[\p{L}\p{M}\p{N}_]+)+", token)
+                                for token in tokens)
+
+
+def opening_story_lines(body, hashtag_names=()):
+    first = first_body_line(body, skip_leading_hashtags=True, hashtag_names=hashtag_names)
     if first is None or count_characters(first.text) >= 19 or explanatory_line(first.text):
         return first, ()
-    parser = OpeningBodyParser()
+    parser = OpeningBodyParser(skip_leading_hashtags=True, hashtag_names=hashtag_names)
     parser.feed(body)
     lines, bounded = parser.opening_result()
     if (not bounded or not 2 <= len(lines) <= 3 or lines[0].text != first.text
@@ -452,7 +474,7 @@ def extract_article(seed, payload, tag):
     body = data.get("body")
     if not isinstance(body, str):
         return explain(record, ["body_unavailable"], "failed")
-    line, source_lines = opening_story_lines(body)
+    line, source_lines = opening_story_lines(body, names)
     if line is None:
         return explain(record, ["empty_body"], "failed")
     size = count_characters(line.text)

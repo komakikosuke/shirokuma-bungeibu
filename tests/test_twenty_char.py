@@ -133,6 +133,49 @@ class ExtractionTests(unittest.TestCase):
         self.assertEqual(row["status"], "pending")
         self.assertIn("explanatory_first_line", row["reasonCodes"])
 
+    def test_leading_hashtag_only_lines_are_skipped_including_links_and_honorifics(self):
+        prefixes = [
+            "<p>#20字小説</p>",
+            "<p>＃20字小説<br>#シロクマ文芸部</p><p><br></p>",
+            "<p>#20字小説 #シロクマ文芸部</p>",
+            "<p>#20字小説#シロクマ文芸部</p>",
+            "<p><a href='https://note.com/hashtag/20字小説'>#20字小説</a></p>",
+            "<h3>#小牧幸助　様</h3><p>#20字小説</p>",
+        ]
+        for prefix in prefixes:
+            with self.subTest(prefix=prefix):
+                row = extract(prefix + f"<p>{STORY}</p>")
+                self.assertEqual((row["text"], row["charCount"], row["status"]), (STORY, 20, "success"))
+
+    def test_hashtags_do_not_count_toward_the_multiline_story_limit(self):
+        row = extract("<p>#20字小説<br>#シロクマ文芸部<br>#小説</p>"
+                      f"<p>{STORY[:7]}<br>{STORY[7:14]}<br>{STORY[14:]}</p>")
+        self.assertEqual(row["text"], STORY)
+        self.assertEqual(row["sourceLines"], [STORY[:7], STORY[7:14], STORY[14:]])
+
+    def test_hashtag_footer_ends_a_multiline_story_without_becoming_story_text(self):
+        row = extract(f"<p>{STORY[:10]}<br>{STORY[10:]}<br>#20字小説</p>")
+        self.assertEqual((row["text"], row["charCount"], row["status"]), (STORY, 20, "success"))
+        self.assertEqual(row["sourceLines"], [STORY[:10], STORY[10:]])
+
+    def test_hashtags_do_not_allow_skipping_greetings_or_crossing_story_boundaries(self):
+        for body in (
+            "<p>#20字小説</p><p>こんばんは！</p>" + f"<p>{STORY}</p>",
+            "<p>#20字小説 の紹介です。</p>" + f"<p>{STORY}</p>",
+            f"<p>{STORY[:10]}<br>#20字小説<br>{STORY[10:]}</p>",
+            f"<blockquote>#20字小説</blockquote><p>{STORY}</p>",
+        ):
+            with self.subTest(body=body):
+                row = extract(body)
+                self.assertNotEqual(row["status"], "success")
+                self.assertNotIn("sourceLines", row)
+
+    def test_body_hashtags_do_not_replace_verified_article_tags_or_supply_a_story(self):
+        row = extract(f"<p>#20字小説</p><p>{STORY}</p>", hashtag_notes=[])
+        self.assertIn("hashtag_unverified", row["reasonCodes"])
+        self.assertEqual(row["status"], "pending")
+        self.assertEqual(extract("<p>#20字小説<br>#小説</p>")["reasonCodes"], ["empty_body"])
+
     def test_title_repeated_in_body_is_pending(self):
         row = extract(name=STORY)
         self.assertEqual(row["status"], "pending")

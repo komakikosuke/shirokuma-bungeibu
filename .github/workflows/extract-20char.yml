@@ -6,6 +6,8 @@ on:
     paths:
       - "scripts/sync_twenty_members.py"
       - "scripts/build_twenty_credits.py"
+      - "scripts/twenty_char.py"
+      - "tests/test_twenty_char.py"
       - ".github/workflows/extract-20char.yml"
       - "twenty-credits/app.js"
       - "tests/test_twenty_playback.mjs"

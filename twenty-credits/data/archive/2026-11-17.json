@@ -7,11 +7,11 @@
     "since": "2026-11-17T19:00:00+09:00",
     "until": "2026-11-17T21:00:00+09:00"
   },
-  "generatedAt": "2026-11-17T21:19:34Z",
+  "generatedAt": "2026-11-17T21:35:48Z",
   "countRule": "extended-grapheme-clusters:regex-2024.11.6:unicode-16.0",
   "sourceSummary": {
     "checked": 119,
-    "extracted": 112
+    "extracted": 113
   },
   "works": [
     {
@@ -245,6 +245,18 @@
       "title": "空（から）の瓶に残されていたものは。　#20字小説",
       "publishedAt": "2026-11-17T20:00:00+09:00",
       "url": "https://note.com/watabe_toua/n/nb4c83a024ff7"
+    },
+    {
+      "key": "nd0d9aaa7e8d0",
+      "text": "「君を待つ」と書いた手紙を春風がさらう。",
+      "charCount": 20,
+      "authorName": "麦ちひろ",
+      "handle": "oki_13",
+      "creditGroup": "club",
+      "sourceType": "extracted",
+      "title": "お題 : 20字小説",
+      "publishedAt": "2026-11-17T20:00:00+09:00",
+      "url": "https://note.com/oki_13/n/nd0d9aaa7e8d0"
     },
     {
       "key": "nd9325b043f8b",
