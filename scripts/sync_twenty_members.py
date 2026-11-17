@@ -7,6 +7,7 @@ import json
 import os
 from pathlib import Path
 from urllib.parse import urlencode
+from urllib.error import HTTPError
 from urllib.request import Request, urlopen
 
 from build_twenty_credits import eligible_work, event_window, load_json, load_members
@@ -97,9 +98,13 @@ def main():
         members = load_members(args.output)
         if args.refresh_published:
             refresh_published(args.input, args.status, args.archive_dir, members)
-    except Exception:
+    except HTTPError as error:
+        parser.exit(2, f"会員判定APIへの接続が失敗しました（HTTP {error.code}）。公開データは変更しません。\n")
+    except ValueError as error:
+        parser.exit(2, f"会員判定を更新できませんでした: {error}\n")
+    except Exception as error:
         # Authentication tokens and the private server response never enter logs.
-        parser.exit(2, "会員判定を更新できませんでした。公開データは更新せず停止します。\n")
+        parser.exit(2, f"会員判定を更新できませんでした（{type(error).__name__}）。公開データは変更しません。\n")
     print(json.dumps({"eventDate": args.event_date, "classifiedWorks": len(result["works"]),
                       "membershipWorks": sum(work["isMember"] for work in result["works"])}, ensure_ascii=False))
 
