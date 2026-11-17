@@ -17,11 +17,20 @@ ENDPOINT = "https://shirokuma-writing-room.claska.chatgpt.site/api/endroll/membe
 
 
 def request_json(request):
+    request.add_header("User-Agent", "ShirokumaEndrollSync/1.0 (+https://github.com/komakikosuke/shirokuma-bungeibu)")
     try:
         with urlopen(request, timeout=30) as response:
             return json.load(response)
     except HTTPError as error:
         error.sync_source = "会員サーバー" if request.full_url == ENDPOINT else "GitHub認証"
+        error.sync_detail = ""
+        if error.code == 403:
+            try:
+                failure = json.load(error)
+                if failure.get("error") == "Server requests only":
+                    error.sync_detail = " / request origin rejected"
+            except (ValueError, TypeError):
+                error.sync_detail = " / non-JSON access restriction"
         raise
 
 
@@ -103,7 +112,7 @@ def main():
         if args.refresh_published:
             refresh_published(args.input, args.status, args.archive_dir, members)
     except HTTPError as error:
-        parser.exit(2, f"{getattr(error, 'sync_source', '会員判定API')}への接続が失敗しました（HTTP {error.code}）。公開データは変更しません。\n")
+        parser.exit(2, f"{getattr(error, 'sync_source', '会員判定API')}への接続が失敗しました（HTTP {error.code}{getattr(error, 'sync_detail', '')}）。公開データは変更しません。\n")
     except ValueError as error:
         parser.exit(2, f"会員判定を更新できませんでした: {error}\n")
     except Exception as error:
