@@ -9,7 +9,7 @@ import json
 from pathlib import Path
 import re
 
-from twenty_char import COUNT_RULE, now_iso, write_json_atomic
+from twenty_char import COUNT_RULE, count_characters, now_iso, write_json_atomic
 
 JST = timezone(timedelta(hours=9))
 HANDLE = re.compile(r"^[a-zA-Z0-9_-]{2,100}$")
@@ -97,11 +97,14 @@ def eligible_work(record, since, until, members):
     published = parse_published(record.get("publishedAt"))
     if not (published and since <= published < until):
         return None
-    accepted = (record.get("status") == "success" and record.get("reasonCodes") in ([], None))
-    accepted_heading = (record.get("status") == "pending"
-                        and record.get("reasonCodes") == ["first_line_heading"])
-    if (not (accepted or accepted_heading) or record.get("exactly20") is not True
-            or record.get("charCount") != 20):
+    reasons = record.get("reasonCodes")
+    accepted = record.get("status") == "success" and reasons in ([], None)
+    accepted_pending = (record.get("status") == "pending" and isinstance(reasons, list)
+                        and bool(reasons) and all(reason in ("first_line_heading", "non_exact_length")
+                                                 for reason in reasons))
+    char_count = record.get("charCount")
+    if (not (accepted or accepted_pending) or type(char_count) is not int
+            or not 19 <= char_count <= 21):
         return None
     key, handle = record.get("key"), record.get("handle")
     text, author = record.get("text"), record.get("authorName")
@@ -113,10 +116,12 @@ def eligible_work(record, since, until, members):
             or not isinstance(title, str) or not title.strip()
             or not isinstance(url, str) or url != f"https://note.com/{handle}/n/{key}"):
         return None
+    if count_characters(text) != char_count:
+        return None
     return {
         "key": key,
         "text": text,
-        "charCount": 20,
+        "charCount": char_count,
         "authorName": author.strip(),
         "handle": handle,
         "creditGroup": credit_group(record, members),

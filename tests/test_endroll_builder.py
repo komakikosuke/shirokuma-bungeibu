@@ -24,7 +24,7 @@ def work(key, handle, published_at, *, status="success", exactly20=True,
         "authorName": handle,
         "handle": handle,
         "publishedAt": published_at,
-        "text": STORY,
+        "text": (STORY + "。" * max(0, char_count - 20))[:char_count],
         "charCount": char_count,
         "status": status,
         "reasonCodes": [] if reasons is None else reasons,
@@ -51,7 +51,7 @@ def extraction(works, **latest_overrides):
 
 
 class EndrollBuilderTests(unittest.TestCase):
-    def test_only_exact_successes_inside_tuesday_window_are_published(self):
+    def test_allowed_lengths_inside_tuesday_window_are_published(self):
         rows = [
             work("na1", "member_one", "2026-11-17T19:00:00+09:00"),
             work("na2", "club_one", "2026-11-17T20:59:59+09:00"),
@@ -63,15 +63,15 @@ class EndrollBuilderTests(unittest.TestCase):
         document, status = build_documents(
             extraction(rows), {"member_one"}, "2026-11-17", "2026-11-17T12:02:00Z"
         )
-        self.assertEqual([row["key"] for row in document["works"]], ["na1", "na2"])
-        self.assertEqual([row["creditGroup"] for row in document["works"]], ["membership", "club"])
+        self.assertEqual([row["key"] for row in document["works"]], ["na1", "na4", "na2"])
+        self.assertEqual([row["creditGroup"] for row in document["works"]], ["membership", "club", "club"])
         self.assertEqual(document["sourceWindow"], {
             "since": "2026-11-17T19:00:00+09:00",
             "until": "2026-11-17T21:00:00+09:00",
         })
-        self.assertEqual(document["sourceSummary"], {"checked": 4, "extracted": 2})
+        self.assertEqual(document["sourceSummary"], {"checked": 4, "extracted": 3})
         self.assertEqual(status["status"], "ready")
-        self.assertEqual((status["membershipCount"], status["clubCount"]), (1, 1))
+        self.assertEqual((status["membershipCount"], status["clubCount"]), (1, 2))
 
     def test_empty_result_keeps_entrance_closed(self):
         document, status = build_documents(extraction([]), set(), "2026-11-17")

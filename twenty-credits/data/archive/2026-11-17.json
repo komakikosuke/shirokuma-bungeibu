@@ -7,11 +7,11 @@
     "since": "2026-11-17T19:00:00+09:00",
     "until": "2026-11-17T21:00:00+09:00"
   },
-  "generatedAt": "2026-11-17T20:43:06Z",
+  "generatedAt": "2026-11-17T20:52:09Z",
   "countRule": "extended-grapheme-clusters:regex-2024.11.6:unicode-16.0",
   "sourceSummary": {
     "checked": 119,
-    "extracted": 96
+    "extracted": 102
   },
   "works": [
     {
@@ -337,6 +337,18 @@
       "title": "20字小説",
       "publishedAt": "2026-11-17T20:00:03+09:00",
       "url": "https://note.com/light_echium245/n/n545f289ddb4a"
+    },
+    {
+      "key": "n97b5d8159a0b",
+      "text": "机の端が片づいたら、深呼吸がひとつできた。",
+      "charCount": 21,
+      "authorName": "かもめ",
+      "handle": "chotto_komatta12",
+      "creditGroup": "club",
+      "sourceType": "extracted",
+      "title": "机の端と、深呼吸。｜#20字小説",
+      "publishedAt": "2026-11-17T20:00:03+09:00",
+      "url": "https://note.com/chotto_komatta12/n/n97b5d8159a0b"
     },
     {
       "key": "ne6aae23f458c",
@@ -855,6 +867,18 @@
       "url": "https://note.com/mio_mizuki/n/nf9ee09ab9334"
     },
     {
+      "key": "n6c22da50fe81",
+      "text": "若葉の光に目を細め、坂道を駆け出した。",
+      "charCount": 19,
+      "authorName": "認識のミステリ",
+      "handle": "shift_view",
+      "creditGroup": "club",
+      "sourceType": "extracted",
+      "title": "#20字小説｜シロクマ文芸部",
+      "publishedAt": "2026-11-17T20:07:47+09:00",
+      "url": "https://note.com/shift_view/n/n6c22da50fe81"
+    },
+    {
       "key": "n38bbffa2895e",
       "text": "人生の続きを、あなたと同じページに書く。",
       "charCount": 20,
@@ -927,6 +951,18 @@
       "url": "https://note.com/morion_202609/n/nc3b0a76b26c0"
     },
     {
+      "key": "ne39959da9882",
+      "text": "教科書が英語って、うちら古典学科やで？",
+      "charCount": 19,
+      "authorName": "数理落語家　自然対数乃亭吟遊",
+      "handle": "agawa_shou",
+      "creditGroup": "club",
+      "sourceType": "extracted",
+      "title": "【20字小説】　『進学』",
+      "publishedAt": "2026-11-17T20:14:28+09:00",
+      "url": "https://note.com/agawa_shou/n/ne39959da9882"
+    },
+    {
       "key": "n8ccc11237b20",
       "text": "優しくなれない日。それでも猫にだけ開く懐",
       "charCount": 20,
@@ -975,6 +1011,18 @@
       "url": "https://note.com/lucky_omame/n/n39bfd0cbf3e0"
     },
     {
+      "key": "nbf0c059884ab",
+      "text": "深い足跡は、玄関の前で引き返していた。",
+      "charCount": 19,
+      "authorName": "マイルドリリー",
+      "handle": "mild_lily825",
+      "creditGroup": "club",
+      "sourceType": "extracted",
+      "title": "招かせない客　#シロクマ文芸部",
+      "publishedAt": "2026-11-17T20:17:43+09:00",
+      "url": "https://note.com/mild_lily825/n/nbf0c059884ab"
+    },
+    {
       "key": "n87ed6cd91ac5",
       "text": "父大好き！カリカリにささ身のせ。給料日？",
       "charCount": 20,
@@ -985,6 +1033,18 @@
       "title": "20字小説　no title③",
       "publishedAt": "2026-11-17T20:20:47+09:00",
       "url": "https://note.com/lucky_omame/n/n87ed6cd91ac5"
+    },
+    {
+      "key": "ne71dd9f576a8",
+      "text": "君が帰らないからまた私は時計を見てる。",
+      "charCount": 19,
+      "authorName": "橘 ゆず",
+      "handle": "yuzu343",
+      "creditGroup": "club",
+      "sourceType": "extracted",
+      "title": "深夜のリビング。/#20字小説",
+      "publishedAt": "2026-11-17T20:21:22+09:00",
+      "url": "https://note.com/yuzu343/n/ne71dd9f576a8"
     },
     {
       "key": "n59f135e3ad47",
@@ -1081,6 +1141,18 @@
       "title": "シロクマ文芸部🐻‍❄️「#20字小説」｜靴下がきらいな人",
       "publishedAt": "2026-11-17T20:33:04+09:00",
       "url": "https://note.com/mfullmoon001/n/ne10bf4a6077e"
+    },
+    {
+      "key": "n05e83380e557",
+      "text": "帰ってくる場所になりたい、そういう話。",
+      "charCount": 19,
+      "authorName": "にこゆ",
+      "handle": "nico_yu",
+      "creditGroup": "club",
+      "sourceType": "extracted",
+      "title": "【20字小説】来世も恋物語",
+      "publishedAt": "2026-11-17T20:34:39+09:00",
+      "url": "https://note.com/nico_yu/n/n05e83380e557"
     },
     {
       "key": "neea05fb642b4",

@@ -6,6 +6,7 @@ import sys
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 from build_twenty_credits import load_members
+from twenty_char import count_characters
 
 
 class TwentyCreditsTests(unittest.TestCase):
@@ -22,6 +23,8 @@ class TwentyCreditsTests(unittest.TestCase):
         members = load_members(ROOT / "data/twenty-char-members.json")
         for work in self.data["works"]:
             self.assertEqual(work["sourceType"], "extracted")
+            self.assertIn(work["charCount"], (19, 20, 21))
+            self.assertEqual(count_characters(work["text"]), work["charCount"])
             expected = "membership" if work["handle"] == "komaki_kousuke" or members.contains(work) else "club"
             self.assertEqual(work["creditGroup"], expected)
 

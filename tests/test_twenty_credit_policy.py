@@ -22,9 +22,24 @@ class TwentyCreditPolicyTests(unittest.TestCase):
     def test_twenty_character_heading_is_published(self):
         self.assertIsNotNone(eligible_work(self.record, self.since, self.until, set()))
 
+    def test_nineteen_to_twenty_one_characters_are_published_with_or_without_headings(self):
+        for length in (19, 20, 21):
+            for heading in (False, True):
+                reasons = (["non_exact_length"] if length != 20 else []) + (["first_line_heading"] if heading else [])
+                record = {**self.record, "text": "あ" * length, "charCount": length,
+                          "exactly20": length == 20, "reasonCodes": reasons,
+                          "status": "pending" if reasons else "success"}
+                with self.subTest(length=length, heading=heading):
+                    published = eligible_work(record, self.since, self.until, set())
+                    self.assertIsNotNone(published)
+                    self.assertEqual(published["charCount"], length)
+                    self.assertEqual(published["text"], record["text"])
+
     def test_heading_with_another_hold_reason_or_wrong_length_stays_excluded(self):
         for changes in (
             {"reasonCodes": ["first_line_heading", "explanatory_first_line"]},
+            {"text": "あ" * 18, "charCount": 18, "exactly20": False},
+            {"text": "あ" * 22, "charCount": 22, "exactly20": False},
             {"charCount": 19, "exactly20": False},
             {"status": "failed"},
             {"publishedAt": "2026-11-17T21:00:00+09:00"},
