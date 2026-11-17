@@ -1,6 +1,12 @@
 name: Build weekly 20-character end roll
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - "scripts/sync_twenty_members.py"
+      - "scripts/build_twenty_credits.py"
+      - ".github/workflows/extract-20char.yml"
   schedule:
     # GitHub Actions uses UTC. 12:00 UTC = Tuesday 21:00 JST.
     - cron: "0 12 * * 2"
@@ -9,6 +15,7 @@ on:
       - "scripts/extract-20char.py"
       - "scripts/twenty_char.py"
       - "scripts/build_twenty_credits.py"
+      - "scripts/sync_twenty_members.py"
       - "scripts/requirements-20char.txt"
       - "scripts/sync-candidates.py"
       - "tests/test_twenty_char.py"
@@ -54,6 +61,7 @@ jobs:
     timeout-minutes: 20
     permissions:
       contents: write
+      id-token: write
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -86,6 +94,12 @@ jobs:
           --max-pages 10
           --output var/twenty-char/results.json
           --log var/twenty-char/events.jsonl
+      - name: Classify participants against the existing room membership roster
+        run: >-
+          python scripts/sync_twenty_members.py
+          --input var/twenty-char/results.json
+          --event-date "${{ steps.window.outputs.event_date }}"
+          --output data/twenty-char-members.json
       - name: Build end-roll data
         run: >-
           python scripts/build_twenty_credits.py
@@ -112,10 +126,39 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/twenty-char-status.json twenty-credits/data/works.json twenty-credits/data/archive/
+          git add data/twenty-char-members.json data/twenty-char-status.json twenty-credits/data/works.json twenty-credits/data/archive/
           if git diff --cached --quiet; then
             echo "End-roll data is already current."
             exit 0
           fi
           git commit -m "Update 20字小説 end roll for ${{ steps.window.outputs.event_date }}"
+          git push
+
+  refresh-published-membership:
+    if: github.event_name == 'push'
+    needs: test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m pip install -r scripts/requirements-20char.txt
+      - name: Reclassify the existing public works without re-extracting stories
+        shell: bash
+        run: |
+          event_date="$(python -c 'import json; print(json.load(open("twenty-credits/data/works.json"))["eventDate"])')"
+          python scripts/sync_twenty_members.py --input twenty-credits/data/works.json \
+            --event-date "$event_date" --output data/twenty-char-members.json --refresh-published
+      - name: Publish membership correction
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/twenty-char-members.json data/twenty-char-status.json twenty-credits/data/works.json twenty-credits/data/archive/
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "Refresh end-roll membership from the existing room roster"
           git push

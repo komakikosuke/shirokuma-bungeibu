@@ -1,8 +1,11 @@
 import json
 from pathlib import Path
 import unittest
+import sys
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "scripts"))
+from build_twenty_credits import load_members
 
 
 class TwentyCreditsTests(unittest.TestCase):
@@ -13,11 +16,13 @@ class TwentyCreditsTests(unittest.TestCase):
         cls.js = (ROOT / "twenty-credits/app.js").read_text(encoding="utf-8")
         cls.data = json.loads((ROOT / "twenty-credits/data/works.json").read_text(encoding="utf-8"))
 
-    def test_initial_public_data_contains_no_preview_or_fictional_works(self):
-        self.assertEqual(self.data["pageStatus"], "scheduled")
+    def test_public_data_contains_only_extracted_works_with_real_membership_classification(self):
         self.assertEqual(self.data["sourceHashtag"], "20字小説")
-        self.assertEqual(self.data["sourceSummary"], {"checked": 0, "extracted": 0})
-        self.assertEqual(self.data["works"], [])
+        self.assertEqual(self.data["sourceSummary"]["extracted"], len(self.data["works"]))
+        members = load_members(ROOT / "data/twenty-char-members.json")
+        for work in self.data["works"]:
+            self.assertEqual(work["sourceType"], "extracted")
+            self.assertEqual(work["creditGroup"], "membership" if members.contains(work) else "club")
 
     def test_page_is_unindexed_and_home_entrance_starts_disabled(self):
         self.assertIn('name="robots" content="noindex,nofollow,noarchive"', self.index)

@@ -1,8 +1,551 @@
 {
-  "version": 1,
-  "description": "20字小説エンドロールでメンバーシップ枠として表示する公開note ID",
-  "members": [
-    "aomame_nono",
-    "tsukasa_tadano"
+  "version": 2,
+  "eventDate": "2026-11-17",
+  "complete": true,
+  "source": {
+    "snapshotId": "db6b3f10-7179-4250-a725-b7ab4d2539c9",
+    "capturedAt": 1794601885958
+  },
+  "works": [
+    {
+      "key": "ne1ed69c608ea",
+      "handle": "aomame_nono",
+      "publishedAt": "2026-11-17T20:00:07+09:00",
+      "isMember": false
+    },
+    {
+      "key": "nac4a6a5a2241",
+      "handle": "rrrainn",
+      "publishedAt": "2026-11-17T19:59:43+09:00",
+      "isMember": false
+    },
+    {
+      "key": "n15f60d77ccc7",
+      "handle": "jazzy_eider8033",
+      "publishedAt": "2026-11-17T20:00:00+09:00",
+      "isMember": false
+    },
+    {
+      "key": "n193d0cfb317a",
+      "handle": "witty_auklet639",
+      "publishedAt": "2026-11-17T20:00:00+09:00",
+      "isMember": false
+    },
+    {
+      "key": "n58cec74799b7",
+      "handle": "sunao_chihama",
+      "publishedAt": "2026-11-17T20:00:00+09:00",
+      "isMember": false
+    },
+    {
+      "key": "n91d6364c90d5",
+      "handle": "rin_plesauretree",
+      "publishedAt": "2026-11-17T20:00:00+09:00",
+      "isMember": true
+    },
+    {
+      "key": "n91de45c60f31",
+      "handle": "minazuki060606",
+      "publishedAt": "2026-11-17T20:00:00+09:00",
+      "isMember": false
+    },
+    {
+      "key": "na540efc36c9c",
+      "handle": "create_dsys72",
+      "publishedAt": "2026-11-17T20:00:00+09:00",
+      "isMember": false
+    },
+    {
+      "key": "nb4c83a024ff7",
+      "handle": "watabe_toua",
+      "publishedAt": "2026-11-17T20:00:00+09:00",
+      "isMember": false
+    },
+    {
+      "key": "nb684249cdf76",
+      "handle": "clear_sable4587",
+      "publishedAt": "2026-11-17T20:00:00+09:00",
+      "isMember": true
+    },
+    {
+      "key": "nc819e412ad52",
+      "handle": "hope0404",
+      "publishedAt": "2026-11-17T20:00:00+09:00",
+      "isMember": true
+    },
+    {
+      "key": "nd9325b043f8b",
+      "handle": "huge_dove563",
+      "publishedAt": "2026-11-17T20:00:00+09:00",
+      "isMember": false
+    },
+    {
+      "key": "nf3d606b09e77",
+      "handle": "kossiy",
+      "publishedAt": "2026-11-17T20:00:00+09:00",
+      "isMember": false
+    },
+    {
+      "key": "nec696c16fa81",
+      "handle": "momo_mg",
+      "publishedAt": "2026-11-17T20:00:01+09:00",
+      "isMember": false
+    },
+    {
+      "key": "n1a2542ec350b",
+      "handle": "se1ge2",
+      "publishedAt": "2026-11-17T20:00:02+09:00",
+      "isMember": false
+    },
+    {
+      "key": "nca83af462f68",
+      "handle": "kind_prawn2176",
+      "publishedAt": "2026-11-17T20:00:02+09:00",
+      "isMember": false
+    },
+    {
+      "key": "nd9ed67c39315",
+      "handle": "haru_yk",
+      "publishedAt": "2026-11-17T20:00:02+09:00",
+      "isMember": false
+    },
+    {
+      "key": "ndbc707927f77",
+      "handle": "light_dog3794",
+      "publishedAt": "2026-11-17T20:00:02+09:00",
+      "isMember": false
+    },
+    {
+      "key": "nedf5b7b1a3f2",
+      "handle": "neneneeko",
+      "publishedAt": "2026-11-17T20:00:02+09:00",
+      "isMember": false
+    },
+    {
+      "key": "n545f289ddb4a",
+      "handle": "light_echium245",
+      "publishedAt": "2026-11-17T20:00:03+09:00",
+      "isMember": false
+    },
+    {
+      "key": "ne6aae23f458c",
+      "handle": "lush_hosta1028",
+      "publishedAt": "2026-11-17T20:00:03+09:00",
+      "isMember": false
+    },
+    {
+      "key": "n711ff514e8fe",
+      "handle": "yoake_mashiro",
+      "publishedAt": "2026-11-17T20:00:04+09:00",
+      "isMember": false
+    },
+    {
+      "key": "nce2cf8478a90",
+      "handle": "lucky_murre513",
+      "publishedAt": "2026-11-17T20:00:04+09:00",
+      "isMember": false
+    },
+    {
+      "key": "ne32d5b8c732f",
+      "handle": "aide_tsumugu",
+      "publishedAt": "2026-11-17T20:00:04+09:00",
+      "isMember": false
+    },
+    {
+      "key": "nf323f3114c1d",
+      "handle": "tubaki2022",
+      "publishedAt": "2026-11-17T20:00:04+09:00",
+      "isMember": false
+    },
+    {
+      "key": "n25aec7213b8d",
+      "handle": "hiroshi_jiromaru",
+      "publishedAt": "2026-11-17T20:00:05+09:00",
+      "isMember": true
+    },
+    {
+      "key": "nf92aa97d7281",
+      "handle": "momoseryo",
+      "publishedAt": "2026-11-17T20:00:05+09:00",
+      "isMember": false
+    },
+    {
+      "key": "ne9e2dc3bf328",
+      "handle": "akashiba555",
+      "publishedAt": "2026-11-17T20:00:06+09:00",
+      "isMember": false
+    },
+    {
+      "key": "n292d07244d90",
+      "handle": "meina3",
+      "publishedAt": "2026-11-17T20:00:07+09:00",
+      "isMember": false
+    },
+    {
+      "key": "n4a2be09b5349",
+      "handle": "open_bison5447",
+      "publishedAt": "2026-11-17T20:00:08+09:00",
+      "isMember": false
+    },
+    {
+      "key": "na34583dba40e",
+      "handle": "rosy_pika19",
+      "publishedAt": "2026-11-17T20:00:08+09:00",
+      "isMember": false
+    },
+    {
+      "key": "n2e39f010c7d2",
+      "handle": "lumi_putcs",
+      "publishedAt": "2026-11-17T20:00:09+09:00",
+      "isMember": true
+    },
+    {
+      "key": "n868dccc5943f",
+      "handle": "toccodocco",
+      "publishedAt": "2026-11-17T20:00:09+09:00",
+      "isMember": false
+    },
+    {
+      "key": "nb6aec06cda10",
+      "handle": "shiny_squid3060",
+      "publishedAt": "2026-11-17T20:00:09+09:00",
+      "isMember": false
+    },
+    {
+      "key": "n3c9b233d5406",
+      "handle": "i_nw_ao_rbdmges",
+      "publishedAt": "2026-11-17T20:00:10+09:00",
+      "isMember": false
+    },
+    {
+      "key": "n365b9e2cb49c",
+      "handle": "rubi_1x36",
+      "publishedAt": "2026-11-17T20:00:11+09:00",
+      "isMember": false
+    },
+    {
+      "key": "naab424f67559",
+      "handle": "nisemono24",
+      "publishedAt": "2026-11-17T20:00:11+09:00",
+      "isMember": false
+    },
+    {
+      "key": "nd9ca2488a403",
+      "handle": "shiny_squid3060",
+      "publishedAt": "2026-11-17T20:00:14+09:00",
+      "isMember": false
+    },
+    {
+      "key": "n4fc89fb66f4c",
+      "handle": "akira_masunaga",
+      "publishedAt": "2026-11-17T20:00:15+09:00",
+      "isMember": false
+    },
+    {
+      "key": "n104eb0a29419",
+      "handle": "sun_pulan",
+      "publishedAt": "2026-11-17T20:00:17+09:00",
+      "isMember": false
+    },
+    {
+      "key": "n5ff4ca4942f8",
+      "handle": "ryoku_suikawa",
+      "publishedAt": "2026-11-17T20:00:18+09:00",
+      "isMember": false
+    },
+    {
+      "key": "nb772065d6fbe",
+      "handle": "mirinoippuku",
+      "publishedAt": "2026-11-17T20:00:19+09:00",
+      "isMember": false
+    },
+    {
+      "key": "n3f2808b10885",
+      "handle": "arimaroku",
+      "publishedAt": "2026-11-17T20:00:31+09:00",
+      "isMember": false
+    },
+    {
+      "key": "n889240c85dc6",
+      "handle": "kantannara",
+      "publishedAt": "2026-11-17T20:00:31+09:00",
+      "isMember": false
+    },
+    {
+      "key": "ne034ed522cc3",
+      "handle": "roquetter",
+      "publishedAt": "2026-11-17T20:00:35+09:00",
+      "isMember": false
+    },
+    {
+      "key": "n3cdab6ab9038",
+      "handle": "mudamuda_muda",
+      "publishedAt": "2026-11-17T20:00:36+09:00",
+      "isMember": false
+    },
+    {
+      "key": "na8ef032f109d",
+      "handle": "tama3ro",
+      "publishedAt": "2026-11-17T20:00:40+09:00",
+      "isMember": false
+    },
+    {
+      "key": "n3c57b3b6d8b1",
+      "handle": "akashiba555",
+      "publishedAt": "2026-11-17T20:00:42+09:00",
+      "isMember": false
+    },
+    {
+      "key": "nd99975e5c8d2",
+      "handle": "aiueo_3",
+      "publishedAt": "2026-11-17T20:00:49+09:00",
+      "isMember": false
+    },
+    {
+      "key": "n616474c1bc33",
+      "handle": "yomosugararip",
+      "publishedAt": "2026-11-17T20:00:51+09:00",
+      "isMember": false
+    },
+    {
+      "key": "n26132648efb2",
+      "handle": "ganbarusyufuyade",
+      "publishedAt": "2026-11-17T20:00:52+09:00",
+      "isMember": false
+    },
+    {
+      "key": "n111fd075db95",
+      "handle": "akashiba555",
+      "publishedAt": "2026-11-17T20:00:56+09:00",
+      "isMember": false
+    },
+    {
+      "key": "n23b978759193",
+      "handle": "yazawa_kentaro",
+      "publishedAt": "2026-11-17T20:01:00+09:00",
+      "isMember": false
+    },
+    {
+      "key": "ndf29117120bf",
+      "handle": "tomo_with_ai",
+      "publishedAt": "2026-11-17T20:01:00+09:00",
+      "isMember": false
+    },
+    {
+      "key": "n676d2f46daf5",
+      "handle": "tomo5562",
+      "publishedAt": "2026-11-17T20:01:02+09:00",
+      "isMember": false
+    },
+    {
+      "key": "n4f95ddd7e2e8",
+      "handle": "qz2p6x4s2vr",
+      "publishedAt": "2026-11-17T20:01:09+09:00",
+      "isMember": false
+    },
+    {
+      "key": "n7a24ee7c0f55",
+      "handle": "osunu_note2023",
+      "publishedAt": "2026-11-17T20:02:02+09:00",
+      "isMember": true
+    },
+    {
+      "key": "n192427ca512a",
+      "handle": "sourcilkotori",
+      "publishedAt": "2026-11-17T20:02:58+09:00",
+      "isMember": false
+    },
+    {
+      "key": "n2f56e7074112",
+      "handle": "m_100tone",
+      "publishedAt": "2026-11-17T20:04:27+09:00",
+      "isMember": false
+    },
+    {
+      "key": "n33ec80acd0fa",
+      "handle": "hearty_phlox231",
+      "publishedAt": "2026-11-17T20:04:53+09:00",
+      "isMember": false
+    },
+    {
+      "key": "n5ae4e70609fe",
+      "handle": "miyunuko",
+      "publishedAt": "2026-11-17T20:05:12+09:00",
+      "isMember": true
+    },
+    {
+      "key": "nad6e44cec6f8",
+      "handle": "yuzuki60st",
+      "publishedAt": "2026-11-17T20:05:16+09:00",
+      "isMember": false
+    },
+    {
+      "key": "n05e1810e509c",
+      "handle": "great_zephyr4402",
+      "publishedAt": "2026-11-17T20:06:26+09:00",
+      "isMember": false
+    },
+    {
+      "key": "n60501ffdae8a",
+      "handle": "grand_macaw5480",
+      "publishedAt": "2026-11-17T20:06:31+09:00",
+      "isMember": false
+    },
+    {
+      "key": "nf9ee09ab9334",
+      "handle": "mio_mizuki",
+      "publishedAt": "2026-11-17T20:06:40+09:00",
+      "isMember": false
+    },
+    {
+      "key": "nb49c973aff4a",
+      "handle": "hasoyam",
+      "publishedAt": "2026-11-17T20:10:16+09:00",
+      "isMember": true
+    },
+    {
+      "key": "n38bbffa2895e",
+      "handle": "sane_gnu4460",
+      "publishedAt": "2026-11-17T20:11:17+09:00",
+      "isMember": false
+    },
+    {
+      "key": "n3d26a8beedbc",
+      "handle": "lucky_omame",
+      "publishedAt": "2026-11-17T20:12:14+09:00",
+      "isMember": false
+    },
+    {
+      "key": "n333846b7023d",
+      "handle": "engwdeslp",
+      "publishedAt": "2026-11-17T20:13:24+09:00",
+      "isMember": false
+    },
+    {
+      "key": "n66b271fe47ef",
+      "handle": "tsumugi_memories",
+      "publishedAt": "2026-11-17T20:13:39+09:00",
+      "isMember": false
+    },
+    {
+      "key": "nc3b0a76b26c0",
+      "handle": "morion_202609",
+      "publishedAt": "2026-11-17T20:14:02+09:00",
+      "isMember": false
+    },
+    {
+      "key": "n8ccc11237b20",
+      "handle": "joyous_panda989",
+      "publishedAt": "2026-11-17T20:15:03+09:00",
+      "isMember": false
+    },
+    {
+      "key": "n69b5edec84c7",
+      "handle": "uuuuu_sui",
+      "publishedAt": "2026-11-17T20:16:37+09:00",
+      "isMember": false
+    },
+    {
+      "key": "nfa639ba0109d",
+      "handle": "at_hiraku",
+      "publishedAt": "2026-11-17T20:16:57+09:00",
+      "isMember": false
+    },
+    {
+      "key": "n39bfd0cbf3e0",
+      "handle": "lucky_omame",
+      "publishedAt": "2026-11-17T20:17:43+09:00",
+      "isMember": false
+    },
+    {
+      "key": "n87ed6cd91ac5",
+      "handle": "lucky_omame",
+      "publishedAt": "2026-11-17T20:20:47+09:00",
+      "isMember": false
+    },
+    {
+      "key": "n950dfbf1e00e",
+      "handle": "kao323",
+      "publishedAt": "2026-11-17T20:22:09+09:00",
+      "isMember": true
+    },
+    {
+      "key": "n59f135e3ad47",
+      "handle": "hot_puma4983",
+      "publishedAt": "2026-11-17T20:25:11+09:00",
+      "isMember": false
+    },
+    {
+      "key": "n986d36b14319",
+      "handle": "gay_curlew1055",
+      "publishedAt": "2026-11-17T20:25:28+09:00",
+      "isMember": false
+    },
+    {
+      "key": "nf695168b814a",
+      "handle": "lucky_omame",
+      "publishedAt": "2026-11-17T20:27:26+09:00",
+      "isMember": false
+    },
+    {
+      "key": "n24e13c3913be",
+      "handle": "serene_yarrow436",
+      "publishedAt": "2026-11-17T20:27:27+09:00",
+      "isMember": false
+    },
+    {
+      "key": "n9a43c00e2e1b",
+      "handle": "limit3",
+      "publishedAt": "2026-11-17T20:27:43+09:00",
+      "isMember": false
+    },
+    {
+      "key": "ncfd0d7f97fb9",
+      "handle": "tsumugi_memories",
+      "publishedAt": "2026-11-17T20:32:19+09:00",
+      "isMember": false
+    },
+    {
+      "key": "neea05fb642b4",
+      "handle": "yagami12345",
+      "publishedAt": "2026-11-17T20:39:34+09:00",
+      "isMember": false
+    },
+    {
+      "key": "n6745905b0816",
+      "handle": "racco_17",
+      "publishedAt": "2026-11-17T20:39:49+09:00",
+      "isMember": false
+    },
+    {
+      "key": "nba9a5ea7afdf",
+      "handle": "clever_yagi2000",
+      "publishedAt": "2026-11-17T20:50:15+09:00",
+      "isMember": false
+    },
+    {
+      "key": "n2f6a01b88b85",
+      "handle": "easy_sorrel824",
+      "publishedAt": "2026-11-17T20:50:27+09:00",
+      "isMember": false
+    },
+    {
+      "key": "n7f086d2cf451",
+      "handle": "yagami12345",
+      "publishedAt": "2026-11-17T20:50:57+09:00",
+      "isMember": false
+    },
+    {
+      "key": "n6bb0447c9692",
+      "handle": "mu25",
+      "publishedAt": "2026-11-17T20:54:28+09:00",
+      "isMember": false
+    },
+    {
+      "key": "n213109a2c894",
+      "handle": "sparkle_memory",
+      "publishedAt": "2026-11-17T20:55:18+09:00",
+      "isMember": false
+    }
   ]
 }

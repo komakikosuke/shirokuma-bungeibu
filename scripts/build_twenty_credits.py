@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+from dataclasses import dataclass
 from datetime import datetime, time, timedelta, timezone
 import json
 from pathlib import Path
@@ -40,16 +41,39 @@ def parse_published(value):
     return parsed if parsed.tzinfo else None
 
 
+@dataclass
+class MembershipSnapshot:
+    event_date: str
+    source: dict
+    works: dict
+
+    def contains(self, record):
+        decision = self.works.get(record["key"])
+        if (decision is None or decision["handle"] != record["handle"]
+                or parse_published(decision["publishedAt"]) != parse_published(record["publishedAt"])):
+            raise ValueError("会員判定と対象作品が一致しません")
+        return decision["isMember"]
+
+
 def load_members(path: Path):
     data = load_json(path)
-    if not isinstance(data, dict) or data.get("version") != 1 or not isinstance(data.get("members"), list):
-        raise ValueError("メンバー設定の形式が不正です")
-    members = set()
-    for handle in data["members"]:
-        if not isinstance(handle, str) or not HANDLE.fullmatch(handle) or handle in members:
-            raise ValueError("メンバー設定に不正または重複した note ID があります")
-        members.add(handle)
-    return members
+    if (not isinstance(data, dict) or data.get("version") != 2 or data.get("complete") is not True
+            or not isinstance(data.get("source"), dict) or not isinstance(data.get("works"), list)
+            or not isinstance(data["source"].get("snapshotId"), str)
+            or not isinstance(data["source"].get("capturedAt"), int)):
+        raise ValueError("完全なサーバー会員判定が必要です。固定のテスト用リストは使用できません")
+    since, until = event_window(data.get("eventDate", ""))
+    decisions = {}
+    for row in data["works"]:
+        if (not isinstance(row, dict) or not isinstance(row.get("key"), str)
+                or not KEY.fullmatch(row["key"]) or row["key"] in decisions
+                or not isinstance(row.get("handle"), str) or not HANDLE.fullmatch(row["handle"])
+                or not isinstance(row.get("isMember"), bool)
+                or not (published := parse_published(row.get("publishedAt")))
+                or not since <= published < until):
+            raise ValueError("会員判定に不正・重複・期間外の作品があります")
+        decisions[row["key"]] = row
+    return MembershipSnapshot(data["eventDate"], data["source"], decisions)
 
 
 def eligible_work(record, since, until, members):
@@ -77,7 +101,8 @@ def eligible_work(record, since, until, members):
         "charCount": 20,
         "authorName": author.strip(),
         "handle": handle,
-        "creditGroup": "membership" if handle in members else "club",
+        "creditGroup": "membership" if (members.contains(record) if isinstance(members, MembershipSnapshot)
+                                         else handle in members) else "club",
         "sourceType": "extracted",
         "title": title.strip(),
         "publishedAt": published.isoformat(),
@@ -87,6 +112,8 @@ def eligible_work(record, since, until, members):
 
 def build_documents(extraction, members, event_date, generated_at=None):
     since, until = event_window(event_date)
+    if isinstance(members, MembershipSnapshot) and members.event_date != event_date:
+        raise ValueError("会員判定の対象日が一致しません")
     if (not isinstance(extraction, dict) or extraction.get("version") != 1
             or extraction.get("hashtag") != "20字小説"
             or extraction.get("countRule") != COUNT_RULE
@@ -128,6 +155,8 @@ def build_documents(extraction, members, event_date, generated_at=None):
         "sourceSummary": {"checked": checked, "extracted": len(works)},
         "works": works,
     }
+    if isinstance(members, MembershipSnapshot):
+        document["membershipSource"] = members.source
     status = {
         "version": 1,
         "status": document["pageStatus"],
@@ -138,6 +167,8 @@ def build_documents(extraction, members, event_date, generated_at=None):
         "sourceWindow": source_window,
         "updatedAt": generated_at,
     }
+    if isinstance(members, MembershipSnapshot):
+        status["membershipSource"] = members.source
     return document, status
 
 

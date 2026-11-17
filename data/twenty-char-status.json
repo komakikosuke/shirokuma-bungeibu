@@ -3,11 +3,15 @@
   "status": "ready",
   "eventDate": "2026-11-17",
   "workCount": 90,
-  "membershipCount": 1,
-  "clubCount": 89,
+  "membershipCount": 9,
+  "clubCount": 81,
   "sourceWindow": {
     "since": "2026-11-17T19:00:00+09:00",
     "until": "2026-11-17T21:00:00+09:00"
   },
-  "updatedAt": "2026-11-17T12:44:19Z"
+  "updatedAt": "2026-11-17T12:44:19Z",
+  "membershipSource": {
+    "snapshotId": "db6b3f10-7179-4250-a725-b7ab4d2539c9",
+    "capturedAt": 1794601885958
+  }
 }

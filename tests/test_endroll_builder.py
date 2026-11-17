@@ -8,7 +8,7 @@ import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
-from build_twenty_credits import build_documents, event_window
+from build_twenty_credits import MembershipSnapshot, build_documents, event_window, load_members
 from twenty_char import COUNT_RULE
 
 JST = timezone(timedelta(hours=9))
@@ -94,8 +94,28 @@ class EndrollBuilderTests(unittest.TestCase):
         homepage = (ROOT / "index.html").read_text(encoding="utf-8")
         self.assertIn('id="endrollEntry" aria-disabled="true" tabindex="-1"', homepage)
         self.assertIn('entry.href="./twenty-credits/"', homepage)
-        initial = json.loads((ROOT / "data/twenty-char-status.json").read_text(encoding="utf-8"))
-        self.assertEqual((initial["status"], initial["workCount"]), ("preview", 0))
+        status = json.loads((ROOT / "data/twenty-char-status.json").read_text(encoding="utf-8"))
+        published = json.loads((ROOT / "twenty-credits/data/works.json").read_text(encoding="utf-8"))
+        self.assertEqual(status["workCount"], len(published["works"]))
+        self.assertEqual(status["membershipCount"], sum(w["creditGroup"] == "membership" for w in published["works"]))
+
+    def test_server_decisions_are_bound_to_the_exact_publication_and_event(self):
+        record = work("na1", "member_one", "2026-11-17T20:00:00+09:00")
+        decisions = MembershipSnapshot("2026-11-17", {"snapshotId": "real"}, {
+            "na1": {"key": "na1", "handle": "member_one", "publishedAt": record["publishedAt"], "isMember": True},
+        })
+        document, status = build_documents(extraction([record]), decisions, "2026-11-17")
+        self.assertEqual(document["works"][0]["creditGroup"], "membership")
+        self.assertEqual(status["membershipSource"], {"snapshotId": "real"})
+        with self.assertRaisesRegex(ValueError, "一致しません"):
+            build_documents(extraction([{**record, "handle": "other", "url": "https://note.com/other/n/na1"}]), decisions, "2026-11-17")
+
+    def test_fixed_test_member_lists_are_rejected(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "members.json"
+            path.write_text(json.dumps({"version": 1, "members": ["test_member"]}), encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "固定のテスト"):
+                load_members(path)
 
 
 if __name__ == "__main__":
