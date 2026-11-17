@@ -28,7 +28,7 @@ class TwentyCreditsTests(unittest.TestCase):
     def test_page_has_controls_empty_state_and_reduced_motion_support(self):
         self.assertIn('id="toggleButton"', self.index)
         self.assertIn('id="restartButton"', self.index)
-        self.assertIn("TUESDAY / 21:00", self.index)
+        self.assertIn("TUESDAY / 20:00", self.index)
         self.assertIn("emptyScene", self.js)
         self.assertIn("prefers-reduced-motion", self.css)
         self.assertIn('matchMedia("(prefers-reduced-motion: reduce)")', self.js)

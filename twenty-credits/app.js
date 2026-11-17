@@ -94,7 +94,7 @@
 
   const emptyScene = () => {
     const scene = element("article", "credit-scene credits-group-heading");
-    scene.append(element("p", "group-kicker", "EVERY TUESDAY / 21:00"));
+    scene.append(element("p", "group-kicker", "EVERY TUESDAY / 20:00"));
     scene.append(element("h2", "group-title", "準備中"));
     scene.append(element("span", "group-rule"));
     return scene;
