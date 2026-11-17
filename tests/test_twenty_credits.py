@@ -22,7 +22,8 @@ class TwentyCreditsTests(unittest.TestCase):
         members = load_members(ROOT / "data/twenty-char-members.json")
         for work in self.data["works"]:
             self.assertEqual(work["sourceType"], "extracted")
-            self.assertEqual(work["creditGroup"], "membership" if members.contains(work) else "club")
+            expected = "membership" if work["handle"] == "komaki_kousuke" or members.contains(work) else "club"
+            self.assertEqual(work["creditGroup"], expected)
 
     def test_page_is_unindexed_and_home_entrance_starts_disabled(self):
         self.assertIn('name="robots" content="noindex,nofollow,noarchive"', self.index)

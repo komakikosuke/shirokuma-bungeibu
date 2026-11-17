@@ -10,7 +10,9 @@ from urllib.parse import urlencode
 from urllib.error import HTTPError
 from urllib.request import Request, urlopen
 
-from build_twenty_credits import eligible_work, event_window, load_json, load_members
+from build_twenty_credits import (
+    credit_group, credit_sort_key, eligible_work, event_window, load_json, load_members,
+)
 from twenty_char import write_json_atomic
 
 ENDPOINT = "https://shirokuma-writing-room.claska.chatgpt.site/api/endroll/membership"
@@ -81,9 +83,8 @@ def refresh_published(path, status_path, archive_dir, members):
     if document.get("eventDate") != members.event_date:
         raise ValueError("会員判定の対象日が一致しません")
     for work in document["works"]:
-        work["creditGroup"] = "membership" if members.contains(work) else "club"
-    document["works"].sort(key=lambda row: (0 if row["creditGroup"] == "membership" else 1,
-                                           row["publishedAt"], row["key"]))
+        work["creditGroup"] = credit_group(work, members)
+    document["works"].sort(key=credit_sort_key)
     document["membershipSource"] = members.source
     status = load_json(status_path)
     if status.get("eventDate") != members.event_date:

@@ -14,10 +14,25 @@ from twenty_char import COUNT_RULE, now_iso, write_json_atomic
 JST = timezone(timedelta(hours=9))
 HANDLE = re.compile(r"^[a-zA-Z0-9_-]{2,100}$")
 KEY = re.compile(r"^n[a-zA-Z0-9]+$")
+HOST_NOTE_ID = "komaki_kousuke"
 
 
 def load_json(path: Path):
     return json.loads(path.read_text(encoding="utf-8"))
+
+
+def credit_group(work, members):
+    # The host closes this credit section without changing paid membership.
+    if work["handle"].lower() == HOST_NOTE_ID:
+        return "membership"
+    is_member = members.contains(work) if isinstance(members, MembershipSnapshot) else work["handle"] in members
+    return "membership" if is_member else "club"
+
+
+def credit_sort_key(work):
+    return (0 if work["creditGroup"] == "membership" else 1,
+            1 if work["handle"].lower() == HOST_NOTE_ID else 0,
+            work["publishedAt"], work["key"])
 
 
 def event_window(event_date: str):
@@ -82,8 +97,11 @@ def eligible_work(record, since, until, members):
     published = parse_published(record.get("publishedAt"))
     if not (published and since <= published < until):
         return None
-    if (record.get("status") != "success" or record.get("exactly20") is not True
-            or record.get("charCount") != 20 or record.get("reasonCodes") not in ([], None)):
+    accepted = (record.get("status") == "success" and record.get("reasonCodes") in ([], None))
+    accepted_heading = (record.get("status") == "pending"
+                        and record.get("reasonCodes") == ["first_line_heading"])
+    if (not (accepted or accepted_heading) or record.get("exactly20") is not True
+            or record.get("charCount") != 20):
         return None
     key, handle = record.get("key"), record.get("handle")
     text, author = record.get("text"), record.get("authorName")
@@ -101,8 +119,7 @@ def eligible_work(record, since, until, members):
         "charCount": 20,
         "authorName": author.strip(),
         "handle": handle,
-        "creditGroup": "membership" if (members.contains(record) if isinstance(members, MembershipSnapshot)
-                                         else handle in members) else "club",
+        "creditGroup": credit_group(record, members),
         "sourceType": "extracted",
         "title": title.strip(),
         "publishedAt": published.isoformat(),
@@ -137,8 +154,7 @@ def build_documents(extraction, members, event_date, generated_at=None):
             raise ValueError("抽出結果に同一記事が重複しています")
         seen.add(work["key"])
         works.append(work)
-    works.sort(key=lambda row: (0 if row["creditGroup"] == "membership" else 1,
-                                row["publishedAt"], row["key"]))
+    works.sort(key=credit_sort_key)
 
     checked = latest.get("summary", {}).get("total")
     checked = checked if isinstance(checked, int) and checked >= 0 else len(extraction["works"])

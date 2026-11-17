@@ -7,11 +7,11 @@
     "since": "2026-11-17T19:00:00+09:00",
     "until": "2026-11-17T21:00:00+09:00"
   },
-  "generatedAt": "2026-11-17T12:44:19Z",
+  "generatedAt": "2026-11-17T20:43:06Z",
   "countRule": "extended-grapheme-clusters:regex-2024.11.6:unicode-16.0",
   "sourceSummary": {
     "checked": 119,
-    "extracted": 90
+    "extracted": 96
   },
   "works": [
     {
@@ -123,6 +123,18 @@
       "url": "https://note.com/kao323/n/n950dfbf1e00e"
     },
     {
+      "key": "n171dfb1bd375",
+      "text": "エンドロールが山場だ。僕の名に目を拭う。",
+      "charCount": 20,
+      "authorName": "小牧幸助｜小説・エッセイ",
+      "handle": "komaki_kousuke",
+      "creditGroup": "membership",
+      "sourceType": "extracted",
+      "title": "20字小説｜映画が終わっても帰らない人　#はじめてのnote",
+      "publishedAt": "2026-11-17T20:00:00+09:00",
+      "url": "https://note.com/komaki_kousuke/n/n171dfb1bd375"
+    },
+    {
       "key": "nac4a6a5a2241",
       "text": "イルカの鳴き声は過去世の傷を修復するの。",
       "charCount": 20,
@@ -157,6 +169,18 @@
       "title": "【20字小説】 それでも",
       "publishedAt": "2026-11-17T20:00:00+09:00",
       "url": "https://note.com/witty_auklet639/n/n193d0cfb317a"
+    },
+    {
+      "key": "n375bbfd19021",
+      "text": "桜の木、花びらひらり舞い戻る、木造校舎。",
+      "charCount": 20,
+      "authorName": "Lumen C.",
+      "handle": "ai_duck201",
+      "creditGroup": "club",
+      "sourceType": "extracted",
+      "title": "『桜の木』｜20字小説【シロクマ文芸部】",
+      "publishedAt": "2026-11-17T20:00:00+09:00",
+      "url": "https://note.com/ai_duck201/n/n375bbfd19021"
     },
     {
       "key": "n58cec74799b7",
@@ -747,6 +771,18 @@
       "url": "https://note.com/sourcilkotori/n/n192427ca512a"
     },
     {
+      "key": "n1c1ebf53fc75",
+      "text": "小さな物語がたくさん生まれる不思議な夜。",
+      "charCount": 20,
+      "authorName": "❁ Ordeal ❁",
+      "handle": "brainy_elk1055",
+      "creditGroup": "club",
+      "sourceType": "extracted",
+      "title": "２０ジショウセツ【シロクマ文芸部｜20字小説】",
+      "publishedAt": "2026-11-17T20:04:20+09:00",
+      "url": "https://note.com/brainy_elk1055/n/n1c1ebf53fc75"
+    },
+    {
       "key": "n2f56e7074112",
       "text": "夜の帳に星を綴る、あの魔女は宙の小説家。",
       "charCount": 20,
@@ -829,6 +865,18 @@
       "title": "結婚って何だろう",
       "publishedAt": "2026-11-17T20:11:17+09:00",
       "url": "https://note.com/sane_gnu4460/n/n38bbffa2895e"
+    },
+    {
+      "key": "n21190dddbeb8",
+      "text": "カッコ悪いというけどそういう君は何なの。",
+      "charCount": 20,
+      "authorName": "ツムジ",
+      "handle": "west4h",
+      "creditGroup": "club",
+      "sourceType": "extracted",
+      "title": "【２０字小説】ーどっちもドッチー",
+      "publishedAt": "2026-11-17T20:12:06+09:00",
+      "url": "https://note.com/west4h/n/n21190dddbeb8"
     },
     {
       "key": "n3d26a8beedbc",
@@ -999,6 +1047,18 @@
       "url": "https://note.com/limit3/n/n9a43c00e2e1b"
     },
     {
+      "key": "nde9a8d9652b7",
+      "text": "誰にも知られていないことだけ知っている。",
+      "charCount": 20,
+      "authorName": "つつ",
+      "handle": "joyous_worm3932",
+      "creditGroup": "club",
+      "sourceType": "extracted",
+      "title": "20字小説｜座右の無名  #シロクマ文芸部",
+      "publishedAt": "2026-11-17T20:29:58+09:00",
+      "url": "https://note.com/joyous_worm3932/n/nde9a8d9652b7"
+    },
+    {
       "key": "ncfd0d7f97fb9",
       "text": "懐かしいなぁ、と思う自分が、もうお年頃。",
       "charCount": 20,
@@ -1009,6 +1069,18 @@
       "title": "20字小説",
       "publishedAt": "2026-11-17T20:32:19+09:00",
       "url": "https://note.com/tsumugi_memories/n/ncfd0d7f97fb9"
+    },
+    {
+      "key": "ne10bf4a6077e",
+      "text": "「寒いね」といつまで歩く素足のリビング。",
+      "charCount": 20,
+      "authorName": "望月むう（ムーン）🐾｜物語と思考｜物語に浸りたい",
+      "handle": "mfullmoon001",
+      "creditGroup": "club",
+      "sourceType": "extracted",
+      "title": "シロクマ文芸部🐻‍❄️「#20字小説」｜靴下がきらいな人",
+      "publishedAt": "2026-11-17T20:33:04+09:00",
+      "url": "https://note.com/mfullmoon001/n/ne10bf4a6077e"
     },
     {
       "key": "neea05fb642b4",
