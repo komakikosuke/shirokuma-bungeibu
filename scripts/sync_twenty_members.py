@@ -17,8 +17,12 @@ ENDPOINT = "https://shirokuma-writing-room.claska.chatgpt.site/api/endroll/membe
 
 
 def request_json(request):
-    with urlopen(request, timeout=30) as response:
-        return json.load(response)
+    try:
+        with urlopen(request, timeout=30) as response:
+            return json.load(response)
+    except HTTPError as error:
+        error.sync_source = "会員サーバー" if request.full_url == ENDPOINT else "GitHub認証"
+        raise
 
 
 def public_works(document, event_date):
@@ -99,7 +103,7 @@ def main():
         if args.refresh_published:
             refresh_published(args.input, args.status, args.archive_dir, members)
     except HTTPError as error:
-        parser.exit(2, f"会員判定APIへの接続が失敗しました（HTTP {error.code}）。公開データは変更しません。\n")
+        parser.exit(2, f"{getattr(error, 'sync_source', '会員判定API')}への接続が失敗しました（HTTP {error.code}）。公開データは変更しません。\n")
     except ValueError as error:
         parser.exit(2, f"会員判定を更新できませんでした: {error}\n")
     except Exception as error:
