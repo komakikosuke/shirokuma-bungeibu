@@ -251,7 +251,8 @@ button:focus-visible, a:focus-visible {
 }
 .credits-intro + .credits-group-heading--membership,
 .credits-group-heading--membership + .credit-work--membership,
-.credit-work--membership + .credit-work--membership {
+.credit-work--membership + .credit-work--membership,
+.credit-work--membership + .credits-group-heading--club {
   margin-top: clamp(60px, 9.6vh, 96px);
 }
 .credit-work--club {
