@@ -249,6 +249,7 @@ button:focus-visible, a:focus-visible {
   min-height: 12.8vh;
   padding-block: clamp(10px, 1.6vh, 16px);
 }
+.credits-intro + .credits-group-heading--membership,
 .credits-group-heading--membership + .credit-work--membership,
 .credit-work--membership + .credit-work--membership {
   margin-top: clamp(60px, 9.6vh, 96px);
