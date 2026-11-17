@@ -89,6 +89,10 @@
       "name": "チズ",
       "checkedAt": "2026-11-16T05:01:53Z"
     },
+    "ganiwara": {
+      "name": "ホシガラス",
+      "checkedAt": "2026-11-17T04:33:27Z"
+    },
     "garasudori": {
       "name": "硝子鳥",
       "checkedAt": "2026-11-16T05:01:53Z"
@@ -127,7 +131,7 @@
     },
     "hot_zephyr144": {
       "name": "モネ | 未来の自分に残すnote",
-      "checkedAt": "2026-11-14T04:28:42Z"
+      "checkedAt": "2026-11-17T04:33:27Z"
     },
     "human_garlic8387": {
       "name": "ponzu",
@@ -257,6 +261,14 @@
       "name": "ポールミセス",
       "checkedAt": "2026-11-16T05:01:53Z"
     },
+    "sisaku_neko": {
+      "name": "猫っぽい何か。",
+      "checkedAt": "2026-11-17T04:33:27Z"
+    },
+    "tarofukushima": {
+      "name": "福島太郎",
+      "checkedAt": "2026-11-17T04:33:27Z"
+    },
     "tomo_with_ai": {
       "name": "トモ。",
       "checkedAt": "2026-11-16T05:01:53Z"
@@ -274,5 +286,5 @@
       "checkedAt": "2026-11-14T10:19:20Z"
     }
   },
-  "updatedAt": "2026-11-16T22:24:19Z"
+  "updatedAt": "2026-11-17T04:33:27Z"
 }
