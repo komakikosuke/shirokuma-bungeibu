@@ -5,13 +5,13 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#5dc0d5">
   <meta name="robots" content="noindex,nofollow,noarchive">
-  <meta name="description" content="シロクマ文芸部「20字小説」のエンドロール。火曜夜に投稿された20字の物語と作者名が、映画のスタッフクレジットのように流れます。">
+  <meta name="description" content="シロクマ文芸部「20字小説」のエンドロール。20字小説と作者が、音楽とともにエンドロールのように流れます。">
   <link rel="icon" type="image/png" href="../assets/polarbear-icon.png">
   <link rel="stylesheet" href="./style.css">
   <title>20字小説｜シロクマ文芸部</title>
 </head>
 <body>
-  <main class="experience is-loading" id="experience">
+  <main class="experience is-loading is-awaiting-start" id="experience">
     <header class="screen-header">
       <div class="screen-brand">
         <strong>20字小説</strong>
@@ -21,6 +21,19 @@
     </header>
 
     <h1 class="sr-only">シロクマ文芸部 20字小説</h1>
+    <div class="start-gate" id="startGate">
+      <div class="start-gate-panel">
+        <p class="start-gate-kicker">20-CHARACTER STORIES</p>
+        <h2>エンドロールを再生</h2>
+        <p class="start-gate-copy">音楽「在りし日の停留所」とともに上映します。</p>
+        <button type="button" class="start-button" id="startWithSound" disabled>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18V6l10 6-10 6Z"/></svg>
+          音楽ありで再生
+        </button>
+        <button type="button" class="start-silent" id="startWithoutSound" disabled>音楽なしで見る</button>
+      </div>
+    </div>
+
     <section class="credits-window" aria-label="20字小説スタッフクレジット">
       <div class="credits-track" id="creditsTrack"></div>
       <p class="loading-message" id="loadingMessage" role="status">作品を読み込んでいます</p>
@@ -37,9 +50,17 @@
       <button type="button" class="control-button control-icon" id="restartButton" disabled aria-label="最初から見る">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 8V4m0 0h4M5 4l3 3a7 7 0 1 1-2 8"/></svg>
       </button>
+      <button type="button" class="control-button control-icon" id="soundButton" disabled aria-label="音楽を消す" aria-pressed="false">
+        <svg class="icon-sound-on" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 10v4h4l5 4V6l-5 4H5Zm12-1a4 4 0 0 1 0 6m2-9a8 8 0 0 1 0 12"/></svg>
+        <svg class="icon-sound-off" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 10v4h4l5 4V6l-5 4H5Zm12 0 4 4m0-4-4 4"/></svg>
+      </button>
     </nav>
 
     <p class="keyboard-hint" aria-hidden="true"><kbd>Space</kbd> 一時停止</p>
+    <p id="musicStatus" class="sr-only" role="status"></p>
+    <audio id="soundtrack" preload="metadata">
+      <source src="./assets/arishihi-no-teiryusho.mp3" type="audio/mpeg">
+    </audio>
     <noscript><p class="error-message">このページの表示にはJavaScriptが必要です。</p></noscript>
   </main>
   <script src="./app.js" defer></script>
