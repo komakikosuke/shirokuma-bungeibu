@@ -18,6 +18,8 @@
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
   const autoplayDisabled = new URLSearchParams(window.location.search).get("autoplay") === "0";
   const DEFAULT_DURATION = 87.053333;
+  const DEFAULT_SOUNDTRACK_DURATION = 646.109333;
+  const ROLL_SPEED = 2;
   const FADE_SECONDS = 8;
   const BASE_VOLUME = 0.58;
   let isReduced = reducedMotion.matches || autoplayDisabled;
@@ -111,8 +113,9 @@
   };
 
   const soundtrackDuration = () => Number.isFinite(soundtrack.duration) && soundtrack.duration > 0
-    ? soundtrack.duration : DEFAULT_DURATION;
-  const duration = () => Math.max(soundtrackDuration(), minimumRollDuration);
+    ? soundtrack.duration : DEFAULT_SOUNDTRACK_DURATION;
+  // Credits run twice as fast; a longer soundtrack never stretches the roll.
+  const duration = () => Math.max(DEFAULT_DURATION, minimumRollDuration) / ROLL_SPEED;
 
   const updateSoundState = () => {
     experience.classList.toggle("is-muted", soundtrack.muted);
@@ -304,7 +307,7 @@
       fragment.append(groupScene(group));
       works.forEach((work) => fragment.append(workScene(work, group.key)));
     });
-    // Longer weekly rolls keep reading time; the music repeats and fades once at the end.
+    // Reading time controls the roll independently from the music's playback rate.
     minimumRollDuration = groupedWorks.length * 8 + renderedGroupCount * 7;
     hasWorks = groupedWorks.length > 0;
     if (!hasWorks) fragment.append(emptyScene());

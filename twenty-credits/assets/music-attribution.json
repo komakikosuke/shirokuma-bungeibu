@@ -4,8 +4,10 @@
   "sourceUrl": "https://bgmer.net/music/465/",
   "licenseUrl": "https://bgmer.net/terms/",
   "creditOptional": true,
-  "variant": "SHORT 01:27",
-  "durationSeconds": 87.053333,
-  "downloadedAt": "2026-11-17",
-  "sha256": "71db24eef8836a2ffb557227472d4dd187d772f11342e5f6d4044fb01c0516c8"
+  "variant": "LONG 10:46",
+  "durationSeconds": 646.109333,
+  "downloadedAt": "2026-11-18",
+  "sha256": "b686c1043711fee238127a4a63cbccb90f4b3902fef0a23c3142ea292a1afa9b",
+  "downloadUrl": "https://bgmer.net/wp-content/uploads/2025/11/465_long_BPM170.mp3",
+  "playbackUrl": "./assets/arishihi-no-teiryusho-long.mp3"
 }
