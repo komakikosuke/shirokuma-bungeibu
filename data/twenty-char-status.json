@@ -1,10 +1,13 @@
 {
   "version": 1,
-  "status": "preview",
-  "eventDate": null,
-  "workCount": 0,
-  "membershipCount": 0,
-  "clubCount": 0,
-  "sourceWindow": null,
-  "updatedAt": null
+  "status": "ready",
+  "eventDate": "2026-11-17",
+  "workCount": 90,
+  "membershipCount": 1,
+  "clubCount": 89,
+  "sourceWindow": {
+    "since": "2026-11-17T19:00:00+09:00",
+    "until": "2026-11-17T21:00:00+09:00"
+  },
+  "updatedAt": "2026-11-17T12:44:19Z"
 }
