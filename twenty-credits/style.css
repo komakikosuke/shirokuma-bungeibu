@@ -249,6 +249,9 @@ button:focus-visible, a:focus-visible {
   min-height: 12.8vh;
   padding-block: clamp(10px, 1.6vh, 16px);
 }
+.credit-work--membership + .credit-work--membership {
+  margin-top: clamp(20px, 3.2vh, 32px);
+}
 .credit-work--club {
   min-height: 10.24vh;
   padding-block: clamp(22px, 3.8vh, 30px);
