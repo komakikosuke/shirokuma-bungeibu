@@ -8,7 +8,7 @@
   --line: rgba(255, 255, 255, .46);
   --serif: "Hiragino Mincho ProN", "Yu Mincho", YuMincho, "Noto Serif JP", serif;
   --sans: -apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic ProN", "Yu Gothic", Meiryo, sans-serif;
-  --duration: 78s;
+  --duration: 87.053s;
 }
 
 *, *::before, *::after { box-sizing: border-box; }
@@ -21,6 +21,7 @@ body {
   font-family: var(--sans);
 }
 button, a { font: inherit; }
+[hidden], audio { display: none !important; }
 button:focus-visible, a:focus-visible {
   outline: 2px solid #fff;
   outline-offset: 4px;
@@ -101,6 +102,78 @@ button:focus-visible, a:focus-visible {
   color: rgba(255,255,255,.82);
 }
 
+.start-gate {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(93, 192, 213, .82);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+}
+.start-gate-panel {
+  width: min(460px, 100%);
+  padding: clamp(34px, 6vw, 56px);
+  border: 1px solid rgba(255,255,255,.34);
+  text-align: center;
+  background: rgba(45, 151, 176, .14);
+  box-shadow: 0 24px 80px rgba(16, 98, 119, .12);
+}
+.start-gate-kicker {
+  margin: 0 0 18px;
+  font: 600 8px/1.4 var(--sans);
+  letter-spacing: .4em;
+  color: rgba(255,255,255,.7);
+}
+.start-gate h2 {
+  margin: 0;
+  font: 500 clamp(25px, 4vw, 38px)/1.6 var(--serif);
+  letter-spacing: .13em;
+  text-indent: .13em;
+}
+.start-gate-copy {
+  margin: 15px 0 28px;
+  font: 500 12px/1.9 var(--serif);
+  letter-spacing: .06em;
+  color: rgba(255,255,255,.78);
+}
+.start-button {
+  min-height: 52px;
+  width: min(270px, 100%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 0 22px;
+  border: 1px solid rgba(255,255,255,.78);
+  border-radius: 100px;
+  color: #25849e;
+  background: rgba(255,255,255,.94);
+  cursor: pointer;
+  font: 700 12px/1 var(--sans);
+  letter-spacing: .08em;
+  transition: transform .2s, background .2s;
+}
+.start-button:hover:not(:disabled) { transform: translateY(-2px); background: #fff; }
+.start-button svg { width: 16px; height: 16px; fill: currentColor; }
+.start-button:disabled, .start-silent:disabled { opacity: .45; cursor: wait; }
+.start-silent {
+  display: block;
+  margin: 18px auto 0;
+  padding: 5px;
+  border: 0;
+  color: rgba(255,255,255,.7);
+  background: transparent;
+  cursor: pointer;
+  font: 500 10px/1.5 var(--sans);
+  letter-spacing: .06em;
+  text-decoration: underline;
+  text-decoration-color: rgba(255,255,255,.32);
+  text-underline-offset: 5px;
+}
+
 .credits-window {
   position: absolute;
   z-index: 2;
@@ -114,11 +187,15 @@ button:focus-visible, a:focus-visible {
   margin-inline: auto;
   transform: translate3d(0, 72vh, 0);
   will-change: transform;
-  animation: credits-roll var(--duration) linear forwards;
-  animation-play-state: running;
 }
-.experience.is-loading .credits-track { animation: none; visibility: hidden; }
-.experience.is-paused .credits-track { animation-play-state: paused; }
+.experience.is-loading .credits-track { visibility: hidden; }
+.experience.is-loading .credits-window,
+.experience.is-awaiting-start .credits-window,
+.experience.is-paused .credits-window,
+.experience.is-ended .credits-window { animation-play-state: paused; }
+.experience.is-loading .credits-track,
+.experience.is-awaiting-start .credits-track,
+.experience.is-paused .credits-track,
 .experience.is-ended .credits-track { animation-play-state: paused; }
 
 .credit-scene {
@@ -271,6 +348,12 @@ button:focus-visible, a:focus-visible {
   letter-spacing: .13em;
   color: rgba(242,252,255,.62);
 }
+.outro-music {
+  margin: 13px 0 0;
+  font: 500 8px/1.7 var(--sans);
+  letter-spacing: .16em;
+  color: rgba(242,252,255,.48);
+}
 
 .loading-message, .error-message {
   position: absolute;
@@ -299,10 +382,11 @@ button:focus-visible, a:focus-visible {
   width: 0;
   height: 100%;
   background: rgba(255,255,255,.82);
-  animation: timeline var(--duration) linear forwards;
 }
-.experience.is-loading .timeline span { animation: none; }
-.experience.is-paused .timeline span, .experience.is-ended .timeline span { animation-play-state: paused; }
+.experience.is-loading .timeline span,
+.experience.is-awaiting-start .timeline span,
+.experience.is-paused .timeline span,
+.experience.is-ended .timeline span { animation-play-state: paused; }
 
 .controls {
   position: absolute;
@@ -340,6 +424,9 @@ button:focus-visible, a:focus-visible {
 .experience.is-paused .control-button .icon-play,
 .experience.is-ended .control-button .icon-play { display: block; }
 .control-icon { width: 40px; padding: 0; }
+.icon-sound-off { display: none; }
+.experience.is-muted .icon-sound-on { display: none; }
+.experience.is-muted .icon-sound-off { display: block; }
 
 .keyboard-hint {
   position: absolute;
@@ -370,11 +457,6 @@ kbd {
   border: 0;
 }
 
-@keyframes credits-roll {
-  from { transform: translate3d(0, 72vh, 0); }
-  to { transform: translate3d(0, calc(-100% + 92vh), 0); }
-}
-@keyframes timeline { from { width: 0; } to { width: 100%; } }
 html[data-motion="reduced"] body { overflow: auto; }
 html[data-motion="reduced"] .experience { min-height: 100svh; height: auto; overflow: visible; }
 html[data-motion="reduced"] .credits-window {
@@ -384,6 +466,8 @@ html[data-motion="reduced"] .credits-window {
   padding: 95px 0 80px;
   -webkit-mask-image: none;
   mask-image: none;
+  animation: none;
+  opacity: 1;
 }
 html[data-motion="reduced"] .credits-track {
   transform: none;
@@ -424,5 +508,5 @@ html[data-motion="reduced"] .controls { position: fixed; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .control-button { transition: none; }
+  .control-button, .start-button { transition: none; }
 }
