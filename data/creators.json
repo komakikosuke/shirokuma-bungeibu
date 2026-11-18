@@ -1,9 +1,13 @@
 {
   "version": 1,
   "creators": {
+    "1degreelower": {
+      "name": "適温より1℃低め",
+      "checkedAt": "2026-11-18T10:33:48Z"
+    },
     "3104deepblue": {
       "name": "deepblue",
-      "checkedAt": "2026-11-15T10:21:55Z"
+      "checkedAt": "2026-11-18T10:33:48Z"
     },
     "417pz": {
       "name": "椎名ピザ",
@@ -23,7 +27,7 @@
     },
     "againstrike": {
       "name": "歩行者ｂ",
-      "checkedAt": "2026-11-15T10:21:55Z"
+      "checkedAt": "2026-11-18T10:33:48Z"
     },
     "aide_tsumugu": {
       "name": "藍出 紡",
@@ -35,7 +39,7 @@
     },
     "akm7188": {
       "name": "佐守良日",
-      "checkedAt": "2026-11-15T10:21:55Z"
+      "checkedAt": "2026-11-18T10:33:48Z"
     },
     "amawawulf22": {
       "name": "AMAWA",
@@ -133,6 +137,10 @@
       "name": "ヒメシャラ",
       "checkedAt": "2026-11-16T05:01:53Z"
     },
+    "hirata_mikiko60": {
+      "name": "椿みきこ🌸季節の花ごよみ",
+      "checkedAt": "2026-11-18T10:33:48Z"
+    },
     "hon_to_toshokan": {
       "name": "本棚の館長",
       "checkedAt": "2026-11-15T16:15:49Z"
@@ -152,6 +160,10 @@
     "inukawa_uten": {
       "name": "fuff",
       "checkedAt": "2026-11-16T22:24:19Z"
+    },
+    "jolly_cuke0625": {
+      "name": "ミーナ",
+      "checkedAt": "2026-11-18T10:33:48Z"
     },
     "kagulog": {
       "name": "カグー",
@@ -183,7 +195,7 @@
     },
     "legal_cougar3582": {
       "name": "堕天使",
-      "checkedAt": "2026-11-15T10:21:55Z"
+      "checkedAt": "2026-11-18T10:33:48Z"
     },
     "light_badger1508": {
       "name": "三州 連環",
@@ -231,7 +243,7 @@
     },
     "mio_mizuki": {
       "name": "水生ミヲ",
-      "checkedAt": "2026-11-15T10:21:55Z"
+      "checkedAt": "2026-11-18T10:33:48Z"
     },
     "mirai_to_mirai": {
       "name": "未来の味蕾",
@@ -313,18 +325,22 @@
       "name": "トモ。",
       "checkedAt": "2026-11-16T05:01:53Z"
     },
+    "uuuuu_sui": {
+      "name": "おすし",
+      "checkedAt": "2026-11-18T10:33:48Z"
+    },
     "witty_duck145": {
       "name": "DK保留中",
       "checkedAt": "2026-11-16T05:01:53Z"
     },
     "yu_2929": {
       "name": "Yuu｜2歳boyママの暮らし",
-      "checkedAt": "2026-11-15T10:21:55Z"
+      "checkedAt": "2026-11-18T10:33:48Z"
     },
     "yukihiran": {
       "name": "雪花*",
       "checkedAt": "2026-11-17T10:35:30Z"
     }
   },
-  "updatedAt": "2026-11-18T04:36:29Z"
+  "updatedAt": "2026-11-18T10:33:48Z"
 }
