@@ -21,8 +21,13 @@
 - 公開案内の確認後、全対象を5秒以上の間隔で順番に追加する。
   1回5件で打ち切らず、その回の全作品を処理する。113件なら完了まで十数分以上かかる。
 - note画面の「追加済」を確認してから `endroll-state.json` に記録する。
-  途中失敗時は当該チャンネルを止め、次回は未確認の作品から再開する。
+  Safari操作で失敗したら `safari-guard.json` に操作段階とエラーを保存して停止する。
+  次の自動実行はSafariを開かずに終了する。操作中にプロセスが中断された場合も同様。
+  ログを確認し、明示的に再開したときだけ未確認の作品から続ける。
   状態保存前に止まっても、画面の「追加済」を確認するため二重追加しない。
+  作業用ウィンドウには専用のURLフラグメントを付け、残っていれば再利用する。
+  初期作成時は空白ページを使い、作成前後のウィンドウIDから対象を特定する。
+  正常時も、専用フラグメント付き・タブ1枚の作業ウィンドウだけを閉じる。
 - 状態は作品URL単位で保持する。週が替わっても前の週の案内で解除しない。
   同じ週に掲載データが修正されれば、後から増えた掲載作品も次回対象になる。
   1週間以上古い掲載データは追加しない。公開後の作品取り消しによる自動削除は行わない。
@@ -43,7 +48,8 @@ curl -fsSL 'https://komakikosuke.github.io/shirokuma-bungeibu/scripts/note_magaz
 標準の `~/Library/Application Support/ShirokumaMagazineSync/note_magazine_sync.py` を更新し、
 置き換え前のコードがあれば `note_magazine_sync.py.bak` に保存する。
 追加のLaunchAgent `jp.shirokuma.endroll-magazine` を登録する。
-水曜21:00に開始し、21時台は2分ごと、22時台は15分ごとに再確認する。
+水曜21:00に開始し、21:02・21:05・21:10・21:20・21:40・22:00・22:30に再確認する。
+再確認は公開待ちやネットワーク失敗に使う。Safari操作失敗後は自動再試行しない。
 実行中の再起動は共通の排他ロックで抑止する。
 登録直後にも一度確認するが、公開前の追加はしない。
 Macのタイムゾーンは日本時間が必要（異なる設定ではインストールを停止）。
@@ -63,3 +69,34 @@ Macのタイムゾーンは日本時間が必要（異なる設定ではイン�
 
 認証情報やCookieは保存せず、マガジンへの書き込みは従来どおりSafariの画面操作で行う。
 LinuxのCIでは時刻・公開確認・掲載対象の検証と、停止後の再開をオフラインでテストする。
+
+## ウィンドウが増える・追加されない場合
+
+自動追加を停止する:
+
+```bash
+launchctl bootout "gui/$(id -u)/jp.shirokuma.endroll-magazine"
+```
+
+修正版に更新し、Safari操作を停止した状態でログを表示する:
+
+```bash
+sync_tmp="$(mktemp -t shirokuma-endroll)" &&
+curl -fsSL 'https://komakikosuke.github.io/shirokuma-bungeibu/scripts/note_magazine_sync.py?v=20261119-safari-guard' -o "$sync_tmp" &&
+/usr/bin/python3 "$sync_tmp" --repair-endroll
+```
+
+この操作で既存の追加済み記録は維持する。既存のSafariウィンドウは開閉しない。
+旧コードのエラーは `sync.log` と `launchd-endroll.log` の末尾に表示する。
+更新後は既存のKeyboard Maestroから実行された場合も、Safari操作停止フラグで終了する。
+`--diagnose-endroll` 単体でも、ログ・直近の失敗・公開判定を読み取りだけで確認できる。
+修正したAppleScriptのMac上での実動作は別途確認する必要がある。
+
+ログから原因を解消したあと、まず1件を確認する:
+
+```bash
+/usr/bin/python3 "$HOME/Library/Application Support/ShirokumaMagazineSync/note_magazine_sync.py" --endroll-only --resume-safari --max-works 1
+```
+
+成功すれば通常の `--endroll-only` 実行で残りを処理する。
+失敗したら停止フラグが再び保存されるため、そのまま自動再試行を続けない。

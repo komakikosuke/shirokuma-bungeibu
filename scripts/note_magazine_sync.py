@@ -45,6 +45,8 @@ DATA_DIR = Path.home() / 'Library' / 'Application Support' / 'ShirokumaMagazineS
 STATE_FILE = DATA_DIR / 'state.json'
 ROOM_STATE_FILE = DATA_DIR / 'room-state.json'
 ENDROLL_STATE_FILE = DATA_DIR / 'endroll-state.json'
+SAFARI_GUARD_FILE = DATA_DIR / 'safari-guard.json'
+SAFARI_MARKER = '#shirokuma-magazine-sync'
 LOG_FILE = DATA_DIR / 'sync.log'
 MAX_PER_RUN = 5
 NOTE_URL = re.compile(r'^https://note\.com/[A-Za-z0-9_-]+/n/n[A-Za-z0-9]+$')
@@ -182,20 +184,57 @@ def load_endroll_feed(now=None, fetch=public_json):
 
 SCRIPT = '''on run argv
   set operation to item 1 of argv
+  set syncMarker to "#shirokuma-magazine-sync"
   tell application "Safari"
+    if operation is "preflight" then
+      repeat with candidate in windows
+        if (count of tabs of candidate) is 1 then
+          set candidateURL to URL of current tab of candidate
+          if candidateURL starts with "https://note.com/" then
+            return do JavaScript "'ok'" in current tab of candidate
+          end if
+        end if
+      end repeat
+      return "no-note-tab"
+    end if
     if operation is "open" then
-      make new document with properties {URL:(item 2 of argv)}
-      return (id of front window) as text
+      -- Adopt the previous working window, including one left after a failed run.
+      repeat with candidate in windows
+        if (count of tabs of candidate) is 1 then
+          set candidateURL to URL of current tab of candidate
+          if candidateURL ends with syncMarker then return (id of candidate) as text
+        end if
+      end repeat
+      -- Create a blank window before navigation. Do not rely on the front window:
+      -- Safari can leave another user's window at the front while it creates one.
+      set previousIDs to id of every window
+      make new document with properties {URL:("about:blank" & syncMarker)}
+      repeat 30 times
+        repeat with candidate in windows
+          set candidateID to id of candidate
+          if previousIDs does not contain candidateID then
+            if (URL of current tab of candidate) ends with syncMarker then
+              return candidateID as text
+            end if
+          end if
+        end repeat
+        delay 0.1
+      end repeat
+      error "Created working window could not be identified; automatic retries paused"
     end if
     set targetID to (item 2 of argv) as integer
     set targetWindow to first window whose id is targetID
     if operation is "navigate" then
-      set URL of current tab of targetWindow to (item 3 of argv)
+      if (count of tabs of targetWindow) is not 1 then error "Working window has extra tabs"
+      if (URL of current tab of targetWindow) does not end with syncMarker then error "Working window marker lost"
+      set URL of current tab of targetWindow to ((item 3 of argv) & syncMarker)
       return "ok"
     end if
     if operation is "url" then return URL of current tab of targetWindow
     if operation is "js" then return do JavaScript (item 3 of argv) in current tab of targetWindow
     if operation is "close" then
+      if (count of tabs of targetWindow) is not 1 then error "Preserved working window: extra tabs"
+      if (URL of current tab of targetWindow) does not end with syncMarker then error "Preserved window: marker lost"
       close targetWindow
       return "ok"
     end if
@@ -264,11 +303,14 @@ def log(msg):
 
 
 def applescript(*args):
-    p = subprocess.run(['/usr/bin/osascript', '-e', SCRIPT, *args],
-                       stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
-                       timeout=35)
+    try:
+        p = subprocess.run(['/usr/bin/osascript', '-e', SCRIPT, *args],
+                           stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
+                           timeout=35)
+    except subprocess.TimeoutExpired:
+        raise RuntimeError('Safari '+args[0]+': AppleScript timed out after 35 seconds')
     if p.returncode:
-        raise RuntimeError('Safari AppleScript: ' + p.stderr.strip()[:450])
+        raise RuntimeError('Safari '+args[0]+': ' + p.stderr.strip()[:450])
     return p.stdout.strip()
 
 
@@ -337,7 +379,7 @@ def wait_article(window,url):
     until=time.monotonic()+35
     while time.monotonic()<until:
         try:
-            current=applescript('url',window).split('?')[0].rstrip('/')
+            current=urllib.parse.urlsplit(applescript('url',window))._replace(query='',fragment='').geturl().rstrip('/')
             if current==url:
                 ready=applescript('js',window,'document.readyState')
                 if ready=='complete':return
@@ -437,8 +479,8 @@ def prepare_channels(endroll_only=False):
 
 def agent_config(script_path):
     # launchd calendar fields use the Mac's local timezone. Installation verifies JST.
-    times = [{'Weekday': 3, 'Hour': 21, 'Minute': minute} for minute in range(0, 60, 2)]
-    times += [{'Weekday': 3, 'Hour': 22, 'Minute': minute} for minute in (0, 15, 30, 45)]
+    times = [{'Weekday': 3, 'Hour': 21, 'Minute': minute} for minute in (0, 2, 5, 10, 20, 40)]
+    times += [{'Weekday': 3, 'Hour': 22, 'Minute': minute} for minute in (0, 30)]
     return {'Label': AGENT_LABEL,
             'ProgramArguments': ['/usr/bin/python3', str(script_path), '--endroll-only'],
             'StartCalendarInterval': times, 'RunAtLoad': True, 'ProcessType': 'Background',
@@ -446,7 +488,7 @@ def agent_config(script_path):
             'StandardErrorPath': str(DATA_DIR / 'launchd-endroll.log')}
 
 
-def install_endroll_agent():
+def install_endroll_agent(start_paused=False):
     if sys.platform != 'darwin':
         raise RuntimeError('Install on the Mac that already runs the magazine sync')
     # Calendar triggers are evaluated by launchd, not the child process's TZ setting.
@@ -454,6 +496,14 @@ def install_endroll_agent():
         if day.astimezone().utcoffset() != timedelta(hours=9):
             raise RuntimeError('Set the Mac timezone to Asia/Tokyo before installing')
     DATA_DIR.mkdir(parents=True, exist_ok=True)
+    if start_paused:
+        save_state({'status': 'paused', 'stage': 'repair',
+                    'at': datetime.now(timezone.utc).isoformat(),
+                    'error': 'Paused for diagnosis after unexpected Safari windows'}, SAFARI_GUARD_FILE)
+    domain = 'gui/' + str(os.getuid())
+    # Stop the old scheduled process before replacing code or registering a new one.
+    subprocess.run(['/bin/launchctl', 'bootout', domain + '/' + AGENT_LABEL],
+                   stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, timeout=15)
     destination = DATA_DIR / 'note_magazine_sync.py'
     source = Path(__file__).resolve()
     if source != destination.resolve():
@@ -468,18 +518,43 @@ def install_endroll_agent():
     temporary = agent.with_suffix('.tmp')
     temporary.write_bytes(plistlib.dumps(agent_config(destination)))
     temporary.replace(agent)
-    domain = 'gui/' + str(os.getuid())
-    # Replacing only this additional agent leaves existing Keyboard Maestro triggers intact.
-    subprocess.run(['/bin/launchctl', 'bootout', domain + '/' + AGENT_LABEL],
-                   stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, timeout=15)
     registered = subprocess.run(['/bin/launchctl', 'bootstrap', domain, str(agent)],
                                 stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, timeout=15)
     if registered.returncode:
         raise RuntimeError('Could not register Wednesday schedule: ' + registered.stderr.strip()[:400])
-    log('INSTALLED: Wednesday 21:00 JST; public-announcement gate, retries and checkpoints enabled')
+    log('INSTALLED: Wednesday 21:00 JST; Safari error circuit breaker enabled'
+        + ('; PAUSED for diagnosis' if start_paused else ''))
 
 
-def main(endroll_only=False):
+def diagnose_endroll():
+    """Print local evidence without opening, changing or closing Safari windows."""
+    for label, path, limit in [('Safari guard', SAFARI_GUARD_FILE, 20),
+                                ('Recent sync.log', LOG_FILE, 40),
+                                ('Recent launchd-endroll.log', DATA_DIR / 'launchd-endroll.log', 30)]:
+        print(label + ':', flush=True)
+        if path.exists():
+            print('\n'.join(path.read_text(encoding='utf-8', errors='replace').splitlines()[-limit:])[-14000:])
+        else:
+            print('(not present)')
+    if ENDROLL_STATE_FILE.exists():
+        state = _load_state(ENDROLL_STATE_FILE)
+        print('End-roll checkpoint: ' + json.dumps(
+            {'eventDate': state.get('eventDate'), 'confirmedCount': len(state.get('added', [])),
+             'latestFailure': (state.get('failures') or [None])[-1]}, ensure_ascii=False))
+    result = load_endroll_feed()
+    result.pop('works')
+    print('Public release check: ' + json.dumps(result, ensure_ascii=False))
+
+
+def safari_guard(stage, error=None):
+    payload = {'status': 'paused' if error else 'in_progress', 'stage': stage,
+               'at': datetime.now(timezone.utc).isoformat()}
+    if error is not None:
+        payload['error'] = str(error)[:1500]
+    save_state(payload, SAFARI_GUARD_FILE)
+
+
+def main(endroll_only=False, resume_safari=False, max_works=None):
     if sys.platform!='darwin':raise RuntimeError('Only runs on your Mac (macOS)')
     # Prevent overlapping scheduled invocations.
     import fcntl
@@ -488,22 +563,46 @@ def main(endroll_only=False):
         try:fcntl.flock(lock.fileno(),fcntl.LOCK_EX|fcntl.LOCK_NB)
         except BlockingIOError:
             log('SKIP: another run is active');return
+        if SAFARI_GUARD_FILE.exists():
+            if not resume_safari:
+                log('PAUSED: previous Safari operation needs diagnosis; no windows opened. Use --diagnose-endroll.')
+                return
+            SAFARI_GUARD_FILE.unlink()
+            log('RESUMED: explicit Safari retry requested')
         channels,channel_errors=prepare_channels(endroll_only)
+        if max_works is not None:
+            budget = max_works
+            for channel in channels:
+                channel['pending'] = channel['pending'][:budget]
+                budget -= len(channel['pending'])
         pending_count=sum(len(channel['pending']) for channel in channels)
         if not pending_count:
             if channel_errors:raise RuntimeError(' / '.join(channel_errors))
             log('OK: no released, unprocessed works');return
         log('Processing '+', '.join(f"{channel['label']} {len(channel['pending'])}" for channel in channels if channel['pending']))
         window=None
+        ui_error=None
+        stage='preflight'
+        safari_guard(stage)
         try:
-            window=applescript('open','https://note.com/komaki_kousuke')
-            if not window.isdigit():raise RuntimeError('Unable to identify dedicated Safari window')
+            log('Safari step: preflight (checking JavaScript permission without creating a window)')
+            checked=applescript('preflight')
+            if checked not in ('ok','no-note-tab'):
+                raise RuntimeError('Unexpected Safari preflight result: '+repr(checked)[:200])
+            stage='open';safari_guard(stage)
+            log('Safari step: open or reuse the marked working window')
+            window=applescript('open')
+            if not window.isdigit():raise RuntimeError('Unable to identify dedicated Safari window: '+repr(window)[:200])
             for channel in channels:
                 state=channel['state'];seen=channel['seen'];added=channel['added']
                 for item in channel['pending']:
                     url=item['url']
                     try:
+                        stage='process '+url;safari_guard(stage)
+                        log(f"[{channel['label']}] CHECK: {url}")
                         outcome=process(window,item,channel['target'])
+                        if outcome not in ('added','already'):
+                            raise RuntimeError('Unconfirmed magazine result: '+repr(outcome)[:200])
                         seen.add(url);added.add(url)
                         state['seen']=sorted(seen);state['added']=sorted(added)
                         save_state(state,channel['state_file'])
@@ -515,12 +614,30 @@ def main(endroll_only=False):
                         save_state(state,channel['state_file'])
                         log(f"[{channel['label']}] STOP CHANNEL: {url} / {e}")
                         channel_errors.append(f"{channel['label']}: {e}")
+                        ui_error=e
+                        safari_guard(stage,e)
                         break
                     time.sleep(5)
+                if ui_error is not None:break
+        except BaseException as error:
+            ui_error=error
+            safari_guard(stage,error)
+            raise
         finally:
             if window:
-                try:applescript('close',window)
-                except Exception as e:log('WARNING: could not close Safari sync window: '+str(e))
+                try:
+                    if applescript('close',window) != 'ok':
+                        raise RuntimeError('Safari did not confirm working-window cleanup')
+                except Exception as error:
+                    log('PAUSED: could not close Safari sync window: '+str(error))
+                    if ui_error is None:
+                        ui_error=error
+                        channel_errors.append(str(error))
+                        safari_guard('close',error)
+            if ui_error is None:
+                SAFARI_GUARD_FILE.unlink(missing_ok=True)
+            else:
+                log('PAUSED: automatic Safari retries stopped. Previous confirmations are saved; run --diagnose-endroll.')
         if channel_errors:
             raise RuntimeError(' / '.join(channel_errors))
 
@@ -531,7 +648,13 @@ if __name__=='__main__':
     mode.add_argument('--endroll-only',action='store_true',help='Run only the gated end-roll channel')
     mode.add_argument('--check-endroll',action='store_true',help='Read-only release and work-count check')
     mode.add_argument('--install-endroll',action='store_true',help='Install Wednesday 21:00 scheduling on macOS')
+    mode.add_argument('--repair-endroll',action='store_true',help='Update the Mac code, pause Safari retries and print logs; does not open windows')
+    mode.add_argument('--diagnose-endroll',action='store_true',help='Print local logs and public release state without operating Safari')
+    parser.add_argument('--resume-safari',action='store_true',help='Explicitly retry once after a paused Safari failure')
+    parser.add_argument('--max-works',type=int,help='Limit a manual verification run to this many works')
     args=parser.parse_args()
+    if args.max_works is not None and args.max_works < 1:parser.error('--max-works must be positive')
+    if args.resume_safari and not args.endroll_only:parser.error('--resume-safari requires --endroll-only')
     try:
         if args.check_endroll:
             result=load_endroll_feed()
@@ -539,8 +662,13 @@ if __name__=='__main__':
             print(json.dumps(result,ensure_ascii=False,indent=2))
         elif args.install_endroll:
             install_endroll_agent()
+        elif args.repair_endroll:
+            install_endroll_agent(start_paused=True)
+            diagnose_endroll()
+        elif args.diagnose_endroll:
+            diagnose_endroll()
         else:
-            main(args.endroll_only)
+            main(args.endroll_only,args.resume_safari,args.max_works)
     except Exception as ex:
         if args.check_endroll:print('ERROR: '+str(ex),file=sys.stderr)
         else:log('ERROR: '+str(ex))

@@ -173,12 +173,18 @@ class StateAndScheduleTests(unittest.TestCase):
         for name, value in [('DATA_DIR', root), ('LOG_FILE', root / 'sync.log'),
                             ('STATE_FILE', root / 'state.json'),
                             ('ROOM_STATE_FILE', root / 'room-state.json'),
+                            ('SAFARI_GUARD_FILE', root / 'safari-guard.json'),
                             ('ENDROLL_STATE_FILE', root / 'endroll-state.json')]:
             patched = patch.object(sync, name, value)
             patched.start()
             self.addCleanup(patched.stop)
         self.log = patch.object(sync, 'log').start()
         self.addCleanup(patch.stopall)
+
+    @staticmethod
+    def safari(operation, *args):
+        if operation == 'open':return '42'
+        return 'ok'
 
     def test_first_endroll_run_queues_all_works_and_old_channels_still_cap_at_five(self):
         works = {row['url']: row for row in feed(113)['works']}
@@ -206,7 +212,7 @@ class StateAndScheduleTests(unittest.TestCase):
         release = sync.load_endroll_feed(NOW, PublicData(feed(3)))
         with patch.object(sync, 'load_endroll_feed', return_value=release), \
                 patch.object(sync.sys, 'platform', 'darwin'), \
-                patch.object(sync, 'applescript', return_value='42'), \
+                patch.object(sync, 'applescript', side_effect=self.safari), \
                 patch.object(sync.time, 'sleep'), \
                 patch.object(sync, 'process', side_effect=['added', RuntimeError('not confirmed')]) as process:
             with self.assertRaisesRegex(RuntimeError, 'not confirmed'):
@@ -215,16 +221,107 @@ class StateAndScheduleTests(unittest.TestCase):
         state = sync._load_state(sync.ENDROLL_STATE_FILE)
         self.assertEqual(state['added'], [work(1)['url']])
         self.assertEqual(state['announcement']['url'], release['announcement']['url'])
+        with patch.object(sync.sys, 'platform', 'darwin'), patch.object(sync, 'applescript') as safari:
+            sync.main(endroll_only=True)
+            safari.assert_not_called()
         with patch.object(sync, 'load_endroll_feed', return_value=release), \
                 patch.object(sync.sys, 'platform', 'darwin'), \
-                patch.object(sync, 'applescript', return_value='42'), \
+                patch.object(sync, 'applescript', side_effect=self.safari), \
                 patch.object(sync.time, 'sleep'), patch.object(sync, 'process', return_value='already') as process:
-            sync.main(endroll_only=True)
+            sync.main(endroll_only=True,resume_safari=True)
             self.assertEqual([call.args[1]['url'] for call in process.call_args_list],
                              [work(2)['url'], work(3)['url']])
             process.reset_mock()
             sync.main(endroll_only=True)
             process.assert_not_called()
+
+    def test_failure_during_window_creation_cannot_spawn_repeated_windows(self):
+        release = sync.load_endroll_feed(NOW, PublicData())
+        opened = []
+        def safari(operation, *args):
+            if operation == 'open':
+                opened.append(operation)
+                raise RuntimeError('Could not get new window ID')
+            return 'ok'
+        with patch.object(sync, 'load_endroll_feed', return_value=release), \
+                patch.object(sync.sys, 'platform', 'darwin'), patch.object(sync, 'applescript', side_effect=safari):
+            with self.assertRaisesRegex(RuntimeError, 'window ID'):
+                sync.main(endroll_only=True)
+            for _ in range(34):
+                sync.main(endroll_only=True)
+        self.assertEqual(opened, ['open'])
+        guard = json.loads(sync.SAFARI_GUARD_FILE.read_text())
+        self.assertEqual(guard['stage'], 'open')
+        self.assertIn('window ID', guard['error'])
+        self.assertEqual(sync._load_state(sync.ENDROLL_STATE_FILE)['added'], [])
+
+    def test_permission_failure_does_not_create_a_window(self):
+        release = sync.load_endroll_feed(NOW, PublicData())
+        with patch.object(sync, 'load_endroll_feed', return_value=release), \
+                patch.object(sync.sys, 'platform', 'darwin'), \
+                patch.object(sync, 'applescript', side_effect=RuntimeError('JavaScript from Apple Events is disabled')) as safari:
+            with self.assertRaisesRegex(RuntimeError, 'disabled'):
+                sync.main(endroll_only=True)
+            sync.main(endroll_only=True)
+        self.assertEqual([c.args for c in safari.call_args_list], [('preflight',)])
+
+    def test_cleanup_failure_saves_confirmation_and_stops_future_windows(self):
+        release = sync.load_endroll_feed(NOW, PublicData())
+        def safari(operation, *args):
+            if operation == 'close':raise RuntimeError('Could not close working window')
+            return self.safari(operation,*args)
+        with patch.object(sync, 'load_endroll_feed', return_value=release), \
+                patch.object(sync.sys, 'platform', 'darwin'), \
+                patch.object(sync, 'applescript', side_effect=safari) as browser, \
+                patch.object(sync.time, 'sleep'), patch.object(sync, 'process', return_value='added'):
+            with self.assertRaisesRegex(RuntimeError, 'Could not close'):
+                sync.main(endroll_only=True)
+            self.assertEqual(sync._load_state(sync.ENDROLL_STATE_FILE)['added'], [work(1)['url']])
+            browser.reset_mock()
+            sync.main(endroll_only=True)
+            browser.assert_not_called()
+        self.assertEqual(json.loads(sync.SAFARI_GUARD_FILE.read_text())['stage'], 'close')
+
+    def test_interrupted_run_leaves_guard_and_does_not_mark_unconfirmed_work(self):
+        release = sync.load_endroll_feed(NOW, PublicData())
+        with patch.object(sync, 'load_endroll_feed', return_value=release), \
+                patch.object(sync.sys, 'platform', 'darwin'), \
+                patch.object(sync, 'applescript', side_effect=self.safari), \
+                patch.object(sync, 'process', side_effect=KeyboardInterrupt):
+            with self.assertRaises(KeyboardInterrupt):sync.main(endroll_only=True)
+        self.assertTrue(sync.SAFARI_GUARD_FILE.exists())
+        self.assertEqual(sync._load_state(sync.ENDROLL_STATE_FILE)['added'], [])
+
+    def test_manual_one_work_check_does_not_process_remaining_works(self):
+        release = sync.load_endroll_feed(NOW, PublicData(feed(113)))
+        with patch.object(sync, 'load_endroll_feed', return_value=release), \
+                patch.object(sync.sys, 'platform', 'darwin'), \
+                patch.object(sync, 'applescript', side_effect=self.safari), \
+                patch.object(sync.time, 'sleep'), patch.object(sync, 'process', return_value='added') as process:
+            sync.main(endroll_only=True,max_works=1)
+        self.assertEqual(process.call_count,1)
+        self.assertEqual(len(sync._load_state(sync.ENDROLL_STATE_FILE)['added']),1)
+        self.assertFalse(sync.SAFARI_GUARD_FILE.exists())
+
+    def test_unconfirmed_return_never_counts_as_added(self):
+        release = sync.load_endroll_feed(NOW, PublicData())
+        with patch.object(sync, 'load_endroll_feed', return_value=release), \
+                patch.object(sync.sys, 'platform', 'darwin'), \
+                patch.object(sync, 'applescript', side_effect=self.safari), \
+                patch.object(sync, 'process', return_value='clicked'):
+            with self.assertRaisesRegex(RuntimeError,'Unconfirmed'):sync.main(endroll_only=True)
+        self.assertEqual(sync._load_state(sync.ENDROLL_STATE_FILE)['added'],[])
+        self.assertTrue(sync.SAFARI_GUARD_FILE.exists())
+
+    def test_diagnosis_prints_evidence_without_operating_safari(self):
+        sync.LOG_FILE.write_text('Safari open: original failure\n',encoding='utf-8')
+        sync.safari_guard('open',RuntimeError('original failure'))
+        with patch.object(sync,'load_endroll_feed',return_value={'status':'released','works':{}}), \
+                patch.object(sync,'applescript') as safari, patch('builtins.print') as output:
+            sync.diagnose_endroll()
+        safari.assert_not_called()
+        self.assertTrue(any('original failure' in str(c) for c in output.call_args_list))
+        self.assertTrue(sync.SAFARI_GUARD_FILE.exists())
 
     def test_endroll_failure_does_not_block_existing_channels(self):
         with patch.object(sync, 'load_endroll_feed', side_effect=RuntimeError('offline')), \
