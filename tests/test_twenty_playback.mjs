@@ -10,7 +10,7 @@ const publicData = { works: Array.from({ length: 90 }, (_, index) => ({
   creditGroup: index < 9 ? "membership" : "club",
 })) };
 
-async function player({ audioDuration = 646, failAudio = false } = {}) {
+async function player({ audioDuration = 646, failAudio = false, pendingAudio = false, pendingContext = false } = {}) {
   class Element {
     constructor() {
       this.children = []; this.style = {}; this.dataset = {}; this.events = new Map(); this.disabled = true;
@@ -28,18 +28,34 @@ async function player({ audioDuration = 646, failAudio = false } = {}) {
   }
   const ids = new Map(["experience", "creditsTrack", "timelineFill", "loadingMessage", "toggleButton", "toggleLabel",
     "restartButton", "soundButton", "startGate", "startWithSound", "startWithoutSound", "musicStatus"].map(id => [id, new Element()]));
+  let playCalls = 0;
   const audio = new Element(); Object.assign(audio, { duration: audioDuration, currentTime: 0, playbackRate: 1,
-    muted: false, volume: 1, paused: true, play: async () => { if (failAudio) throw Error("audio unavailable"); audio.paused = false; },
+    muted: false, volume: 1, paused: true, play: () => {
+      playCalls++;
+      if (pendingAudio) return new Promise(() => {});
+      if (failAudio) return Promise.reject(Error("audio unavailable"));
+      audio.paused = false;
+      return Promise.resolve();
+    },
     pause: () => { audio.paused = true; } });
   ids.set("soundtrack", audio);
-  let now = 0, nextFrame = 0; const frames = new Map();
+  let now = 0, nextFrame = 0, nextTimer = 0; const frames = new Map(), timers = new Map();
   const document = { hidden: false, documentElement: new Element(), body: new Element(),
     getElementById: id => ids.get(id), querySelector: () => new Element(), createElement: () => new Element(),
     createDocumentFragment: () => new Element(), addEventListener() {} };
+  const browser = { location: { search: "" }, matchMedia: () => ({ matches: false, addEventListener() {} }), addEventListener() {} };
+  if (pendingContext) browser.AudioContext = class {
+    constructor() { this.state = "suspended"; this.destination = {}; }
+    createMediaElementSource() { return { connect() {} }; }
+    createGain() { return { gain: { value: 0 }, connect() {} }; }
+    resume() { return new Promise(() => {}); }
+  };
   runInNewContext(source, { document, HTMLElement: Element, URLSearchParams,
-    window: { location: { search: "" }, matchMedia: () => ({ matches: false, addEventListener() {} }), addEventListener() {} },
+    window: browser,
     performance: { now: () => now }, requestAnimationFrame: fn => { frames.set(++nextFrame, fn); return nextFrame; },
     cancelAnimationFrame: id => frames.delete(id), fetch: async () => ({ ok: true, json: async () => publicData }),
+    setTimeout: (fn, delay) => { timers.set(++nextTimer, { fn, at: now + delay }); return nextTimer; },
+    clearTimeout: id => timers.delete(id),
   });
   const settle = async () => { for (let i = 0; i < 12; i++) await Promise.resolve(); };
   await settle();
@@ -48,7 +64,13 @@ async function player({ audioDuration = 646, failAudio = false } = {}) {
     audio.currentTime = time; now = time * 1000;
     const pending = [...frames.values()]; frames.clear(); pending.forEach(fn => fn(now));
   };
-  return { ids, audio, click, step, setWallClock: value => { now = value; } };
+  const advance = async seconds => {
+    now += seconds * 1000;
+    for (const [id, timer] of timers) if (timer.at <= now) { timers.delete(id); timer.fn(); }
+    await settle();
+    const pending = [...frames.values()]; frames.clear(); pending.forEach(fn => fn(now));
+  };
+  return { ids, audio, click, step, advance, playCalls: () => playCalls, setWallClock: value => { now = value; } };
 }
 
 await test("90 real works scroll at double speed while a long soundtrack stays at normal speed", async () => {
@@ -80,4 +102,51 @@ await test("a longer audio file never lengthens the credits and silent playback 
     assert(p.ids.get("experience").classList.contains("is-ended"));
     assert.equal(p.audio.playbackRate, 1);
   }
+});
+
+await test("silent viewing starts and finishes without invoking audio playback", async () => {
+  const p = await player({ pendingAudio: true, pendingContext: true });
+  await p.click("startWithoutSound");
+  assert.equal(p.playCalls(), 0);
+  assert.equal(p.ids.get("experience").classList.contains("is-starting"), false);
+  await p.advance(183.5);
+  assert.equal(p.ids.get("timelineFill").style.width, "50%");
+  await p.advance(183.5);
+  assert(p.ids.get("experience").classList.contains("is-ended"));
+});
+
+await test("an audio request or suspended Web Audio context that never settles cannot block the stories", async () => {
+  for (const options of [{ pendingAudio: true }, { pendingContext: true }]) {
+    const p = await player(options);
+    await p.click("startWithSound");
+    assert(p.ids.get("experience").classList.contains("is-starting"));
+    await p.advance(4);
+    assert.equal(p.ids.get("experience").classList.contains("is-starting"), false);
+    assert(p.audio.muted);
+    assert.match(p.ids.get("musicStatus").textContent, /無音/);
+    await p.advance(183.5);
+    assert.equal(p.ids.get("timelineFill").style.width, "50%");
+  }
+});
+
+await test("switching to silent playback releases a pending audio start immediately", async () => {
+  const p = await player({ pendingAudio: true });
+  await p.click("startWithSound");
+  await p.click("soundButton");
+  assert.equal(p.ids.get("experience").classList.contains("is-starting"), false);
+  await p.advance(183.5);
+  assert.equal(p.ids.get("timelineFill").style.width, "50%");
+  assert.equal(p.playCalls(), 1);
+});
+
+await test("a soundtrack that stops advancing mid-roll falls back without freezing or jumping", async () => {
+  const p = await player();
+  await p.click("startWithSound");
+  p.step(100);
+  const before = p.ids.get("timelineFill").style.width;
+  await p.advance(4);
+  assert(p.audio.muted);
+  assert.equal(p.ids.get("timelineFill").style.width, before);
+  await p.advance(10);
+  assert.equal(p.ids.get("timelineFill").style.width, `${110 / 367 * 100}%`);
 });

@@ -22,6 +22,7 @@
   const ROLL_SPEED = 2;
   const FADE_SECONDS = 8;
   const BASE_VOLUME = 0.58;
+  const AUDIO_WAIT_TIMEOUT_MS = 4000;
   let isReduced = reducedMotion.matches || autoplayDisabled;
   let hasStarted = false;
   let isPlaying = false;
@@ -37,6 +38,7 @@
   let endY = 0;
   let minimumRollDuration = 0;
   let lastMediaTime = 0;
+  let lastMediaAdvanceTime = 0;
   let mediaOffset = 0;
   let audioContext;
   let gain;
@@ -129,6 +131,16 @@
     endY = height * 0.92 - track.offsetHeight;
   };
 
+  const useSilentClock = () => {
+    anchorPosition = position;
+    anchorTime = performance.now();
+    mediaClock = false;
+    soundtrack.pause();
+    soundtrack.muted = true;
+    updateSoundState();
+    musicStatus.textContent = "音楽を再生できないため、無音で上映しています。";
+  };
+
   const paint = () => {
     const progress = Math.max(0, Math.min(1, position / duration()));
     const fadeRatio = Math.max(0, Math.min(1, (duration() - position) / FADE_SECONDS));
@@ -144,6 +156,13 @@
   const readClock = () => {
     if (!mediaClock) return anchorPosition + (performance.now() - anchorTime) / 1000;
     const currentTime = soundtrack.currentTime;
+    if (Math.abs(currentTime - lastMediaTime) > 0.0001) {
+      lastMediaAdvanceTime = performance.now();
+    } else if (performance.now() - lastMediaAdvanceTime >= AUDIO_WAIT_TIMEOUT_MS) {
+      // A WebView or a stalled download must not freeze the stories with the audio.
+      useSilentClock();
+      return position;
+    }
     if (currentTime < lastMediaTime - soundtrackDuration() / 2) {
       mediaOffset += soundtrackDuration();
     }
@@ -205,24 +224,36 @@
     experience.classList.add("is-starting");
     toggleLabel.textContent = "一時停止";
     paint();
+    let audioTimer;
     try {
-      // Both audio and scrolling start from this position after playback is ready.
-      mediaOffset = Math.floor(position / soundtrackDuration()) * soundtrackDuration();
-      lastMediaTime = position - mediaOffset;
-      soundtrack.currentTime = lastMediaTime;
-      soundtrack.loop = duration() > soundtrackDuration();
-      // Call play inside the click event to preserve Safari user activation.
-      await Promise.all([prepareAudio(), soundtrack.play()]);
-      if (currentOperation !== operation) return;
-      mediaClock = true;
-      musicStatus.textContent = "";
+      if (soundtrack.muted) {
+        // Silent viewing never depends on media permissions, decoding or loading.
+        soundtrack.pause();
+        mediaClock = false;
+        musicStatus.textContent = "";
+      } else {
+        // Both audio and scrolling start from this position after playback is ready.
+        mediaOffset = Math.floor(position / soundtrackDuration()) * soundtrackDuration();
+        lastMediaTime = position - mediaOffset;
+        soundtrack.currentTime = lastMediaTime;
+        soundtrack.loop = duration() > soundtrackDuration();
+        // Call play inside the click event to preserve Safari user activation.
+        await Promise.race([
+          Promise.all([prepareAudio(), soundtrack.play()]),
+          new Promise((_, reject) => {
+            audioTimer = setTimeout(() => reject(new Error("Audio startup timed out")), AUDIO_WAIT_TIMEOUT_MS);
+          }),
+        ]);
+        if (currentOperation !== operation) return;
+        mediaClock = true;
+        lastMediaAdvanceTime = performance.now();
+        musicStatus.textContent = "";
+      }
     } catch {
       if (currentOperation !== operation) return;
-      mediaClock = false;
-      soundtrack.pause();
-      soundtrack.muted = true;
-      updateSoundState();
-      musicStatus.textContent = "音楽を再生できないため、無音で上映しています。";
+      useSilentClock();
+    } finally {
+      clearTimeout(audioTimer);
     }
     anchorPosition = position;
     anchorTime = performance.now();
@@ -284,8 +315,8 @@
     if (!hasStarted) return begin(true);
     soundtrack.muted = !soundtrack.muted;
     updateSoundState();
-    // Retry a failed audio load at the current roll position.
-    if (!mediaClock && !soundtrack.muted && isPlaying) {
+    // Both switching to silent mode and retrying sound preserve the roll position.
+    if (isPlaying) {
       pause();
       return play();
     }
@@ -340,12 +371,7 @@
   soundtrack.addEventListener("ended", () => { if (isPlaying && mediaClock) finish(); });
   soundtrack.addEventListener("error", () => {
     if (!isPlaying || !mediaClock) return;
-    anchorPosition = position;
-    anchorTime = performance.now();
-    mediaClock = false;
-    soundtrack.muted = true;
-    updateSoundState();
-    musicStatus.textContent = "音楽を再生できないため、無音で上映しています。";
+    useSilentClock();
   });
   document.addEventListener("keydown", (event) => {
     if (event.target instanceof HTMLElement
