@@ -272,12 +272,17 @@
     try {
       // Data commits made by GitHub Actions need not rebuild the Pages HTML.
       // Read the current feed directly on the public origin, as the home counter does.
-      const debugFeed = document.querySelector('meta[name="atlas-debug-feed"]')?.content;
+      const debugMeta = document.querySelector('meta[name="atlas-debug-feed"]');
+      const debugFeed = debugMeta?.content;
       const debugEnabled = new URLSearchParams(location.search).get("debug") === "komaki" && Boolean(debugFeed);
       const feedUrl = debugEnabled ? debugFeed : location.hostname === "komakikosuke.github.io"
         ? "https://raw.githubusercontent.com/komakikosuke/shirokuma-bungeibu/main/data/prefecture-atlas.json"
         : "../data/prefecture-atlas.json";
-      const [map, data] = await Promise.all([getJson("./map.json"), getJson(feedUrl)]);
+      const feed = getJson(feedUrl).catch(error => {
+        if (debugEnabled && debugMeta.dataset.fallback) return getJson(debugMeta.dataset.fallback);
+        throw error;
+      });
+      const [map, data] = await Promise.all([getJson("./map.json"), feed]);
       if (map.version !== 1 || !Array.isArray(map.prefectures) || map.prefectures.length !== 47 ||
           new Set(map.prefectures.map(p => p.code)).size !== 47 ||
           !map.prefectures.every(p => /^(0[1-9]|[1-3]\d|4[0-7])$/.test(p.code) && typeof p.name === "string" && /^[MLZ\d,.\s-]+$/.test(p.path) && Array.isArray(p.point) && p.point.length === 2 && p.point.every(Number.isFinite))) throw Error("地図データの形式が違います");
