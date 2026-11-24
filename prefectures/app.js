@@ -1,0 +1,403 @@
+(function () {
+  "use strict";
+  const TAG = "都道府県クリエイター図鑑";
+  const PAGE_SIZE = 3;
+  const SVG_NS = "http://www.w3.org/2000/svg";
+  const normalize = value => String(value || "").normalize("NFKC").trim();
+  const tagName = value => normalize(value).replace(/^[#＃]/, "");
+  const searchText = value => normalize(value).toLocaleLowerCase("ja-JP");
+  const imageUrl = value => {
+    try {
+      const url = new URL(value);
+      return url.protocol === "https:" && !url.username && !url.password &&
+        /(^|\.)(st-note\.com|note\.com|note\.mu|amazonaws\.com)$/.test(url.hostname) ? url.href : "";
+    } catch (_) { return ""; }
+  };
+  function normalizeArticle(raw, prefectures) {
+    if (!raw || typeof raw !== "object" || !/^n[A-Za-z0-9]+$/.test(raw.key)) return null;
+    const author = raw.author;
+    if (!author || !/^[A-Za-z0-9_-]{1,100}$/.test(author.handle) || typeof author.name !== "string" || !author.name.trim()) return null;
+    const url = "https://note.com/" + author.handle + "/n/" + raw.key;
+    if (raw.url !== url || typeof raw.title !== "string" || !raw.title.trim() || !Number.isFinite(Date.parse(raw.publishedAt))) return null;
+    const tags = [...new Set((Array.isArray(raw.tags) ? raw.tags : []).filter(t => typeof t === "string").map(tagName))];
+    const codes = prefectures.filter(p => tags.includes(p.name)).map(p => p.code);
+    if (!tags.includes(TAG) || !codes.length) return null;
+    return {
+      key: raw.key, url, title: raw.title.slice(0, 500), publishedAt: raw.publishedAt,
+      author: {handle: author.handle, name: author.name.slice(0, 150), avatarUrl: imageUrl(author.avatarUrl)},
+      imageUrl: imageUrl(raw.imageUrl), tags, prefectures: codes, isPaid: raw.isPaid === true
+    };
+  }
+  function parseDocument(data, prefectures) {
+    if (!data || data.version !== 1 || data.tag !== TAG || !Array.isArray(data.articles)) throw Error("掲載データの形式が違います");
+    const unique = new Map();
+    for (const raw of data.articles) {
+      const article = normalizeArticle(raw, prefectures);
+      if (article) unique.set(article.key, article);
+    }
+    if (data.articles.length && !unique.size) throw Error("掲載データを確認できません");
+    return [...unique.values()];
+  }
+  function summarize(articles, prefectures) {
+    const unique = new Map(articles.map(a => [a.key, a]));
+    const counts = new Map(prefectures.map(p => [p.code, {articles: new Set(), creators: new Set()}]));
+    const creators = new Set();
+    for (const article of unique.values()) {
+      creators.add(article.author.handle);
+      for (const code of article.prefectures) {
+        const count = counts.get(code);
+        if (count) { count.articles.add(article.key); count.creators.add(article.author.handle); }
+      }
+    }
+    return {articles: unique.size, creators: creators.size, prefectures: [...counts.values()].filter(c => c.articles.size).length, counts};
+  }
+  const colorLevel = count => count === 0 ? 0 : count < 5 ? 1 : count < 10 ? 2 : count < 20 ? 3 : 4;
+  function filterArticles(articles, state, prefectures) {
+    const names = new Map(prefectures.map(p => [p.code, p.name]));
+    const query = searchText(state.query);
+    return articles.filter(article => {
+      if (state.prefecture && !article.prefectures.includes(state.prefecture)) return false;
+      if (state.tag && !article.tags.includes(state.tag)) return false;
+      if (state.author && article.author.handle !== state.author) return false;
+      return !query || searchText([article.title, article.author.name, article.author.handle, ...article.tags, ...article.prefectures.map(c => names.get(c))].join(" ")).includes(query);
+    }).sort((a, b) => (Date.parse(b.publishedAt) - Date.parse(a.publishedAt)) * (state.sort === "old" ? -1 : 1) || a.key.localeCompare(b.key));
+  }
+  const model = Object.freeze({TAG, normalizeArticle, parseDocument, summarize, colorLevel, filterArticles});
+  if (typeof module !== "undefined" && module.exports) module.exports = model;
+  if (typeof document === "undefined") return;
+
+  const $ = id => document.getElementById(id);
+  const number = new Intl.NumberFormat("ja-JP");
+  const dateLabel = new Intl.DateTimeFormat("ja-JP", {timeZone: "Asia/Tokyo", month: "long", day: "numeric"});
+  const updateLabel = new Intl.DateTimeFormat("ja-JP", {timeZone: "Asia/Tokyo", month: "numeric", day: "numeric", hour: "numeric", minute: "2-digit"});
+  let prefectures = [], articles = [], stats, registry, mapGroups = new Map(), callouts, tooltip;
+  let loaded = false, searchTimer;
+  const state = {prefecture: "", tab: "articles", view: "map", query: "", tag: "", author: "", sort: "new", limit: PAGE_SIZE};
+  function element(name, className, text) {
+    const node = document.createElement(name);
+    if (className) node.className = className;
+    if (text !== undefined) node.textContent = text;
+    return node;
+  }
+  function svg(name, attrs = {}, text) {
+    const node = document.createElementNS(SVG_NS, name);
+    for (const [key, value] of Object.entries(attrs)) node.setAttribute(key, value);
+    if (text !== undefined) node.textContent = text;
+    return node;
+  }
+  function externalLink(text, url, className) {
+    const node = element("a", className, text);
+    node.href = url; node.target = "_blank"; node.rel = "noopener noreferrer";
+    return node;
+  }
+  const currentPrefecture = () => prefectures.find(p => p.code === state.prefecture);
+  const scopedArticles = () => articles.filter(a => !state.prefecture || a.prefectures.includes(state.prefecture));
+  function readHash() {
+    const params = new URLSearchParams(location.hash.slice(1));
+    state.prefecture = prefectures.some(p => p.code === params.get("pref")) ? params.get("pref") : "";
+    state.tab = params.get("tab") === "creators" ? "creators" : "articles";
+    state.view = params.get("view") === "list" ? "list" : "map";
+  }
+  function writeHash() {
+    const params = new URLSearchParams();
+    if (state.prefecture) params.set("pref", state.prefecture);
+    if (state.tab === "creators") params.set("tab", "creators");
+    if (state.view === "list") params.set("view", "list");
+    const hash = params.toString();
+    history.replaceState(null, "", location.pathname + location.search + (hash ? "#" + hash : ""));
+  }
+  function setTabs(first, second, active) {
+    [first, second].forEach((id, index) => {
+      $(id).setAttribute("aria-selected", String(index === active));
+      $(id).tabIndex = index === active ? 0 : -1;
+    });
+  }
+  function selectPrefecture(code, scroll = false) {
+    if (!loaded || (code && !prefectures.some(p => p.code === code))) return;
+    state.prefecture = code; state.tag = ""; state.author = ""; state.limit = PAGE_SIZE;
+    $("prefectureSelect").value = code;
+    writeHash(); renderMapCounts(); renderPrefectureList(); renderResults();
+    if (scroll && matchMedia("(max-width: 960px)").matches) {
+      $("resultsPanel").scrollIntoView({behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth", block: "start"});
+      $("resultsTitle").focus({preventScroll: true});
+    }
+  }
+  function buildMap() {
+    const root = svg("svg", {viewBox: registry.viewBox, role: "group", "aria-label": "都道府県ごとの記事数を示す日本地図"});
+    const regions = svg("g");
+    mapGroups = new Map();
+    for (const pref of prefectures) {
+      const group = svg("g", {class: "prefecture", role: "button", tabindex: "0", "data-prefecture": pref.code});
+      group.append(svg("title"), svg("path", {d: pref.path}));
+      group.addEventListener("click", () => selectPrefecture(pref.code, true));
+      group.addEventListener("keydown", event => {
+        if (event.key === "Enter" || event.key === " ") { event.preventDefault(); selectPrefecture(pref.code, true); }
+      });
+      regions.append(group); mapGroups.set(pref.code, group);
+    }
+    root.append(regions, svg("path", {d: "M94 363H212L232 383V445H94Z", class: "map-inset", "aria-hidden": "true"}), svg("text", {x: 98, y: 354, class: "map-inset-label", "aria-hidden": "true"}, "沖縄"));
+    callouts = svg("g", {"aria-hidden": "true"});
+    tooltip = svg("g", {class: "selection-tooltip", "aria-hidden": "true"});
+    root.append(callouts, tooltip);
+    $("japanMap").replaceChildren(root);
+    $("japanMap").setAttribute("aria-busy", "false");
+  }
+  function renderMapCounts() {
+    for (const pref of prefectures) {
+      const count = stats.counts.get(pref.code);
+      const group = mapGroups.get(pref.code);
+      group.setAttribute("aria-pressed", String(state.prefecture === pref.code));
+      const label = pref.name + "：" + number.format(count.articles.size) + "記事、" + number.format(count.creators.size) + "人の書き手";
+      group.setAttribute("aria-label", label);
+      group.querySelector("title").textContent = label;
+      group.querySelector("path").setAttribute("class", "level-" + colorLevel(count.articles.size));
+    }
+    const selected = mapGroups.get(state.prefecture);
+    if (selected) selected.parentNode.append(selected);
+    callouts.replaceChildren(); tooltip.replaceChildren();
+    const positions = {"01": [668, 80], "13": [608, 394], "40": [24, 506], "47": [24, 434]};
+    for (const [code, position] of Object.entries(positions)) {
+      const pref = prefectures.find(p => p.code === code), count = stats.counts.get(code).articles.size;
+      if (!pref || !count || state.prefecture === code) continue;
+      const [x, y] = position;
+      const group = svg("g", {class: "map-callout"});
+      group.append(svg("line", {x1: x + 47, y1: y + 16, x2: pref.point[0], y2: pref.point[1]}), svg("rect", {x, y, width: 98, height: 32, rx: 16}), svg("text", {x: x + 11, y: y + 21}, pref.name), svg("text", {x: x + 86, y: y + 21, "text-anchor": "end", class: "callout-count"}, number.format(count)));
+      group.addEventListener("click", () => selectPrefecture(code, true));
+      callouts.append(group);
+    }
+    const pref = currentPrefecture();
+    if (pref) {
+      const count = stats.counts.get(pref.code);
+      const x = Math.max(10, Math.min(716, pref.point[0] - 78));
+      const y = Math.max(15, pref.point[1] - 88);
+      tooltip.append(svg("rect", {x, y, width: 174, height: 64, rx: 8}), svg("text", {x: x + 13, y: y + 26, class: "tooltip-name"}, pref.name), svg("text", {x: x + 13, y: y + 49}, count.articles.size + "記事・" + count.creators.size + "人の書き手"));
+    }
+  }
+  function renderPrefectureList() {
+    $("listView").replaceChildren();
+    for (const region of [...new Set(prefectures.map(p => p.region))]) {
+      const group = element("section", "region-group");
+      group.append(element("h3", "", region));
+      const buttons = element("div", "region-buttons");
+      for (const pref of prefectures.filter(p => p.region === region)) {
+        const count = stats.counts.get(pref.code).articles.size;
+        const button = element("button", "prefecture-button");
+        button.type = "button";
+        button.setAttribute("aria-pressed", String(pref.code === state.prefecture));
+        button.setAttribute("aria-label", pref.name + "、" + count + "記事");
+        button.append(element("span", "", pref.name), element("span", "count", number.format(count)));
+        button.addEventListener("click", () => selectPrefecture(pref.code, true));
+        buttons.append(button);
+      }
+      group.append(buttons); $("listView").append(group);
+    }
+  }
+  function renderView() {
+    setTabs("mapTab", "listTab", state.view === "map" ? 0 : 1);
+    $("mapView").hidden = state.view !== "map";
+    $("listView").hidden = state.view !== "list";
+  }
+  function avatar(author) {
+    const node = element("span", "avatar", [...author.name][0] || "文");
+    node.setAttribute("aria-hidden", "true");
+    if (author.avatarUrl) {
+      const img = element("img"); img.src = author.avatarUrl; img.alt = ""; img.loading = "lazy"; img.referrerPolicy = "no-referrer";
+      img.addEventListener("error", () => node.replaceChildren(document.createTextNode([...author.name][0] || "文")), {once: true});
+      node.replaceChildren(img);
+    }
+    return node;
+  }
+  function authorLink(author) {
+    const link = externalLink("", "https://note.com/" + author.handle, "article-author");
+    link.append(avatar(author), element("span", "article-author-name", author.name));
+    return link;
+  }
+  function displayCategory(article) {
+    const names = new Set(prefectures.map(p => p.name));
+    return article.tags.find(t => t !== TAG && !names.has(t)) || "";
+  }
+  function articleCard(article) {
+    const card = element("article", "article-card");
+    card.append(authorLink(article.author));
+    const body = externalLink("", article.url, "article-body");
+    body.append(element("h3", "", article.title));
+    const thumb = element("span", "article-thumbnail");
+    thumb.setAttribute("aria-hidden", "true");
+    if (article.imageUrl) {
+      const img = element("img"); img.src = article.imageUrl; img.alt = ""; img.loading = "lazy"; img.referrerPolicy = "no-referrer";
+      img.addEventListener("error", () => img.remove(), {once: true});
+      thumb.append(img);
+    }
+    body.append(thumb); card.append(body);
+    const meta = element("div", "article-meta");
+    const category = displayCategory(article);
+    if (category) meta.append(element("span", "article-category", category));
+    const date = element("time", "", dateLabel.format(new Date(article.publishedAt))); date.dateTime = article.publishedAt; meta.append(date);
+    if (article.isPaid) meta.append(element("span", "paid-label", "有料"));
+    meta.append(externalLink("noteで読む", article.url, "article-read")); card.append(meta);
+    return card;
+  }
+  function creatorCards(list) {
+    const creators = new Map();
+    for (const article of list) {
+      if (!creators.has(article.author.handle)) creators.set(article.author.handle, {author: article.author, articles: []});
+      creators.get(article.author.handle).articles.push(article);
+    }
+    return [...creators.values()];
+  }
+  function creatorCard(creator) {
+    const card = element("article", "creator-card"), header = element("div", "creator-card-info");
+    header.append(authorLink(creator.author), element("span", "creator-count", creator.articles.length + "記事"));
+    card.append(header);
+    const recent = element("p", "creator-recent"); recent.append(externalLink(creator.articles[0].title, creator.articles[0].url)); card.append(recent);
+    const button = element("button", "creator-articles-button", (state.prefecture ? "この県の" : "") + creator.articles.length + "記事を見る");
+    button.type = "button";
+    button.addEventListener("click", () => { state.author = creator.author.handle; state.tab = "articles"; state.limit = PAGE_SIZE; writeHash(); renderResults(); $("articlesTab").focus({preventScroll: true}); });
+    card.append(button);
+    return card;
+  }
+  function renderGenreFilters(base) {
+    const counts = new Map(), excluded = new Set([TAG, ...prefectures.map(p => p.name)]);
+    for (const article of base) for (const tag of article.tags) if (!excluded.has(tag)) counts.set(tag, (counts.get(tag) || 0) + 1);
+    const choices = [...counts].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], "ja")).slice(0, 4).map(([tag]) => tag);
+    if (state.tag && !choices.includes(state.tag)) choices.push(state.tag);
+    const active = document.activeElement?.dataset.genre;
+    $("genreFilters").replaceChildren();
+    for (const tag of ["", ...choices]) {
+      const button = element("button", "", tag || "すべて"); button.type = "button"; button.dataset.genre = tag;
+      button.setAttribute("aria-pressed", String(tag === state.tag));
+      button.addEventListener("click", () => { state.tag = tag; state.limit = PAGE_SIZE; renderResults(); });
+      $("genreFilters").append(button);
+    }
+    if (active !== undefined) [...$("genreFilters").children].find(b => b.dataset.genre === active)?.focus({preventScroll: true});
+  }
+  function emptyMessage(filtered) {
+    const node = element("div", "empty-message");
+    const pref = currentPrefecture();
+    if (filtered) {
+      node.append(element("strong", "", "記事が見つかりませんでした。"), element("p", "", "検索する言葉や、選んだタグを変えてみてください。"));
+    } else {
+      node.append(element("strong", "", pref ? pref.name + "の最初の記事を、あなたから。" : "最初のひと記事を、待っています。"), element("p", "", "ふるさとの話も、旅先の記憶も。タグをつけて、地図に色を添えてください。"));
+      const link = element("a", "", "参加方法を見る"); link.href = "#participate"; node.append(link);
+    }
+    return node;
+  }
+  function renderResults() {
+    if (!loaded) return;
+    const pref = currentPrefecture(), base = scopedArticles(), filtered = filterArticles(articles, state, prefectures), creators = creatorCards(filtered);
+    $("resultsEnglish").textContent = pref?.englishName || "ALL JAPAN";
+    $("resultsTitle").textContent = pref?.name || "全国の新着記事";
+    $("resultsCount").textContent = number.format(filtered.length) + " 記事 ・ " + number.format(creators.length) + " 人の書き手";
+    $("articleTabCount").textContent = number.format(filtered.length);
+    $("creatorTabCount").textContent = number.format(creators.length);
+    $("clearPrefecture").hidden = !pref;
+    $("searchInput").placeholder = pref ? pref.name + "の記事・書き手を検索" : "記事・クリエイターを検索";
+    setTabs("articlesTab", "creatorsTab", state.tab === "articles" ? 0 : 1);
+    $("resultsList").setAttribute("aria-labelledby", state.tab === "articles" ? "articlesTab" : "creatorsTab");
+    renderGenreFilters(base);
+    $("clearAuthor").hidden = !state.author;
+    if (state.author) $("clearAuthor").textContent = (articles.find(a => a.author.handle === state.author)?.author.name || state.author) + "　×";
+    $("clearAuthor").setAttribute("aria-label", "書き手による絞り込みを解除する");
+    $("resultsList").replaceChildren();
+    const list = state.tab === "articles" ? filtered : creators;
+    if (!list.length) $("resultsList").append(emptyMessage(Boolean(state.query || state.tag || state.author)));
+    else for (const record of list.slice(0, state.limit)) $("resultsList").append(state.tab === "articles" ? articleCard(record) : creatorCard(record));
+    $("loadMore").hidden = state.limit >= list.length;
+    $("loadMore").textContent = "さらに" + Math.min(6, list.length - state.limit) + (state.tab === "articles" ? "記事" : "人の書き手") + "を見る";
+    $("resultAnnouncement").textContent = (pref?.name || "全国") + "、" + filtered.length + "記事、" + creators.length + "人の書き手";
+    const guideName = pref?.name || "京都府";
+    $("prefectureTag").dataset.copy = guideName;
+    $("prefectureTag").firstElementChild.textContent = "#" + guideName;
+  }
+  async function getJson(url) {
+    const response = await fetch(url, {cache: "no-store"});
+    if (!response.ok) throw Error("読み込みに失敗しました: " + response.status);
+    return response.json();
+  }
+  async function load() {
+    $("retryButton").disabled = true;
+    $("loadError").hidden = true;
+    $("resultsPanel").setAttribute("aria-busy", "true");
+    try {
+      // Data commits made by GitHub Actions need not rebuild the Pages HTML.
+      // Read the current feed directly on the public origin, as the home counter does.
+      const feedUrl = location.hostname === "komakikosuke.github.io"
+        ? "https://raw.githubusercontent.com/komakikosuke/shirokuma-bungeibu/main/data/prefecture-atlas.json"
+        : "../data/prefecture-atlas.json";
+      const [map, data] = await Promise.all([getJson("./map.json"), getJson(feedUrl)]);
+      if (map.version !== 1 || !Array.isArray(map.prefectures) || map.prefectures.length !== 47 ||
+          new Set(map.prefectures.map(p => p.code)).size !== 47 ||
+          !map.prefectures.every(p => /^(0[1-9]|[1-3]\d|4[0-7])$/.test(p.code) && typeof p.name === "string" && /^[MLZ\d,.\s-]+$/.test(p.path) && Array.isArray(p.point) && p.point.length === 2 && p.point.every(Number.isFinite))) throw Error("地図データの形式が違います");
+      registry = map; prefectures = map.prefectures; articles = parseDocument(data, prefectures); stats = summarize(articles, prefectures);
+      loaded = true; readHash();
+      $("sampleNotice").hidden = data.sample !== true;
+      $("articleTotal").textContent = number.format(stats.articles);
+      $("creatorTotal").textContent = number.format(stats.creators);
+      $("prefectureTotal").textContent = number.format(stats.prefectures);
+      $("prefectureSelect").replaceChildren(element("option", "", "都道府県を選ぶ"));
+      $("prefectureSelect").firstElementChild.value = "";
+      for (const pref of prefectures) {
+        const option = element("option", "", pref.name + "（" + stats.counts.get(pref.code).articles.size + "記事）");
+        option.value = pref.code; $("prefectureSelect").append(option);
+      }
+      $("prefectureSelect").value = state.prefecture;
+      $("updatedAt").textContent = data.sample === true ? "画面確認用サンプル" : data.generatedAt && Number.isFinite(Date.parse(data.generatedAt)) ? "最終更新 " + updateLabel.format(new Date(data.generatedAt)) + "（日本時間）" : "これから記事が集まります";
+      buildMap(); renderMapCounts(); renderPrefectureList(); renderView(); renderResults();
+    } catch (error) {
+      console.error("図鑑の読み込みに失敗しました", error);
+      $("loadError").hidden = false;
+      if (!loaded) {
+        $("japanMap").replaceChildren(element("p", "map-loading", "地図と記事を読み込めませんでした。"));
+        $("japanMap").setAttribute("aria-busy", "false");
+        $("resultsList").replaceChildren(element("p", "empty-message", "「もう一度読み込む」からお試しください。"));
+        $("resultsCount").textContent = "掲載状況を確認できません";
+        $("updatedAt").textContent = "掲載データを確認できません";
+      }
+    } finally {
+      $("retryButton").disabled = false;
+      $("resultsPanel").setAttribute("aria-busy", "false");
+    }
+  }
+  function bindTabKeys(ids) {
+    for (const id of ids) $(id).addEventListener("keydown", event => {
+      if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+      event.preventDefault();
+      const index = event.key === "Home" ? 0 : event.key === "End" ? ids.length - 1 : (ids.indexOf(id) + (event.key === "ArrowLeft" ? -1 : 1) + ids.length) % ids.length;
+      $(ids[index]).click(); $(ids[index]).focus();
+    });
+  }
+  $("mapTab").addEventListener("click", () => { state.view = "map"; writeHash(); renderView(); });
+  $("listTab").addEventListener("click", () => { state.view = "list"; writeHash(); renderView(); });
+  $("articlesTab").addEventListener("click", () => { state.tab = "articles"; state.limit = PAGE_SIZE; writeHash(); renderResults(); });
+  $("creatorsTab").addEventListener("click", () => { state.tab = "creators"; state.limit = PAGE_SIZE; writeHash(); renderResults(); });
+  bindTabKeys(["mapTab", "listTab"]); bindTabKeys(["articlesTab", "creatorsTab"]);
+  $("prefectureSelect").addEventListener("change", event => selectPrefecture(event.target.value, true));
+  $("clearPrefecture").addEventListener("click", () => selectPrefecture(""));
+  $("clearAuthor").addEventListener("click", () => { state.author = ""; state.limit = PAGE_SIZE; renderResults(); });
+  $("sortSelect").addEventListener("change", event => { state.sort = event.target.value; state.limit = PAGE_SIZE; renderResults(); });
+  $("loadMore").addEventListener("click", () => { state.limit += 6; renderResults(); });
+  const applySearch = () => { state.query = $("searchInput").value.trim(); state.limit = PAGE_SIZE; renderResults(); };
+  $("searchForm").addEventListener("submit", event => { event.preventDefault(); clearTimeout(searchTimer); applySearch(); });
+  $("searchInput").addEventListener("input", event => { if (event.isComposing) return; clearTimeout(searchTimer); searchTimer = setTimeout(applySearch, 160); });
+  $("searchInput").addEventListener("compositionend", () => { clearTimeout(searchTimer); searchTimer = setTimeout(applySearch, 160); });
+  $("retryButton").addEventListener("click", load);
+  document.querySelectorAll("[data-copy]").forEach(button => button.addEventListener("click", async () => {
+    const text = "#" + button.dataset.copy;
+    try {
+      if (!navigator.clipboard?.writeText) throw Error("Clipboard unavailable");
+      await navigator.clipboard.writeText(text);
+      $("copyStatus").textContent = text + " をコピーしました。";
+    } catch (_) {
+      const range = document.createRange(); range.selectNodeContents(button.firstElementChild);
+      const selection = window.getSelection(); selection.removeAllRanges(); selection.addRange(range);
+      $("copyStatus").textContent = "タグを選択しました。コピーしてお使いください。";
+    }
+  }));
+  window.addEventListener("hashchange", () => {
+    if (!loaded || location.hash === "#participate" || location.hash === "#explore") return;
+    readHash(); state.tag = ""; state.author = ""; state.limit = PAGE_SIZE;
+    $("prefectureSelect").value = state.prefecture;
+    renderMapCounts(); renderPrefectureList(); renderView(); renderResults();
+  });
+  load();
+})();

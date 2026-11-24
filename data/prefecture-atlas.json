@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "tag": "都道府県クリエイター図鑑",
+  "generatedAt": null,
+  "articles": [],
+  "sync": {
+    "status": "pending",
+    "scannedPages": 0,
+    "discoveredArticles": 0,
+    "checkedArticles": 0,
+    "failedArticles": 0
+  }
+}
