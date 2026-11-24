@@ -21,6 +21,8 @@ ROOT = Path(__file__).resolve().parents[1]
 JST = timezone(timedelta(hours=9))
 COUNT_RULE = "extended-grapheme-clusters:regex-2024.11.6:unicode-16.0"
 GRAPHEMES = regex.compile(r"\X")
+MAX_STORY_LINES = 4
+TEXT_SEPARATOR = re.compile(r"([-_＿─━―ー=＝*＊])\1{2,}")
 # note can return ruby as literal editor notation instead of <ruby>/<rt>.
 # Require its explicit marker; ordinary brackets and escaped notation stay text.
 NOTE_RUBY = re.compile(r"(?<!\\)[|｜]([^|｜《》\r\n]+)《[^《》\r\n]+》")
@@ -85,7 +87,7 @@ class BodyParser(HTMLParser):
     IGNORE = set("script style noscript template head title rt rp".split())
     VOID = set("area base br col embed hr img input link meta param source track wbr".split())
 
-    def __init__(self, *, skip_leading_hashtags=False, hashtag_names=()):
+    def __init__(self, *, skip_leading_hashtags=False, hashtag_names=(), skip_leading_notices=False):
         super().__init__(convert_charrefs=True)
         self.stack = []
         self.parts = []
@@ -93,12 +95,14 @@ class BodyParser(HTMLParser):
         self.first = None
         self.skip_leading_hashtags = skip_leading_hashtags
         self.hashtag_names = hashtag_names
+        self.skip_leading_notices = skip_leading_notices
 
     def _flush(self):
         text = without_ruby_readings("".join(self.parts), self.kinds).strip()
         skip_tag = (self.skip_leading_hashtags and not (self.kinds - {"heading", "link"})
                     and hashtag_only_line(text, self.hashtag_names))
-        if self.first is None and text and not skip_tag:
+        skip_notice = self.skip_leading_notices and ignorable_opening_notice(text)
+        if self.first is None and text and not (skip_tag or skip_notice):
             self.first = FirstLine(text, tuple(sorted(self.kinds)))
         self.parts.clear()
         self.kinds.clear()
@@ -160,19 +164,21 @@ class BodyParser(HTMLParser):
         return self.first
 
 
-def first_body_line(body, *, skip_leading_hashtags=False, hashtag_names=()):
-    parser = BodyParser(skip_leading_hashtags=skip_leading_hashtags, hashtag_names=hashtag_names)
+def first_body_line(body, *, skip_leading_hashtags=False, hashtag_names=(), skip_leading_notices=False):
+    parser = BodyParser(skip_leading_hashtags=skip_leading_hashtags, hashtag_names=hashtag_names,
+                        skip_leading_notices=skip_leading_notices)
     parser.feed(body)
     return parser.result()
 
 
 class OpeningBodyParser(BodyParser):
-    """Collect at most three opening lines and require an explicit end boundary."""
+    """Collect at most four opening lines and require an explicit end boundary."""
 
     BLANK_BLOCKS = {"p", "div", "h1", "h2", "h3", "h4", "h5", "h6"}
 
-    def __init__(self, *, skip_leading_hashtags=False, hashtag_names=()):
-        super().__init__(skip_leading_hashtags=skip_leading_hashtags, hashtag_names=hashtag_names)
+    def __init__(self, *, skip_leading_hashtags=False, hashtag_names=(), skip_leading_notices=False):
+        super().__init__(skip_leading_hashtags=skip_leading_hashtags, hashtag_names=hashtag_names,
+                         skip_leading_notices=skip_leading_notices)
         self.lines = []
         self.markers = []
         self.visible = 0
@@ -185,7 +191,11 @@ class OpeningBodyParser(BodyParser):
         text = without_ruby_readings("".join(self.parts), self.kinds).strip()
         tag_line = (self.skip_leading_hashtags and not (self.kinds - {"heading", "link"})
                     and hashtag_only_line(text, self.hashtag_names))
-        if tag_line:
+        skip_notice = (not self.lines and self.skip_leading_notices
+                       and ignorable_opening_notice(text))
+        separator = (self.lines and not (self.kinds - {"heading"})
+                     and TEXT_SEPARATOR.fullmatch(text))
+        if tag_line or skip_notice or separator:
             self.parts.clear()
             self.kinds.clear()
             if self.lines:
@@ -193,7 +203,7 @@ class OpeningBodyParser(BodyParser):
             return
         if text:
             self.lines.append(FirstLine(text, tuple(sorted(self.kinds))))
-            if len(self.lines) > 3:
+            if len(self.lines) > MAX_STORY_LINES:
                 self.done = True
         self.parts.clear()
         self.kinds.clear()
@@ -357,7 +367,7 @@ REASONS = {
     "unpublished_article": "公開済みの記事であることを確認できません",
     "metadata_incomplete": "記事タイトル・投稿者・投稿日時の一部を検証できません",
     "hashtag_unverified": "指定ハッシュタグを記事のタグ情報で確認できません",
-    "restricted_article": "有料・限定公開などの記事のため確認が必要です",
+    "restricted_article": "限定公開または本文形式のため確認が必要です",
     "outside_range": "一行目が抽出許容範囲の19〜21字に収まりません",
     "non_exact_length": "19字または21字です。正式ルールの20字ではありません",
     "explanatory_first_line": "一行目が説明・案内文の可能性があります",
@@ -389,6 +399,14 @@ def explanatory_line(text):
     return bool(INTRO.search(normalized) or GREETING_ONLY.fullmatch(normalized))
 
 
+def ignorable_opening_notice(text):
+    """Skip matching notices only before the story; exactly 20 characters stay."""
+    normalized = unicodedata.normalize("NFKC", text)
+    return count_characters(text) != 20 and any(
+        keyword in normalized for keyword in ("参加", "20文字", "20字")
+    )
+
+
 def hashtag_only_line(text, hashtag_names=()):
     normalized = unicodedata.normalize("NFKC", text).strip()
     tokens = normalized.split()
@@ -400,13 +418,15 @@ def hashtag_only_line(text, hashtag_names=()):
 
 
 def opening_story_lines(body, hashtag_names=()):
-    first = first_body_line(body, skip_leading_hashtags=True, hashtag_names=hashtag_names)
+    first = first_body_line(body, skip_leading_hashtags=True, hashtag_names=hashtag_names,
+                            skip_leading_notices=True)
     if first is None or count_characters(first.text) >= 19 or explanatory_line(first.text):
         return first, ()
-    parser = OpeningBodyParser(skip_leading_hashtags=True, hashtag_names=hashtag_names)
+    parser = OpeningBodyParser(skip_leading_hashtags=True, hashtag_names=hashtag_names,
+                               skip_leading_notices=True)
     parser.feed(body)
     lines, bounded = parser.opening_result()
-    if (not bounded or not 2 <= len(lines) <= 3 or lines[0].text != first.text
+    if (not bounded or not 2 <= len(lines) <= MAX_STORY_LINES or lines[0].text != first.text
             or any(set(line.kinds) - {"heading"} for line in lines)):
         return first, ()
     joined = "".join(line.text for line in lines)
@@ -472,12 +492,9 @@ def extract_article(seed, payload, tag):
                 names.add(raw["name"].removeprefix("#"))
     if tag not in names:
         codes.append("hashtag_unverified")
-    # Free articles also return a nonempty paywall *configuration* object.
-    # Only an explicit restriction signal should make that a review reason.
-    paywall = data.get("paywall") if isinstance(data.get("paywall"), dict) else {}
-    context = paywall.get("context") if isinstance(paywall.get("context"), dict) else {}
-    if (data.get("type") != "TextNote" or data.get("is_limited") is True
-            or data.get("price", 0) != 0 or context.get("is_show_limited_pay_note_paywall") is True):
+    # Paid articles are allowed when the public API supplies the opening body.
+    # This does not fetch private or paywalled text that the API does not expose.
+    if data.get("type") != "TextNote" or data.get("is_limited") is True:
         codes.append("restricted_article")
     body = data.get("body")
     if not isinstance(body, str):
@@ -506,7 +523,7 @@ def extract_article(seed, payload, tag):
         return explain(record, codes, "failed")
     if codes:
         return explain(record, codes, "pending")
-    record.update(status="success", reason=("本文冒頭の連続した2〜3行から20字を抽出しました（掲載未承認）"
+    record.update(status="success", reason=("本文冒頭の連続した2〜4行から20字を抽出しました（掲載未承認）"
                                          if source_lines else "本文の最初の空でない一行から20字を抽出しました（掲載未承認）"))
     return record
 

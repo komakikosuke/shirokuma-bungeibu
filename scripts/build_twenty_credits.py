@@ -9,7 +9,7 @@ import json
 from pathlib import Path
 import re
 
-from twenty_char import COUNT_RULE, count_characters, now_iso, write_json_atomic
+from twenty_char import COUNT_RULE, MAX_STORY_LINES, count_characters, now_iso, write_json_atomic
 
 JST = timezone(timedelta(hours=9))
 HANDLE = re.compile(r"^[a-zA-Z0-9_-]{2,100}$")
@@ -120,7 +120,7 @@ def eligible_work(record, since, until, members):
         return None
     source_lines = record.get("sourceLines")
     if source_lines is not None and (
-            not isinstance(source_lines, list) or not 2 <= len(source_lines) <= 3
+            not isinstance(source_lines, list) or not 2 <= len(source_lines) <= MAX_STORY_LINES
             or any(not isinstance(line, str) or not line or line != line.strip()
                    or "\n" in line or "\r" in line for line in source_lines)
             or "".join(source_lines) != text or count_characters(source_lines[0]) >= 19):

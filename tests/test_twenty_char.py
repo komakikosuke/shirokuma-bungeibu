@@ -78,7 +78,7 @@ class ExtractionTests(unittest.TestCase):
         self.assertEqual((row["text"], row["charCount"], row["status"]), (STORY, 20, "success"))
         self.assertEqual(row["sourceLines"], [STORY[:9], STORY[9:]])
 
-    def test_two_or_three_opening_lines_need_a_complete_boundary(self):
+    def test_two_to_four_opening_lines_need_a_complete_boundary(self):
         parts = [STORY[:7], STORY[7:14], STORY[14:]]
         bodies = [
             f"<p>{STORY[:10]}<br>{STORY[10:]}</p>",
@@ -86,6 +86,7 @@ class ExtractionTests(unittest.TestCase):
             f"<p>{STORY[:10]}<br>{STORY[10:]}</p><img src='x'><p>説明です。</p>",
             "<p>" + "<br>".join(parts) + "</p><hr><p>説明です。</p>",
             "\n".join(parts) + "\n\n説明です。",
+            "<p>" + "<br>".join(STORY[index:index + 5] for index in range(0, 20, 5)) + "</p>",
         ]
         for body in bodies:
             with self.subTest(body=body):
@@ -107,7 +108,7 @@ class ExtractionTests(unittest.TestCase):
         bodies = [
             f"<p>{STORY[:10]}</p><p><br></p><p>{STORY[10:]}</p>",
             f"<p>{STORY[:10]}<br>{STORY[10:]}<br>さらに続く文章。</p>",
-            "<p>あいうえお<br>かきくけこ<br>さしすせそ<br>たちつてと</p>",
+            "<p>あいうえ<br>おかきく<br>けこさし<br>すせそた<br>ちつてと</p>",
             "<p>こんばんは！<br>" + "あ" * 14 + "</p>",
             "<p>#20字小説<br>" + "あ" * 14 + "</p>",
             "<p>前書き</p><p>" + STORY[3:] + "</p>",
@@ -161,14 +162,53 @@ class ExtractionTests(unittest.TestCase):
     def test_hashtags_do_not_allow_skipping_greetings_or_crossing_story_boundaries(self):
         for body in (
             "<p>#20字小説</p><p>こんばんは！</p>" + f"<p>{STORY}</p>",
-            "<p>#20字小説 の紹介です。</p>" + f"<p>{STORY}</p>",
             f"<p>{STORY[:10]}<br>#20字小説<br>{STORY[10:]}</p>",
-            f"<blockquote>#20字小説</blockquote><p>{STORY}</p>",
         ):
             with self.subTest(body=body):
                 row = extract(body)
                 self.assertNotEqual(row["status"], "success")
                 self.assertNotIn("sourceLines", row)
+
+    def test_matching_non_twenty_character_opening_notices_are_skipped(self):
+        prefixes = [
+            "<p>▲今回も参加しました！</p><hr>",
+            "<p>（20文字）</p><p><br></p>",
+            "<h3>第一部　20字小説（20文字）</h3>",
+            "<p>#20字小説 の紹介です。</p>",
+            "<blockquote>#20字小説</blockquote>",
+            "<p>今回の参加作品です。</p><p>（２０文字）</p><p><br></p>",
+        ]
+        for prefix in prefixes:
+            with self.subTest(prefix=prefix):
+                row = extract(prefix + f"<p>{STORY}</p>")
+                self.assertEqual((row["text"], row["charCount"], row["status"]), (STORY, 20, "success"))
+        for keyword in ("参加", "20文字", "20字"):
+            for length in (19, 21):
+                preface = keyword + "あ" * (length - len(keyword))
+                row = extract(f"<p>{preface}</p><p>{STORY}</p>")
+                self.assertEqual((row["text"], row["charCount"]), (STORY, 20))
+
+    def test_exactly_twenty_character_lines_with_notice_keywords_are_kept(self):
+        for keyword in ("参加", "20文字", "20字"):
+            text = keyword + STORY[len(keyword):]
+            row = extract(f"<p>{text}</p><p>ここからは説明です。</p>")
+            self.assertEqual((row["text"], row["charCount"], row["status"]), (text, 20, "success"))
+
+    def test_notice_skipping_does_not_skip_titles_or_join_across_blanks(self):
+        row = extract(f"<p>参加しました。</p><h2>『付箋』</h2><p>{STORY}</p>")
+        self.assertEqual((row["text"], row["charCount"], row["status"]), ("『付箋』", 4, "failed"))
+        row = extract(f"<p>（20文字）</p><p>{STORY[:10]}<br><br>{STORY[10:]}</p>")
+        self.assertEqual(row["status"], "failed")
+        self.assertNotIn("sourceLines", row)
+        row = extract(f"<p>参加しました。</p><p>{STORY[:10]}<br>{STORY[10:]}<br>参加しました。</p>")
+        self.assertEqual(row["status"], "failed")
+
+    def test_four_line_story_with_text_separator_keeps_its_entire_opening(self):
+        lines = ["花が散り戻らぬ", "これ真実", "鳥立つ", "それを見る。"]
+        body = "<p>（20文字）</p><p>" + "<br>".join(lines) + "</p><p>＿＿＿＿＿＿<br>◯コンセプト<br>作品についての説明。</p>"
+        row = extract(body)
+        self.assertEqual((row["text"], row["charCount"], row["status"]), ("".join(lines), 20, "success"))
+        self.assertEqual(row["sourceLines"], lines)
 
     def test_body_hashtags_do_not_replace_verified_article_tags_or_supply_a_story(self):
         row = extract(f"<p>#20字小説</p><p>{STORY}</p>", hashtag_notes=[])
@@ -279,9 +319,17 @@ class ExtractionTests(unittest.TestCase):
                 self.assertEqual(row["status"], "pending")
                 self.assertIn("hashtag_unverified", row["reasonCodes"])
 
-    def test_paid_or_limited_article_is_pending(self):
-        for fields in [{"price": 100}, {"is_limited": True},
-                       {"paywall": {"context": {"is_show_limited_pay_note_paywall": True}}}]:
+    def test_paid_article_public_opening_is_allowed(self):
+        for fields in [{"price": 100},
+                       {"price": 100, "paywall": {"context": {"is_show_limited_pay_note_paywall": True}}}]:
+            with self.subTest(fields=fields):
+                row = extract(**fields)
+                self.assertEqual((row["text"], row["charCount"], row["status"]), (STORY, 20, "success"))
+        row = extract(body=123, price=100)
+        self.assertEqual(row["reasonCodes"], ["body_unavailable"])
+
+    def test_limited_or_non_text_article_stays_pending(self):
+        for fields in [{"is_limited": True}, {"type": "ImageNote"}]:
             with self.subTest(fields=fields):
                 row = extract(**fields)
                 self.assertEqual(row["status"], "pending")

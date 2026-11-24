@@ -29,10 +29,16 @@ class TwentyCreditPolicyTests(unittest.TestCase):
         self.assertEqual(published["sourceLines"], lines)
         self.assertEqual(published["charCount"], 20)
 
+    def test_four_line_publication_inserts_one_space_per_original_break(self):
+        lines = [self.record["text"][index:index + 5] for index in range(0, 20, 5)]
+        published = eligible_work({**self.record, "sourceLines": lines}, self.since, self.until, set())
+        self.assertEqual(published["text"], " ".join(lines))
+        self.assertEqual(published["sourceLines"], lines)
+        self.assertEqual(published["charCount"], 20)
+
     def test_multiline_source_lines_must_match_the_validated_story(self):
         for lines in ([self.record["text"]], ["あ" * 10, "あ" * 10],
-                      [self.record["text"][:5], self.record["text"][5:10],
-                       self.record["text"][10:15], self.record["text"][15:]]):
+                      [self.record["text"][index:index + 4] for index in range(0, 20, 4)]):
             with self.subTest(lines=lines):
                 self.assertIsNone(eligible_work({**self.record, "sourceLines": lines}, self.since, self.until, set()))
 

@@ -26,7 +26,7 @@ class TwentyCreditsTests(unittest.TestCase):
             self.assertIn(work["charCount"], (19, 20, 21))
             source_lines = work.get("sourceLines")
             if source_lines:
-                self.assertIn(len(source_lines), (2, 3))
+                self.assertIn(len(source_lines), (2, 3, 4))
                 self.assertEqual(work["text"], " ".join(source_lines))
             self.assertEqual(count_characters("".join(source_lines) if source_lines else work["text"]), work["charCount"])
             expected = "membership" if work["handle"] == "komaki_kousuke" or members.contains(work) else "club"

@@ -7,11 +7,11 @@
     "since": "2026-11-24T19:00:00+09:00",
     "until": "2026-11-24T21:00:00+09:00"
   },
-  "generatedAt": "2026-11-24T18:35:26Z",
+  "generatedAt": "2026-11-24T18:47:20Z",
   "countRule": "extended-grapheme-clusters:regex-2024.11.6:unicode-16.0",
   "sourceSummary": {
     "checked": 109,
-    "extracted": 102
+    "extracted": 106
   },
   "works": [
     {
@@ -161,6 +161,30 @@
       "title": "減らない便箋│20字小説",
       "publishedAt": "2026-11-24T20:00:00+09:00",
       "url": "https://note.com/sunao_chihama/n/n0c593bc76552"
+    },
+    {
+      "key": "n170a6bec0c28",
+      "text": "第1回「マドレーヌで貝殻水着を作ろう！」",
+      "charCount": 20,
+      "authorName": "適温より1℃低め",
+      "handle": "1degreelower",
+      "creditGroup": "club",
+      "sourceType": "extracted",
+      "title": "⚪️企画作品｜君のマドレーヌを食べたい",
+      "publishedAt": "2026-11-24T20:00:00+09:00",
+      "url": "https://note.com/1degreelower/n/n170a6bec0c28"
+    },
+    {
+      "key": "n18f1c6c61560",
+      "text": "これは伝説の作家になるぞと投稿、閲覧6。",
+      "charCount": 20,
+      "authorName": "うさぎ｜働き方の研究室🌱",
+      "handle": "usagi_work_lab",
+      "creditGroup": "club",
+      "sourceType": "extracted",
+      "title": "うさぎ研究室のちょっと変な会議録を覗いていきませんか？🐰🧪 〜note初心者が初投稿で盛大に勘違いしていた話〜",
+      "publishedAt": "2026-11-24T20:00:00+09:00",
+      "url": "https://note.com/usagi_work_lab/n/n18f1c6c61560"
     },
     {
       "key": "n39e35b660be0",
@@ -652,6 +676,24 @@
       "url": "https://note.com/brainy_elk1055/n/n669de60a493b"
     },
     {
+      "key": "n6f9e4a2c29eb",
+      "text": "花が散り戻らぬ これ真実 鳥立つ それを見る。",
+      "charCount": 20,
+      "authorName": "柳に鯉",
+      "handle": "yanagisawa_51",
+      "creditGroup": "club",
+      "sourceType": "extracted",
+      "title": "花の決意［20字小説 | シロクマ文芸部］",
+      "publishedAt": "2026-11-24T20:00:28+09:00",
+      "url": "https://note.com/yanagisawa_51/n/n6f9e4a2c29eb",
+      "sourceLines": [
+        "花が散り戻らぬ",
+        "これ真実",
+        "鳥立つ",
+        "それを見る。"
+      ]
+    },
+    {
       "key": "n99c6c487fe74",
       "text": "君の言葉　とても美しいけど　味がしないね",
       "charCount": 20,
@@ -1050,6 +1092,18 @@
       "title": "「 さくらんぼ」【#20字小説】",
       "publishedAt": "2026-11-24T20:09:14+09:00",
       "url": "https://note.com/_sny/n/n4197b95829a1"
+    },
+    {
+      "key": "ne18baf9e9e68",
+      "text": "想いは沈み、恋は浮く。忘れて、忘れないで",
+      "charCount": 20,
+      "authorName": "マイルドリリー",
+      "handle": "mild_lily825",
+      "creditGroup": "club",
+      "sourceType": "extracted",
+      "title": "エンドロールに流れたくて、冬　#シロクマ文芸部",
+      "publishedAt": "2026-11-24T20:12:23+09:00",
+      "url": "https://note.com/mild_lily825/n/ne18baf9e9e68"
     },
     {
       "key": "nb91ef403d08a",
