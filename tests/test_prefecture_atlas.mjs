@@ -27,14 +27,14 @@ test("unsafe article destinations and image URLs are rejected", () => {
   const article = model.normalizeArticle(sample("n111", "writer", ["京都府"], {imageUrl: "https://st-note.com.evil.example/image.png"}), prefectures);
   assert.equal(article.imageUrl, "");
 });
-test("prefecture, author, registered tag and full width search work together", () => {
+test("prefecture, author and registered tag filters work together", () => {
   const articles = [
     model.normalizeArticle(sample("n111", "writer", ["京都府", "旅"], {title: "京都 ＣＡＦＥ", author: {handle: "writer", name: "森のしおり"}}), prefectures),
     model.normalizeArticle(sample("n222", "other", ["東京都", "食"]), prefectures)
   ];
-  assert.equal(model.filterArticles(articles, {prefecture: "26", tag: "旅", author: "writer", query: "cafe"}, prefectures).length, 1);
-  assert.equal(model.filterArticles(articles, {query: "森のしおり"}, prefectures).length, 1);
-  assert.equal(model.filterArticles(articles, {prefecture: "13", query: "cafe"}, prefectures).length, 0);
+  assert.equal(model.filterArticles(articles, {prefecture: "26", tag: "旅", author: "writer"}).length, 1);
+  assert.equal(model.filterArticles(articles, {author: "other"}).length, 1);
+  assert.equal(model.filterArticles(articles, {prefecture: "13", tag: "旅"}).length, 0);
 });
 test("all five color intervals include their boundary values", () => {
   assert.deepEqual([0,1,4,5,9,10,19,20,100].map(model.colorLevel), [0,1,1,2,2,3,3,4,4]);

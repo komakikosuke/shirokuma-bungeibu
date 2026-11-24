@@ -5,7 +5,6 @@
   const SVG_NS = "http://www.w3.org/2000/svg";
   const normalize = value => String(value || "").normalize("NFKC").trim();
   const tagName = value => normalize(value).replace(/^[#＃]/, "");
-  const searchText = value => normalize(value).toLocaleLowerCase("ja-JP");
   const imageUrl = value => {
     try {
       const url = new URL(value);
@@ -52,14 +51,12 @@
     return {articles: unique.size, creators: creators.size, prefectures: [...counts.values()].filter(c => c.articles.size).length, counts};
   }
   const colorLevel = count => count === 0 ? 0 : count < 5 ? 1 : count < 10 ? 2 : count < 20 ? 3 : 4;
-  function filterArticles(articles, state, prefectures) {
-    const names = new Map(prefectures.map(p => [p.code, p.name]));
-    const query = searchText(state.query);
+  function filterArticles(articles, state) {
     return articles.filter(article => {
       if (state.prefecture && !article.prefectures.includes(state.prefecture)) return false;
       if (state.tag && !article.tags.includes(state.tag)) return false;
       if (state.author && article.author.handle !== state.author) return false;
-      return !query || searchText([article.title, article.author.name, article.author.handle, ...article.tags, ...article.prefectures.map(c => names.get(c))].join(" ")).includes(query);
+      return true;
     }).sort((a, b) => (Date.parse(b.publishedAt) - Date.parse(a.publishedAt)) * (state.sort === "old" ? -1 : 1) || a.key.localeCompare(b.key));
   }
   const model = Object.freeze({TAG, normalizeArticle, parseDocument, summarize, colorLevel, filterArticles});
@@ -71,8 +68,8 @@
   const dateLabel = new Intl.DateTimeFormat("ja-JP", {timeZone: "Asia/Tokyo", month: "long", day: "numeric"});
   const updateLabel = new Intl.DateTimeFormat("ja-JP", {timeZone: "Asia/Tokyo", month: "numeric", day: "numeric", hour: "numeric", minute: "2-digit"});
   let prefectures = [], articles = [], stats, registry, mapGroups = new Map(), callouts, tooltip;
-  let loaded = false, searchTimer;
-  const state = {prefecture: "", tab: "articles", view: "map", query: "", tag: "", author: "", sort: "new", limit: PAGE_SIZE};
+  let loaded = false;
+  const state = {prefecture: "", tab: "articles", view: "map", tag: "", author: "", sort: "new", limit: PAGE_SIZE};
   function element(name, className, text) {
     const node = document.createElement(name);
     if (className) node.className = className;
@@ -115,7 +112,6 @@
   function selectPrefecture(code, scroll = false) {
     if (!loaded || (code && !prefectures.some(p => p.code === code))) return;
     state.prefecture = code; state.tag = ""; state.author = ""; state.limit = PAGE_SIZE;
-    $("prefectureSelect").value = code;
     writeHash(); renderMapCounts(); renderPrefectureList(); renderResults();
     if (scroll && matchMedia("(max-width: 960px)").matches) {
       $("resultsPanel").scrollIntoView({behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth", block: "start"});
@@ -275,7 +271,7 @@
     const node = element("div", "empty-message");
     const pref = currentPrefecture();
     if (filtered) {
-      node.append(element("strong", "", "記事が見つかりませんでした。"), element("p", "", "検索する言葉や、選んだタグを変えてみてください。"));
+      node.append(element("strong", "", "記事が見つかりませんでした。"), element("p", "", "選んだタグや書き手を変えてみてください。"));
     } else {
       node.append(element("strong", "", pref ? pref.name + "の最初の記事を、あなたから。" : "最初のひと記事を、待っています。"), element("p", "", "ふるさとの話も、旅先の記憶も。タグをつけて、地図に色を添えてください。"));
       const link = element("a", "", "参加方法を見る"); link.href = "#participate"; node.append(link);
@@ -284,14 +280,13 @@
   }
   function renderResults() {
     if (!loaded) return;
-    const pref = currentPrefecture(), base = scopedArticles(), filtered = filterArticles(articles, state, prefectures), creators = creatorCards(filtered);
+    const pref = currentPrefecture(), base = scopedArticles(), filtered = filterArticles(articles, state), creators = creatorCards(filtered);
     $("resultsEnglish").textContent = pref?.englishName || "ALL JAPAN";
     $("resultsTitle").textContent = pref?.name || "全国の新着記事";
     $("resultsCount").textContent = number.format(filtered.length) + " 記事 ・ " + number.format(creators.length) + " 人の書き手";
     $("articleTabCount").textContent = number.format(filtered.length);
     $("creatorTabCount").textContent = number.format(creators.length);
     $("clearPrefecture").hidden = !pref;
-    $("searchInput").placeholder = pref ? pref.name + "の記事・書き手を検索" : "記事・クリエイターを検索";
     setTabs("articlesTab", "creatorsTab", state.tab === "articles" ? 0 : 1);
     $("resultsList").setAttribute("aria-labelledby", state.tab === "articles" ? "articlesTab" : "creatorsTab");
     renderGenreFilters(base);
@@ -300,7 +295,7 @@
     $("clearAuthor").setAttribute("aria-label", "書き手による絞り込みを解除する");
     $("resultsList").replaceChildren();
     const list = state.tab === "articles" ? filtered : creators;
-    if (!list.length) $("resultsList").append(emptyMessage(Boolean(state.query || state.tag || state.author)));
+    if (!list.length) $("resultsList").append(emptyMessage(Boolean(state.tag || state.author)));
     else for (const record of list.slice(0, state.limit)) $("resultsList").append(state.tab === "articles" ? articleCard(record) : creatorCard(record));
     $("loadMore").hidden = state.limit >= list.length;
     $("loadMore").textContent = "さらに" + Math.min(6, list.length - state.limit) + (state.tab === "articles" ? "記事" : "人の書き手") + "を見る";
@@ -337,13 +332,6 @@
       $("articleTotal").textContent = number.format(stats.articles);
       $("creatorTotal").textContent = number.format(stats.creators);
       $("prefectureTotal").textContent = number.format(stats.prefectures);
-      $("prefectureSelect").replaceChildren(element("option", "", "都道府県を選ぶ"));
-      $("prefectureSelect").firstElementChild.value = "";
-      for (const pref of prefectures) {
-        const option = element("option", "", pref.name + "（" + stats.counts.get(pref.code).articles.size + "記事）");
-        option.value = pref.code; $("prefectureSelect").append(option);
-      }
-      $("prefectureSelect").value = state.prefecture;
       $("updatedAt").textContent = data.sample === true ? "画面確認用サンプル" : data.generatedAt && Number.isFinite(Date.parse(data.generatedAt)) ? "最終更新 " + updateLabel.format(new Date(data.generatedAt)) + "（日本時間）" : "これから記事が集まります";
       buildMap(); renderMapCounts(); renderPrefectureList(); renderView(); renderResults();
     } catch (error) {
@@ -374,15 +362,10 @@
   $("articlesTab").addEventListener("click", () => { state.tab = "articles"; state.limit = PAGE_SIZE; writeHash(); renderResults(); });
   $("creatorsTab").addEventListener("click", () => { state.tab = "creators"; state.limit = PAGE_SIZE; writeHash(); renderResults(); });
   bindTabKeys(["mapTab", "listTab"]); bindTabKeys(["articlesTab", "creatorsTab"]);
-  $("prefectureSelect").addEventListener("change", event => selectPrefecture(event.target.value, true));
   $("clearPrefecture").addEventListener("click", () => selectPrefecture(""));
   $("clearAuthor").addEventListener("click", () => { state.author = ""; state.limit = PAGE_SIZE; renderResults(); });
   $("sortSelect").addEventListener("change", event => { state.sort = event.target.value; state.limit = PAGE_SIZE; renderResults(); });
   $("loadMore").addEventListener("click", () => { state.limit += 6; renderResults(); });
-  const applySearch = () => { state.query = $("searchInput").value.trim(); state.limit = PAGE_SIZE; renderResults(); };
-  $("searchForm").addEventListener("submit", event => { event.preventDefault(); clearTimeout(searchTimer); applySearch(); });
-  $("searchInput").addEventListener("input", event => { if (event.isComposing) return; clearTimeout(searchTimer); searchTimer = setTimeout(applySearch, 160); });
-  $("searchInput").addEventListener("compositionend", () => { clearTimeout(searchTimer); searchTimer = setTimeout(applySearch, 160); });
   $("retryButton").addEventListener("click", load);
   document.querySelectorAll("[data-copy]").forEach(button => button.addEventListener("click", async () => {
     const text = "#" + button.dataset.copy;
@@ -399,7 +382,6 @@
   window.addEventListener("hashchange", () => {
     if (!loaded || location.hash === "#participate" || location.hash === "#explore") return;
     readHash(); state.tag = ""; state.author = ""; state.limit = PAGE_SIZE;
-    $("prefectureSelect").value = state.prefecture;
     renderMapCounts(); renderPrefectureList(); renderView(); renderResults();
   });
   load();

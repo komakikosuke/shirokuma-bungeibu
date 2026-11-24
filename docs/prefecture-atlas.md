@@ -15,7 +15,7 @@
 
 ## 構成
 
-- `prefectures/index.html`、`style.css`、`app.js`：静的ページ。地図／県一覧、県選択、記事／書き手、検索、登録タグでの絞り込み、新旧順、追加表示、タグコピーを備える。
+- `prefectures/index.html`、`style.css`、`app.js`：静的ページ。地図／県一覧、県選択、記事／書き手、登録タグでの絞り込み、新旧順、追加表示、タグコピーを備える。
 - `prefectures/map.json`：47都道府県の名称・コード・地図。地球地図日本を変換した [dataofjapan/land](https://github.com/dataofjapan/land) の境界を簡略化・配置。出典元を画面上にも表示。離島は地図を見やすくするため一部省略し、沖縄本島は別枠に配置。
 - `scripts/sync_prefecture_atlas.py`：noteの公開ハッシュタグ一覧を最後まで走査し、記事詳細の登録タグを確認する。
 - `data/prefecture-atlas.json`：公開情報のみを含む掲載データ。初期値は0件。
