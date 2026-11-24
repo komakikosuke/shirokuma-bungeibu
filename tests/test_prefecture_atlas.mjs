@@ -33,8 +33,21 @@ test("prefecture selection and chronological ordering work together", () => {
     model.normalizeArticle(sample("n222", "other", ["東京都", "食"], {publishedAt: "2026-11-25T10:00:00+09:00"}), prefectures)
   ];
   assert.deepEqual(model.filterArticles(articles, {prefecture: "26"}).map(a => a.key), ["n111"]);
-  assert.deepEqual(model.filterArticles(articles, {sort: "new"}).map(a => a.key), ["n222", "n111"]);
-  assert.deepEqual(model.filterArticles(articles, {sort: "old"}).map(a => a.key), ["n111", "n222"]);
+  assert.deepEqual(model.filterArticles(articles, {}).map(a => a.key), ["n222", "n111"]);
+});
+test("Komaki preview is isolated from normal hashtag eligibility", () => {
+  const article = sample("n333", "komaki_kousuke", [], {tags: ["20字小説"]});
+  const debug = {version: 1, purpose: "prefecture-atlas-preview", creator: "komaki_kousuke", articles: [article]};
+  assert.equal(model.normalizeArticle(article, prefectures), null);
+  const preview = model.parseDebugDocument(debug);
+  assert.deepEqual(preview[0].prefectures, ["13"]);
+  assert.deepEqual(preview[0].tags, ["20字小説"]);
+  assert.equal(preview[0].debug, true);
+  assert.throws(() => model.parseDocument({...debug, tag: model.TAG}, prefectures));
+});
+test("debug mode only accepts the requested creator's public article identity", () => {
+  const debug = {version: 1, purpose: "prefecture-atlas-preview", creator: "komaki_kousuke", articles: [sample("n333", "someone_else", ["東京都"])]};
+  assert.throws(() => model.parseDebugDocument(debug));
 });
 test("all five color intervals include their boundary values", () => {
   assert.deepEqual([0,1,4,5,9,10,19,20,100].map(model.colorLevel), [0,1,1,2,2,3,3,4,4]);

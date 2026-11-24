@@ -7,12 +7,14 @@ on:
     paths:
       - "prefectures/**"
       - "scripts/sync_prefecture_atlas.py"
+      - "scripts/build_prefecture_atlas_debug.py"
       - "tests/test_prefecture_atlas*"
       - ".github/workflows/sync-prefecture-atlas.yml"
   pull_request:
     paths:
       - "prefectures/**"
       - "scripts/sync_prefecture_atlas.py"
+      - "scripts/build_prefecture_atlas_debug.py"
       - "tests/test_prefecture_atlas*"
       - ".github/workflows/sync-prefecture-atlas.yml"
   schedule:
@@ -40,7 +42,7 @@ jobs:
           node-version: "22"
       - name: Check collection rules and UI data model
         run: |
-          python3 -m unittest discover -s tests -p 'test_prefecture_atlas.py' -v
+          python3 -m unittest discover -s tests -p 'test_prefecture_atlas*.py' -v
           node --test tests/test_prefecture_atlas.mjs
           node --check prefectures/app.js
   sync:
@@ -59,12 +61,18 @@ jobs:
           python-version: "3.12"
       - name: Collect articles with both required hashtags
         run: python3 scripts/sync_prefecture_atlas.py
+      - name: Refresh the separate Komaki debug feed
+        continue-on-error: true
+        run: python3 scripts/build_prefecture_atlas_debug.py
       - name: Save successfully collected data to the same branch
         shell: bash
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add data/prefecture-atlas.json
+          if [ -f data/prefecture-atlas-debug.json ]; then
+            git add data/prefecture-atlas-debug.json
+          fi
           if git diff --cached --quiet; then
             echo "No atlas changes."
             exit 0

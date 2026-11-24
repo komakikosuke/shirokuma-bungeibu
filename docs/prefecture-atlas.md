@@ -15,7 +15,7 @@
 
 ## 構成
 
-- `prefectures/index.html`、`style.css`、`app.js`：静的ページ。地図／県一覧、県選択、記事とクリエイター名の一覧、新旧順、追加表示、企画タグのコピーを備える。
+- `prefectures/index.html`、`style.css`、`app.js`：静的ページ。地図／県一覧、県選択、記事とクリエイター名の一覧、追加表示、企画タグのコピーを備える。
 - `prefectures/map.json`：47都道府県の名称・コード・地図。地球地図日本を変換した [dataofjapan/land](https://github.com/dataofjapan/land) の境界を簡略化・配置。出典元を画面上にも表示。離島は地図を見やすくするため一部省略し、沖縄本島は別枠に配置。
 - `scripts/sync_prefecture_atlas.py`：noteの公開ハッシュタグ一覧を最後まで走査し、記事詳細の登録タグを確認する。
 - `data/prefecture-atlas.json`：公開情報のみを含む掲載データ。初期値は0件。
@@ -33,3 +33,16 @@
     python3 scripts/sync_prefecture_atlas.py
 
 サンプルは `python3 scripts/build_prefecture_atlas_preview.py` で制作プレビュー用の `dist/` 内にだけ生成する。`sample: true` を検出するとサンプル表示の案内を出す。本番データにサンプル記事は混ぜない。
+
+## 小牧幸助の最新記事を使うデバッグ
+
+通常の掲載データとは別に、scripts/build_prefecture_atlas_debug.py が本人の公開RSSから最新3記事を選び、記事詳細の公開メタデータを取得する。出力は data/prefecture-atlas-debug.json。本文は保存せず、記事の実際のハッシュタグをそのまま保持する。
+
+デバッグデータには purpose: prefecture-atlas-preview を付け、通常の収集データとしては読み込めない。通常の2種類のハッシュタグによる掲載条件は変えない。
+
+プレビュー生成時にだけ atlas-debug-feed メタタグを設定する。メタタグのある確認用ページで ?debug=komaki を指定すると、本人の最新記事だけを東京に仮表示する。メタタグのない本番用HTMLではこのURL指定はデバッグを有効にしない。専用の案内と「通常表示に戻る」リンクを出す。
+
+    python3 scripts/build_prefecture_atlas_debug.py
+    python3 scripts/build_prefecture_atlas_preview.py --debug-komaki
+
+既存の定期収集ワークフローは、通常の掲載データと別ファイルのデバッグデータを更新する。デバッグ取得が一時的に失敗しても通常の収集は継続する。

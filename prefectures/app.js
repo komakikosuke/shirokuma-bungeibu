@@ -12,23 +12,39 @@
         /(^|\.)(st-note\.com|note\.com|note\.mu|amazonaws\.com)$/.test(url.hostname) ? url.href : "";
     } catch (_) { return ""; }
   };
-  function normalizeArticle(raw, prefectures) {
+  function normalizePublicMetadata(raw) {
     if (!raw || typeof raw !== "object" || !/^n[A-Za-z0-9]+$/.test(raw.key)) return null;
     const author = raw.author;
     if (!author || !/^[A-Za-z0-9_-]{1,100}$/.test(author.handle) || typeof author.name !== "string" || !author.name.trim()) return null;
     const url = "https://note.com/" + author.handle + "/n/" + raw.key;
     if (raw.url !== url || typeof raw.title !== "string" || !raw.title.trim() || !Number.isFinite(Date.parse(raw.publishedAt))) return null;
     const tags = [...new Set((Array.isArray(raw.tags) ? raw.tags : []).filter(t => typeof t === "string").map(tagName))];
-    const codes = prefectures.filter(p => tags.includes(p.name)).map(p => p.code);
-    if (!tags.includes(TAG) || !codes.length) return null;
     return {
       key: raw.key, url, title: raw.title.slice(0, 500), publishedAt: raw.publishedAt,
       author: {handle: author.handle, name: author.name.slice(0, 150), avatarUrl: imageUrl(author.avatarUrl)},
-      imageUrl: imageUrl(raw.imageUrl), tags, prefectures: codes, isPaid: raw.isPaid === true
+      imageUrl: imageUrl(raw.imageUrl), tags, isPaid: raw.isPaid === true
     };
   }
+  function normalizeArticle(raw, prefectures) {
+    const article = normalizePublicMetadata(raw);
+    if (!article) return null;
+    const codes = prefectures.filter(p => article.tags.includes(p.name)).map(p => p.code);
+    if (!article.tags.includes(TAG) || !codes.length) return null;
+    return {...article, prefectures: codes};
+  }
+  function parseDebugDocument(data) {
+    if (!data || data.version !== 1 || data.purpose !== "prefecture-atlas-preview" ||
+        data.creator !== "komaki_kousuke" || !Array.isArray(data.articles) || !data.articles.length) throw Error("デバッグ記事の形式が違います");
+    const unique = new Map();
+    for (const raw of data.articles) {
+      const article = normalizePublicMetadata(raw);
+      if (!article || article.author.handle !== "komaki_kousuke") throw Error("デバッグ記事の投稿者を確認できません");
+      unique.set(article.key, {...article, prefectures: ["13"], debug: true});
+    }
+    return [...unique.values()].sort((a, b) => Date.parse(b.publishedAt) - Date.parse(a.publishedAt) || a.key.localeCompare(b.key)).slice(0, 3);
+  }
   function parseDocument(data, prefectures) {
-    if (!data || data.version !== 1 || data.tag !== TAG || !Array.isArray(data.articles)) throw Error("掲載データの形式が違います");
+    if (!data || data.version !== 1 || data.purpose === "prefecture-atlas-preview" || data.tag !== TAG || !Array.isArray(data.articles)) throw Error("掲載データの形式が違います");
     const unique = new Map();
     for (const raw of data.articles) {
       const article = normalizeArticle(raw, prefectures);
@@ -55,9 +71,9 @@
     return articles.filter(article => {
       if (state.prefecture && !article.prefectures.includes(state.prefecture)) return false;
       return true;
-    }).sort((a, b) => (Date.parse(b.publishedAt) - Date.parse(a.publishedAt)) * (state.sort === "old" ? -1 : 1) || a.key.localeCompare(b.key));
+    }).sort((a, b) => Date.parse(b.publishedAt) - Date.parse(a.publishedAt) || a.key.localeCompare(b.key));
   }
-  const model = Object.freeze({TAG, normalizeArticle, parseDocument, summarize, colorLevel, filterArticles});
+  const model = Object.freeze({TAG, normalizeArticle, parseDocument, parseDebugDocument, summarize, colorLevel, filterArticles});
   if (typeof module !== "undefined" && module.exports) module.exports = model;
   if (typeof document === "undefined") return;
 
@@ -67,7 +83,7 @@
   const updateLabel = new Intl.DateTimeFormat("ja-JP", {timeZone: "Asia/Tokyo", month: "numeric", day: "numeric", hour: "numeric", minute: "2-digit"});
   let prefectures = [], articles = [], stats, registry, mapGroups = new Map(), callouts, tooltip;
   let loaded = false;
-  const state = {prefecture: "", view: "map", sort: "new", limit: PAGE_SIZE};
+  const state = {prefecture: "", view: "map", limit: PAGE_SIZE};
   function element(name, className, text) {
     const node = document.createElement(name);
     if (className) node.className = className;
@@ -138,7 +154,7 @@
       const count = stats.counts.get(pref.code);
       const group = mapGroups.get(pref.code);
       group.setAttribute("aria-pressed", String(state.prefecture === pref.code));
-      const label = pref.name + "：" + number.format(count.articles.size) + "記事、" + number.format(count.creators.size) + "人の書き手";
+      const label = pref.name + "の記事を読む";
       group.setAttribute("aria-label", label);
       group.querySelector("title").textContent = label;
       group.querySelector("path").setAttribute("class", "level-" + colorLevel(count.articles.size));
@@ -158,10 +174,9 @@
     }
     const pref = currentPrefecture();
     if (pref) {
-      const count = stats.counts.get(pref.code);
       const x = Math.max(10, Math.min(716, pref.point[0] - 78));
-      const y = Math.max(15, pref.point[1] - 88);
-      tooltip.append(svg("rect", {x, y, width: 174, height: 64, rx: 8}), svg("text", {x: x + 13, y: y + 26, class: "tooltip-name"}, pref.name), svg("text", {x: x + 13, y: y + 49}, count.articles.size + "記事・" + count.creators.size + "人の書き手"));
+      const y = Math.max(15, pref.point[1] - 64);
+      tooltip.append(svg("rect", {x, y, width: 128, height: 40, rx: 8}), svg("text", {x: x + 13, y: y + 26, class: "tooltip-name"}, pref.name));
     }
   }
   function renderPrefectureList() {
@@ -232,17 +247,15 @@
   function renderResults() {
     if (!loaded) return;
     const pref = currentPrefecture(), list = filterArticles(articles, state);
-    const creatorCount = new Set(list.map(article => article.author.handle)).size;
     $("resultsEnglish").textContent = pref?.englishName || "ALL JAPAN";
     $("resultsTitle").textContent = pref?.name || "全国の新着記事";
-    $("resultsCount").textContent = number.format(list.length) + " 記事 ・ " + number.format(creatorCount) + " 人の書き手";
     $("clearPrefecture").hidden = !pref;
     $("resultsList").replaceChildren();
     if (!list.length) $("resultsList").append(emptyMessage());
     else for (const article of list.slice(0, state.limit)) $("resultsList").append(articleCard(article));
     $("loadMore").hidden = state.limit >= list.length;
     $("loadMore").textContent = "さらに" + Math.min(6, list.length - state.limit) + "記事を見る";
-    $("resultAnnouncement").textContent = (pref?.name || "全国") + "、" + list.length + "記事、" + creatorCount + "人の書き手";
+    $("resultAnnouncement").textContent = (pref?.name || "全国") + "の記事を表示しました。";
   }
   async function getJson(url) {
     const controller = new AbortController(), timer = setTimeout(() => controller.abort(), 15000);
@@ -259,20 +272,26 @@
     try {
       // Data commits made by GitHub Actions need not rebuild the Pages HTML.
       // Read the current feed directly on the public origin, as the home counter does.
-      const feedUrl = location.hostname === "komakikosuke.github.io"
+      const debugFeed = document.querySelector('meta[name="atlas-debug-feed"]')?.content;
+      const debugEnabled = new URLSearchParams(location.search).get("debug") === "komaki" && Boolean(debugFeed);
+      const feedUrl = debugEnabled ? debugFeed : location.hostname === "komakikosuke.github.io"
         ? "https://raw.githubusercontent.com/komakikosuke/shirokuma-bungeibu/main/data/prefecture-atlas.json"
         : "../data/prefecture-atlas.json";
       const [map, data] = await Promise.all([getJson("./map.json"), getJson(feedUrl)]);
       if (map.version !== 1 || !Array.isArray(map.prefectures) || map.prefectures.length !== 47 ||
           new Set(map.prefectures.map(p => p.code)).size !== 47 ||
           !map.prefectures.every(p => /^(0[1-9]|[1-3]\d|4[0-7])$/.test(p.code) && typeof p.name === "string" && /^[MLZ\d,.\s-]+$/.test(p.path) && Array.isArray(p.point) && p.point.length === 2 && p.point.every(Number.isFinite))) throw Error("地図データの形式が違います");
-      registry = map; prefectures = map.prefectures; articles = parseDocument(data, prefectures); stats = summarize(articles, prefectures);
+      registry = map; prefectures = map.prefectures;
+      articles = debugEnabled ? parseDebugDocument(data) : parseDocument(data, prefectures);
+      stats = summarize(articles, prefectures);
       loaded = true; readHash();
+      if (debugEnabled && !state.prefecture) state.prefecture = "13";
+      $("debugNotice").hidden = !debugEnabled;
       $("sampleNotice").hidden = data.sample !== true;
       $("articleTotal").textContent = number.format(stats.articles);
       $("creatorTotal").textContent = number.format(stats.creators);
       $("prefectureTotal").textContent = number.format(stats.prefectures);
-      $("updatedAt").textContent = data.sample === true ? "画面確認用サンプル" : data.generatedAt && Number.isFinite(Date.parse(data.generatedAt)) ? "最終更新 " + updateLabel.format(new Date(data.generatedAt)) + "（日本時間）" : "これから記事が集まります";
+      $("updatedAt").textContent = data.sample === true ? "画面確認用サンプル" : data.generatedAt && Number.isFinite(Date.parse(data.generatedAt)) ? (debugEnabled ? "デバッグ記事の取得 " : "最終更新 ") + updateLabel.format(new Date(data.generatedAt)) + "（日本時間）" : "これから記事が集まります";
       buildMap(); renderMapCounts(); renderPrefectureList(); renderView(); renderResults();
     } catch (error) {
       console.error("図鑑の読み込みに失敗しました", error);
@@ -281,7 +300,6 @@
         $("japanMap").replaceChildren(element("p", "map-loading", "地図と記事を読み込めませんでした。"));
         $("japanMap").setAttribute("aria-busy", "false");
         $("resultsList").replaceChildren(element("p", "empty-message", "「もう一度読み込む」からお試しください。"));
-        $("resultsCount").textContent = "掲載状況を確認できません";
         $("updatedAt").textContent = "掲載データを確認できません";
       }
     } finally {
@@ -301,7 +319,6 @@
   $("listTab").addEventListener("click", () => { state.view = "list"; writeHash(); renderView(); });
   bindTabKeys(["mapTab", "listTab"]);
   $("clearPrefecture").addEventListener("click", () => selectPrefecture(""));
-  $("sortSelect").addEventListener("change", event => { state.sort = event.target.value; state.limit = PAGE_SIZE; renderResults(); });
   $("loadMore").addEventListener("click", () => { state.limit += 6; renderResults(); });
   $("retryButton").addEventListener("click", load);
   document.querySelectorAll("[data-copy]").forEach(button => button.addEventListener("click", async () => {

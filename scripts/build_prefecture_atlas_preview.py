@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Build an isolated, explicitly labeled design preview. Never edits live data."""
+import argparse
 import datetime as dt
 import json
 from pathlib import Path
@@ -43,6 +44,12 @@ def sample_document():
 
 
 def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--debug-komaki", action="store_true", help="東京に小牧幸助の最新記事を仮表示する")
+    args = parser.parse_args()
+    debug_source = ROOT / "data/prefecture-atlas-debug.json"
+    if args.debug_komaki and not debug_source.exists():
+        parser.error("デバッグ記事を先に取得してください")
     dist = ROOT / "dist"
     dist.mkdir(exist_ok=True)
     for directory in ("prefectures", "assets"):
@@ -51,7 +58,12 @@ def main():
     data = sample_document()
     (dist / "data/prefecture-atlas.json").write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n")
     shutil.copyfile(ROOT / "data/prefecture-atlas.json", dist / "data/prefecture-atlas-empty.json")
-    (dist / "index.html").write_text('<!doctype html><html lang="ja"><meta charset="utf-8"><meta name="robots" content="noindex,nofollow"><meta http-equiv="refresh" content="0;url=./prefectures/#pref=26"><title>都道府県クリエイター図鑑・制作プレビュー</title><a href="./prefectures/#pref=26">制作プレビューを開く</a></html>\n')
+    if debug_source.exists():
+        shutil.copyfile(debug_source, dist / "data/prefecture-atlas-debug.json")
+        page = dist / "prefectures/index.html"
+        page.write_text(page.read_text().replace("</head>", '<meta name="atlas-debug-feed" content="../data/prefecture-atlas-debug.json">\n</head>'))
+    target = "./prefectures/?debug=komaki#pref=13" if args.debug_komaki else "./prefectures/#pref=26"
+    (dist / "index.html").write_text('<!doctype html><html lang="ja"><meta charset="utf-8"><meta name="robots" content="noindex,nofollow"><meta http-equiv="refresh" content="0;url=' + target + '"><title>都道府県クリエイター図鑑・制作プレビュー</title><a href="' + target + '">制作プレビューを開く</a></html>\n')
     config = ROOT / ".openai"
     config.mkdir(exist_ok=True)
     (config / "hosting.json").write_text(json.dumps({"static": {"directory": "dist"}}) + "\n")

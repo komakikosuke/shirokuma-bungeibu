@@ -8,8 +8,8 @@
   <meta name="robots" content="noindex,nofollow">
   <title>都道府県クリエイター図鑑｜シロクマ文芸部</title>
   <link rel="icon" href="../assets/polarbear-icon.png" type="image/png">
-  <link rel="stylesheet" href="./style.css?v=3">
-  <script defer src="./app.js?v=3"></script>
+  <link rel="stylesheet" href="./style.css?v=4">
+  <script defer src="./app.js?v=4"></script>
 </head>
 <body>
   <a class="skip-link" href="#explore">地図と記事一覧へ</a>
@@ -26,6 +26,7 @@
     </div>
   </header>
   <div id="sampleNotice" class="sample-notice" hidden><div class="container">画面確認用のサンプル表示です。記事・人数は実際の掲載状況ではありません。</div></div>
+  <div id="debugNotice" class="debug-notice" hidden><div class="container"><span>デバッグ表示：小牧幸助の最新記事を東京に仮表示しています。</span><a href="./#pref=13">通常表示に戻る</a></div></div>
   <section class="hero" aria-labelledby="pageTitle">
     <div class="container hero-inner">
       <div class="hero-copy">
@@ -70,7 +71,6 @@
         </div>
         <aside id="resultsPanel" class="results-panel" aria-labelledby="resultsTitle" aria-busy="true">
           <div class="results-heading"><div><p id="resultsEnglish" class="prefecture-english">ALL JAPAN</p><h2 id="resultsTitle" tabindex="-1">全国の新着記事</h2></div><button id="clearPrefecture" class="icon-button close-button" type="button" aria-label="都道府県の選択を解除する" hidden>×</button></div>
-          <div class="results-summary"><p id="resultsCount" class="results-count">記事を読み込んでいます…</p><label class="sr-only" for="sortSelect">記事の並び順</label><div class="select-wrap sort-wrap"><select id="sortSelect"><option value="new">新しい順</option><option value="old">古い順</option></select></div></div>
           <p id="resultAnnouncement" class="sr-only" role="status" aria-live="polite"></p>
           <div id="resultsList" class="results-list"><p class="empty-message">記事を読み込んでいます…</p></div>
           <button id="loadMore" class="load-more" type="button" hidden>さらに記事を見る</button>
