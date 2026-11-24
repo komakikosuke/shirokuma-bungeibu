@@ -96,8 +96,8 @@ jobs:
           --hashtag "20字小説"
           --since "${{ steps.window.outputs.since }}"
           --until "${{ steps.window.outputs.until }}"
-          --limit 200
-          --max-pages 10
+          --limit 300
+          --max-pages 20
           --output var/twenty-char/results.json
           --log var/twenty-char/events.jsonl
       - name: Classify participants against the existing room membership roster
