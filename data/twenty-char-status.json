@@ -1,17 +1,17 @@
 {
   "version": 1,
   "status": "ready",
-  "eventDate": "2026-11-17",
-  "workCount": 113,
+  "eventDate": "2026-11-24",
+  "workCount": 100,
   "membershipCount": 11,
-  "clubCount": 102,
+  "clubCount": 89,
   "sourceWindow": {
-    "since": "2026-11-17T19:00:00+09:00",
-    "until": "2026-11-17T21:00:00+09:00"
+    "since": "2026-11-24T19:00:00+09:00",
+    "until": "2026-11-24T21:00:00+09:00"
   },
-  "updatedAt": "2026-11-17T21:35:48Z",
+  "updatedAt": "2026-11-24T12:52:00Z",
   "membershipSource": {
-    "snapshotId": "6ea37cef-a05c-480d-a948-830dd0627a7a",
-    "capturedAt": 1794946251646
+    "snapshotId": "a5292364-7d2a-4af0-a7ea-6f01877ff0c3",
+    "capturedAt": 1795495972832
   }
 }
