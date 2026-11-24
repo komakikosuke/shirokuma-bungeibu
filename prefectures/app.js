@@ -2,6 +2,7 @@
   "use strict";
   const TAG = "都道府県クリエイター図鑑";
   const PAGE_SIZE = 3;
+  const MOBILE_SELECTION_DELAY = 450;
   const SVG_NS = "http://www.w3.org/2000/svg";
   const normalize = value => String(value || "").normalize("NFKC").trim();
   const tagName = value => normalize(value).replace(/^[#＃]/, "");
@@ -83,6 +84,7 @@
   const updateLabel = new Intl.DateTimeFormat("ja-JP", {timeZone: "Asia/Tokyo", month: "numeric", day: "numeric", hour: "numeric", minute: "2-digit"});
   let prefectures = [], articles = [], stats, registry, mapGroups = new Map(), callouts, tooltip;
   let loaded = false;
+  let resultsScrollTimer;
   const state = {prefecture: "", view: "map", limit: PAGE_SIZE};
   function element(name, className, text) {
     const node = document.createElement(name);
@@ -120,13 +122,22 @@
       $(id).tabIndex = index === active ? 0 : -1;
     });
   }
+  function cancelResultsScroll() {
+    clearTimeout(resultsScrollTimer);
+    resultsScrollTimer = undefined;
+  }
   function selectPrefecture(code, scroll = false) {
     if (!loaded || (code && !prefectures.some(p => p.code === code))) return;
+    cancelResultsScroll();
     state.prefecture = code; state.limit = PAGE_SIZE;
     writeHash(); renderMapCounts(); renderPrefectureList(); renderResults();
     if (scroll && matchMedia("(max-width: 960px)").matches) {
-      $("resultsPanel").scrollIntoView({behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth", block: "start"});
-      $("resultsTitle").focus({preventScroll: true});
+      resultsScrollTimer = setTimeout(() => {
+        resultsScrollTimer = undefined;
+        if (state.prefecture !== code || !matchMedia("(max-width: 960px)").matches) return;
+        $("resultsPanel").scrollIntoView({behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth", block: "start"});
+        $("resultsTitle").focus({preventScroll: true});
+      }, MOBILE_SELECTION_DELAY);
     }
   }
   function buildMap() {
@@ -320,8 +331,8 @@
       $(ids[index]).click(); $(ids[index]).focus();
     });
   }
-  $("mapTab").addEventListener("click", () => { state.view = "map"; writeHash(); renderView(); });
-  $("listTab").addEventListener("click", () => { state.view = "list"; writeHash(); renderView(); });
+  $("mapTab").addEventListener("click", () => { cancelResultsScroll(); state.view = "map"; writeHash(); renderView(); });
+  $("listTab").addEventListener("click", () => { cancelResultsScroll(); state.view = "list"; writeHash(); renderView(); });
   bindTabKeys(["mapTab", "listTab"]);
   $("clearPrefecture").addEventListener("click", () => selectPrefecture(""));
   $("loadMore").addEventListener("click", () => { state.limit += 6; renderResults(); });
@@ -339,6 +350,7 @@
     }
   }));
   window.addEventListener("hashchange", () => {
+    cancelResultsScroll();
     if (!loaded || location.hash === "#participate" || location.hash === "#explore") return;
     readHash(); state.limit = PAGE_SIZE;
     renderMapCounts(); renderPrefectureList(); renderView(); renderResults();
