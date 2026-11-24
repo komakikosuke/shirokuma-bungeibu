@@ -21,6 +21,9 @@ ROOT = Path(__file__).resolve().parents[1]
 JST = timezone(timedelta(hours=9))
 COUNT_RULE = "extended-grapheme-clusters:regex-2024.11.6:unicode-16.0"
 GRAPHEMES = regex.compile(r"\X")
+# note can return ruby as literal editor notation instead of <ruby>/<rt>.
+# Require its explicit marker; ordinary brackets and escaped notation stay text.
+NOTE_RUBY = re.compile(r"(?<!\\)[|｜]([^|｜《》\r\n]+)《[^《》\r\n]+》")
 
 
 def _existing_collector():
@@ -45,6 +48,11 @@ def now_iso():
 def count_characters(text):
     """Count extended grapheme clusters; preserve the author's original text."""
     return len(GRAPHEMES.findall(text))
+
+
+def without_ruby_readings(text, kinds):
+    """Keep ruby's base text, as for HTML ruby; never interpret code examples."""
+    return text if "code" in kinds else NOTE_RUBY.sub(r"\1", text)
 
 
 def normalize_hashtag(value):
@@ -87,7 +95,7 @@ class BodyParser(HTMLParser):
         self.hashtag_names = hashtag_names
 
     def _flush(self):
-        text = "".join(self.parts).strip()
+        text = without_ruby_readings("".join(self.parts), self.kinds).strip()
         skip_tag = (self.skip_leading_hashtags and not (self.kinds - {"heading", "link"})
                     and hashtag_only_line(text, self.hashtag_names))
         if self.first is None and text and not skip_tag:
@@ -174,7 +182,7 @@ class OpeningBodyParser(BodyParser):
     def _flush(self):
         if self.done:
             return
-        text = "".join(self.parts).strip()
+        text = without_ruby_readings("".join(self.parts), self.kinds).strip()
         tag_line = (self.skip_leading_hashtags and not (self.kinds - {"heading", "link"})
                     and hashtag_only_line(text, self.hashtag_names))
         if tag_line:

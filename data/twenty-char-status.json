@@ -2,14 +2,14 @@
   "version": 1,
   "status": "ready",
   "eventDate": "2026-11-24",
-  "workCount": 100,
+  "workCount": 102,
   "membershipCount": 11,
-  "clubCount": 89,
+  "clubCount": 91,
   "sourceWindow": {
     "since": "2026-11-24T19:00:00+09:00",
     "until": "2026-11-24T21:00:00+09:00"
   },
-  "updatedAt": "2026-11-24T12:52:00Z",
+  "updatedAt": "2026-11-24T18:35:26Z",
   "membershipSource": {
     "snapshotId": "a5292364-7d2a-4af0-a7ea-6f01877ff0c3",
     "capturedAt": 1795495972832

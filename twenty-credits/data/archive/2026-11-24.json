@@ -7,11 +7,11 @@
     "since": "2026-11-24T19:00:00+09:00",
     "until": "2026-11-24T21:00:00+09:00"
   },
-  "generatedAt": "2026-11-24T12:52:00Z",
+  "generatedAt": "2026-11-24T18:35:26Z",
   "countRule": "extended-grapheme-clusters:regex-2024.11.6:unicode-16.0",
   "sourceSummary": {
     "checked": 109,
-    "extracted": 100
+    "extracted": 102
   },
   "works": [
     {
@@ -341,6 +341,23 @@
       "title": "考察ブーム｜20字小説｜シロクマ文芸部",
       "publishedAt": "2026-11-24T20:00:04+09:00",
       "url": "https://note.com/fuu_utsusemi/n/n5d662c4c55ac"
+    },
+    {
+      "key": "n121059d3e860",
+      "text": "硬！ 方々硬かった？ 片肩が、ただガタガタ。",
+      "charCount": 20,
+      "authorName": "中之人成",
+      "handle": "akashiba555",
+      "creditGroup": "club",
+      "sourceType": "extracted",
+      "title": "20字小説　「片肩」　#シロクマ文芸部",
+      "publishedAt": "2026-11-24T20:00:05+09:00",
+      "url": "https://note.com/akashiba555/n/n121059d3e860",
+      "sourceLines": [
+        "硬！",
+        "方々硬かった？",
+        "片肩が、ただガタガタ。"
+      ]
     },
     {
       "key": "n71183e29f708",
@@ -693,6 +710,22 @@
       "title": "《20字小説》同じ温度 ― 冬",
       "publishedAt": "2026-11-24T20:00:34+09:00",
       "url": "https://note.com/hinao_mikagami/n/n7b05da6095c3"
+    },
+    {
+      "key": "ncd440a4052e4",
+      "text": "雨の日の鳥達は賑やかだ。 晩秋の道を征く。",
+      "charCount": 20,
+      "authorName": "森 悠",
+      "handle": "dainamolly",
+      "creditGroup": "club",
+      "sourceType": "extracted",
+      "title": "二十字の世界",
+      "publishedAt": "2026-11-24T20:00:35+09:00",
+      "url": "https://note.com/dainamolly/n/ncd440a4052e4",
+      "sourceLines": [
+        "雨の日の鳥達は賑やかだ。",
+        "晩秋の道を征く。"
+      ]
     },
     {
       "key": "n10e7a435bad3",

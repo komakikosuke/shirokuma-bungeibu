@@ -219,6 +219,40 @@ class ExtractionTests(unittest.TestCase):
         row = extract("<p><ruby>今日<rp>(</rp><rt>きょう</rt><rp>)</rp></ruby>は昨日の私が置いた鍵で明日を開ける。</p>")
         self.assertEqual((row["text"], row["charCount"]), (STORY, 20))
 
+    def test_note_ruby_notation_keeps_only_base_text(self):
+        for marker in ("|", "｜"):
+            body = STORY.replace("昨日", marker + "昨日《きのう》").replace("鍵", marker + "鍵《かぎ》")
+            with self.subTest(marker=marker):
+                row = extract(f"<p>{body}</p>")
+                self.assertEqual((row["text"], row["charCount"], row["status"]), (STORY, 20, "success"))
+        row = extract("<p>今日は昨日の私が置いた|<strong>鍵</strong>《かぎ》で明日を開ける。</p>")
+        self.assertEqual((row["text"], row["charCount"], row["status"]), (STORY, 20, "success"))
+
+    def test_note_ruby_notation_in_bounded_two_and_three_line_stories(self):
+        cases = [
+            (["雨の日の鳥達は賑やかだ。", "晩秋の道を|征《ゆ》く。"],
+             ["雨の日の鳥達は賑やかだ。", "晩秋の道を征く。"]),
+            (["|硬《カタ》！", "|方々《カタガタ》|硬《カタ》かった？", "|片肩《カタカタ》が、ただガタガタ。"],
+             ["硬！", "方々硬かった？", "片肩が、ただガタガタ。"]),
+        ]
+        for raw, plain in cases:
+            with self.subTest(lines=len(raw)):
+                body = "<p>" + "<br>".join(raw) + "</p><p><br></p><p>あとがき</p>"
+                row = extract(body)
+                self.assertEqual((row["text"], row["charCount"], row["status"]), ("".join(plain), 20, "success"))
+                self.assertEqual(row["sourceLines"], plain)
+
+    def test_note_ruby_notation_does_not_normalize_base_graphemes(self):
+        text = STORY.replace("鍵", "か\u3099")
+        row = extract(f"<p>{STORY.replace('鍵', '|か' + chr(0x3099) + '《が》')}</p>")
+        self.assertEqual((row["text"], row["charCount"]), (text, 20))
+
+    def test_literal_brackets_incomplete_ruby_and_code_are_preserved(self):
+        for text in ("鍵《かぎ》", "|鍵《》", "|鍵《かぎ", r"\|鍵《かぎ》"):
+            with self.subTest(text=text):
+                self.assertEqual(first_body_line(f"<p>{text}</p>").text, text)
+        self.assertEqual(first_body_line("<pre><code>|鍵《かぎ》</code></pre>").text, "|鍵《かぎ》")
+
     def test_hidden_elements_and_scripts_are_not_body_text(self):
         row = extract(f"<script>説明</script><p hidden>説明</p><p style='display: none'>説明</p><p>{STORY}</p>")
         self.assertEqual((row["text"], row["status"]), (STORY, "success"))
