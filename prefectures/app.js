@@ -54,8 +54,6 @@
   function filterArticles(articles, state) {
     return articles.filter(article => {
       if (state.prefecture && !article.prefectures.includes(state.prefecture)) return false;
-      if (state.tag && !article.tags.includes(state.tag)) return false;
-      if (state.author && article.author.handle !== state.author) return false;
       return true;
     }).sort((a, b) => (Date.parse(b.publishedAt) - Date.parse(a.publishedAt)) * (state.sort === "old" ? -1 : 1) || a.key.localeCompare(b.key));
   }
@@ -69,7 +67,7 @@
   const updateLabel = new Intl.DateTimeFormat("ja-JP", {timeZone: "Asia/Tokyo", month: "numeric", day: "numeric", hour: "numeric", minute: "2-digit"});
   let prefectures = [], articles = [], stats, registry, mapGroups = new Map(), callouts, tooltip;
   let loaded = false;
-  const state = {prefecture: "", tab: "articles", view: "map", tag: "", author: "", sort: "new", limit: PAGE_SIZE};
+  const state = {prefecture: "", view: "map", sort: "new", limit: PAGE_SIZE};
   function element(name, className, text) {
     const node = document.createElement(name);
     if (className) node.className = className;
@@ -88,17 +86,14 @@
     return node;
   }
   const currentPrefecture = () => prefectures.find(p => p.code === state.prefecture);
-  const scopedArticles = () => articles.filter(a => !state.prefecture || a.prefectures.includes(state.prefecture));
   function readHash() {
     const params = new URLSearchParams(location.hash.slice(1));
     state.prefecture = prefectures.some(p => p.code === params.get("pref")) ? params.get("pref") : "";
-    state.tab = params.get("tab") === "creators" ? "creators" : "articles";
     state.view = params.get("view") === "list" ? "list" : "map";
   }
   function writeHash() {
     const params = new URLSearchParams();
     if (state.prefecture) params.set("pref", state.prefecture);
-    if (state.tab === "creators") params.set("tab", "creators");
     if (state.view === "list") params.set("view", "list");
     const hash = params.toString();
     history.replaceState(null, "", location.pathname + location.search + (hash ? "#" + hash : ""));
@@ -111,7 +106,7 @@
   }
   function selectPrefecture(code, scroll = false) {
     if (!loaded || (code && !prefectures.some(p => p.code === code))) return;
-    state.prefecture = code; state.tag = ""; state.author = ""; state.limit = PAGE_SIZE;
+    state.prefecture = code; state.limit = PAGE_SIZE;
     writeHash(); renderMapCounts(); renderPrefectureList(); renderResults();
     if (scroll && matchMedia("(max-width: 960px)").matches) {
       $("resultsPanel").scrollIntoView({behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth", block: "start"});
@@ -208,10 +203,6 @@
     link.append(avatar(author), element("span", "article-author-name", author.name));
     return link;
   }
-  function displayCategory(article) {
-    const names = new Set(prefectures.map(p => p.name));
-    return article.tags.find(t => t !== TAG && !names.has(t)) || "";
-  }
   function articleCard(article) {
     const card = element("article", "article-card");
     card.append(authorLink(article.author));
@@ -226,83 +217,32 @@
     }
     body.append(thumb); card.append(body);
     const meta = element("div", "article-meta");
-    const category = displayCategory(article);
-    if (category) meta.append(element("span", "article-category", category));
     const date = element("time", "", dateLabel.format(new Date(article.publishedAt))); date.dateTime = article.publishedAt; meta.append(date);
     if (article.isPaid) meta.append(element("span", "paid-label", "有料"));
     meta.append(externalLink("noteで読む", article.url, "article-read")); card.append(meta);
     return card;
   }
-  function creatorCards(list) {
-    const creators = new Map();
-    for (const article of list) {
-      if (!creators.has(article.author.handle)) creators.set(article.author.handle, {author: article.author, articles: []});
-      creators.get(article.author.handle).articles.push(article);
-    }
-    return [...creators.values()];
-  }
-  function creatorCard(creator) {
-    const card = element("article", "creator-card"), header = element("div", "creator-card-info");
-    header.append(authorLink(creator.author), element("span", "creator-count", creator.articles.length + "記事"));
-    card.append(header);
-    const recent = element("p", "creator-recent"); recent.append(externalLink(creator.articles[0].title, creator.articles[0].url)); card.append(recent);
-    const button = element("button", "creator-articles-button", (state.prefecture ? "この県の" : "") + creator.articles.length + "記事を見る");
-    button.type = "button";
-    button.addEventListener("click", () => { state.author = creator.author.handle; state.tab = "articles"; state.limit = PAGE_SIZE; writeHash(); renderResults(); $("articlesTab").focus({preventScroll: true}); });
-    card.append(button);
-    return card;
-  }
-  function renderGenreFilters(base) {
-    const counts = new Map(), excluded = new Set([TAG, ...prefectures.map(p => p.name)]);
-    for (const article of base) for (const tag of article.tags) if (!excluded.has(tag)) counts.set(tag, (counts.get(tag) || 0) + 1);
-    const choices = [...counts].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], "ja")).slice(0, 4).map(([tag]) => tag);
-    if (state.tag && !choices.includes(state.tag)) choices.push(state.tag);
-    const active = document.activeElement?.dataset.genre;
-    $("genreFilters").replaceChildren();
-    for (const tag of ["", ...choices]) {
-      const button = element("button", "", tag || "すべて"); button.type = "button"; button.dataset.genre = tag;
-      button.setAttribute("aria-pressed", String(tag === state.tag));
-      button.addEventListener("click", () => { state.tag = tag; state.limit = PAGE_SIZE; renderResults(); });
-      $("genreFilters").append(button);
-    }
-    if (active !== undefined) [...$("genreFilters").children].find(b => b.dataset.genre === active)?.focus({preventScroll: true});
-  }
-  function emptyMessage(filtered) {
+  function emptyMessage() {
     const node = element("div", "empty-message");
     const pref = currentPrefecture();
-    if (filtered) {
-      node.append(element("strong", "", "記事が見つかりませんでした。"), element("p", "", "選んだタグや書き手を変えてみてください。"));
-    } else {
-      node.append(element("strong", "", pref ? pref.name + "の最初の記事を、あなたから。" : "最初のひと記事を、待っています。"), element("p", "", "ふるさとの話も、旅先の記憶も。タグをつけて、地図に色を添えてください。"));
-      const link = element("a", "", "参加方法を見る"); link.href = "#participate"; node.append(link);
-    }
+    node.append(element("strong", "", pref ? pref.name + "の最初の記事を、あなたから。" : "最初のひと記事を、待っています。"), element("p", "", "ふるさとの話も、旅先の記憶も。タグをつけて、地図に色を添えてください。"));
+    const link = element("a", "", "参加方法を見る"); link.href = "#participate"; node.append(link);
     return node;
   }
   function renderResults() {
     if (!loaded) return;
-    const pref = currentPrefecture(), base = scopedArticles(), filtered = filterArticles(articles, state), creators = creatorCards(filtered);
+    const pref = currentPrefecture(), list = filterArticles(articles, state);
+    const creatorCount = new Set(list.map(article => article.author.handle)).size;
     $("resultsEnglish").textContent = pref?.englishName || "ALL JAPAN";
     $("resultsTitle").textContent = pref?.name || "全国の新着記事";
-    $("resultsCount").textContent = number.format(filtered.length) + " 記事 ・ " + number.format(creators.length) + " 人の書き手";
-    $("articleTabCount").textContent = number.format(filtered.length);
-    $("creatorTabCount").textContent = number.format(creators.length);
+    $("resultsCount").textContent = number.format(list.length) + " 記事 ・ " + number.format(creatorCount) + " 人の書き手";
     $("clearPrefecture").hidden = !pref;
-    setTabs("articlesTab", "creatorsTab", state.tab === "articles" ? 0 : 1);
-    $("resultsList").setAttribute("aria-labelledby", state.tab === "articles" ? "articlesTab" : "creatorsTab");
-    renderGenreFilters(base);
-    $("clearAuthor").hidden = !state.author;
-    if (state.author) $("clearAuthor").textContent = (articles.find(a => a.author.handle === state.author)?.author.name || state.author) + "　×";
-    $("clearAuthor").setAttribute("aria-label", "書き手による絞り込みを解除する");
     $("resultsList").replaceChildren();
-    const list = state.tab === "articles" ? filtered : creators;
-    if (!list.length) $("resultsList").append(emptyMessage(Boolean(state.tag || state.author)));
-    else for (const record of list.slice(0, state.limit)) $("resultsList").append(state.tab === "articles" ? articleCard(record) : creatorCard(record));
+    if (!list.length) $("resultsList").append(emptyMessage());
+    else for (const article of list.slice(0, state.limit)) $("resultsList").append(articleCard(article));
     $("loadMore").hidden = state.limit >= list.length;
-    $("loadMore").textContent = "さらに" + Math.min(6, list.length - state.limit) + (state.tab === "articles" ? "記事" : "人の書き手") + "を見る";
-    $("resultAnnouncement").textContent = (pref?.name || "全国") + "、" + filtered.length + "記事、" + creators.length + "人の書き手";
-    const guideName = pref?.name || "京都府";
-    $("prefectureTag").dataset.copy = guideName;
-    $("prefectureTag").firstElementChild.textContent = "#" + guideName;
+    $("loadMore").textContent = "さらに" + Math.min(6, list.length - state.limit) + "記事を見る";
+    $("resultAnnouncement").textContent = (pref?.name || "全国") + "、" + list.length + "記事、" + creatorCount + "人の書き手";
   }
   async function getJson(url) {
     const controller = new AbortController(), timer = setTimeout(() => controller.abort(), 15000);
@@ -359,11 +299,8 @@
   }
   $("mapTab").addEventListener("click", () => { state.view = "map"; writeHash(); renderView(); });
   $("listTab").addEventListener("click", () => { state.view = "list"; writeHash(); renderView(); });
-  $("articlesTab").addEventListener("click", () => { state.tab = "articles"; state.limit = PAGE_SIZE; writeHash(); renderResults(); });
-  $("creatorsTab").addEventListener("click", () => { state.tab = "creators"; state.limit = PAGE_SIZE; writeHash(); renderResults(); });
-  bindTabKeys(["mapTab", "listTab"]); bindTabKeys(["articlesTab", "creatorsTab"]);
+  bindTabKeys(["mapTab", "listTab"]);
   $("clearPrefecture").addEventListener("click", () => selectPrefecture(""));
-  $("clearAuthor").addEventListener("click", () => { state.author = ""; state.limit = PAGE_SIZE; renderResults(); });
   $("sortSelect").addEventListener("change", event => { state.sort = event.target.value; state.limit = PAGE_SIZE; renderResults(); });
   $("loadMore").addEventListener("click", () => { state.limit += 6; renderResults(); });
   $("retryButton").addEventListener("click", load);
@@ -381,7 +318,7 @@
   }));
   window.addEventListener("hashchange", () => {
     if (!loaded || location.hash === "#participate" || location.hash === "#explore") return;
-    readHash(); state.tag = ""; state.author = ""; state.limit = PAGE_SIZE;
+    readHash(); state.limit = PAGE_SIZE;
     renderMapCounts(); renderPrefectureList(); renderView(); renderResults();
   });
   load();

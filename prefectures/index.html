@@ -8,8 +8,8 @@
   <meta name="robots" content="noindex,nofollow">
   <title>都道府県クリエイター図鑑｜シロクマ文芸部</title>
   <link rel="icon" href="../assets/polarbear-icon.png" type="image/png">
-  <link rel="stylesheet" href="./style.css?v=2">
-  <script defer src="./app.js?v=2"></script>
+  <link rel="stylesheet" href="./style.css?v=3">
+  <script defer src="./app.js?v=3"></script>
 </head>
 <body>
   <a class="skip-link" href="#explore">地図と記事一覧へ</a>
@@ -25,12 +25,11 @@
       </nav>
     </div>
   </header>
-  <div class="container breadcrumb"><a href="../">ホーム</a><span aria-hidden="true">›</span><span>都道府県クリエイター図鑑</span></div>
   <div id="sampleNotice" class="sample-notice" hidden><div class="container">画面確認用のサンプル表示です。記事・人数は実際の掲載状況ではありません。</div></div>
   <section class="hero" aria-labelledby="pageTitle">
     <div class="container hero-inner">
       <div class="hero-copy">
-        <nav class="hero-breadcrumb" aria-label="サイト内リンク"><a href="../">ホーム</a><span aria-hidden="true">/</span><a href="https://shirokuma-writing-room.claska.chatgpt.site">みんなの部室</a></nav>
+        <nav class="hero-breadcrumb" aria-label="パンくずリスト"><a href="../">ホーム</a><span aria-hidden="true">/</span><span aria-current="page">都道府県クリエイター図鑑</span></nav>
         <h1 id="pageTitle">都道府県<span>クリエイター図鑑</span></h1>
         <p class="hero-lead">その土地の話から、<span>書く人に出会う。</span></p>
         <p class="hero-description">ふるさとの話も、旅先の記憶も。<span>あなたの記事で、日本地図に色がつきます。</span></p>
@@ -67,16 +66,13 @@
           <div id="listView" class="prefecture-list" role="tabpanel" aria-labelledby="listTab" hidden></div>
           <div class="map-legend" aria-label="記事数による色分け">
             <strong>記事数</strong><ul><li><i class="level-0"></i>0</li><li><i class="level-1"></i>1–4</li><li><i class="level-2"></i>5–9</li><li><i class="level-3"></i>10–19</li><li><i class="level-4"></i>20以上</li></ul>
-            <span class="auto-caption">noteの記事を自動掲載</span>
           </div>
         </div>
         <aside id="resultsPanel" class="results-panel" aria-labelledby="resultsTitle" aria-busy="true">
-          <div class="results-heading"><div><p id="resultsEnglish" class="prefecture-english">ALL JAPAN</p><h2 id="resultsTitle" tabindex="-1">全国の新着記事</h2><p id="resultsCount" class="results-count">記事を読み込んでいます…</p></div><button id="clearPrefecture" class="icon-button close-button" type="button" aria-label="都道府県の選択を解除する" hidden>×</button></div>
-          <div class="result-tabs" role="tablist" aria-label="表示する内容"><button id="articlesTab" type="button" role="tab" aria-selected="true" aria-controls="resultsList">記事 <span id="articleTabCount">—</span></button><button id="creatorsTab" type="button" role="tab" aria-selected="false" aria-controls="resultsList" tabindex="-1">書き手 <span id="creatorTabCount">—</span></button></div>
-          <div id="genreFilters" class="genre-filters" aria-label="記事のタグで絞り込む"></div>
-          <div class="result-tools"><button id="clearAuthor" class="author-filter" type="button" hidden></button><label class="sr-only" for="sortSelect">記事の並び順</label><div class="select-wrap sort-wrap"><select id="sortSelect"><option value="new">新しい順</option><option value="old">古い順</option></select></div></div>
+          <div class="results-heading"><div><p id="resultsEnglish" class="prefecture-english">ALL JAPAN</p><h2 id="resultsTitle" tabindex="-1">全国の新着記事</h2></div><button id="clearPrefecture" class="icon-button close-button" type="button" aria-label="都道府県の選択を解除する" hidden>×</button></div>
+          <div class="results-summary"><p id="resultsCount" class="results-count">記事を読み込んでいます…</p><label class="sr-only" for="sortSelect">記事の並び順</label><div class="select-wrap sort-wrap"><select id="sortSelect"><option value="new">新しい順</option><option value="old">古い順</option></select></div></div>
           <p id="resultAnnouncement" class="sr-only" role="status" aria-live="polite"></p>
-          <div id="resultsList" class="results-list" role="tabpanel" aria-labelledby="articlesTab"><p class="empty-message">記事を読み込んでいます…</p></div>
+          <div id="resultsList" class="results-list"><p class="empty-message">記事を読み込んでいます…</p></div>
           <button id="loadMore" class="load-more" type="button" hidden>さらに記事を見る</button>
         </aside>
       </div>
@@ -84,7 +80,7 @@
     </section>
     <section class="participation" id="participate" aria-labelledby="participateTitle">
       <div class="participation-copy"><h2 id="participateTitle">あなたの記事で、<br>地図に色を。</h2><p>出身・暮らし・旅行など、土地とのつながりは自由。<br>小説も、趣味の話も、役立つ情報も歓迎です。</p></div>
-      <div class="participation-details"><ol class="steps"><li><span class="step-number" aria-hidden="true">01</span><h3>土地にまつわる記事を書く</h3><p>ふるさとの思い出や、おすすめの店。<br>その土地とのつながりを書いてください。</p></li><li><span class="step-number" aria-hidden="true">02</span><h3>２つのタグをつける</h3><button type="button" class="copy-tag" data-copy="都道府県クリエイター図鑑"><span>#都道府県クリエイター図鑑</span><span class="copy-icon" aria-hidden="true"></span></button><button type="button" class="copy-tag" id="prefectureTag" data-copy="京都府"><span>#京都府</span><span class="copy-icon" aria-hidden="true"></span></button></li><li><span class="step-number" aria-hidden="true">03</span><h3>noteで公開する</h3><p>条件を満たした記事を自動で収集。<br>この地図と記事一覧に反映します。</p></li></ol><p class="participation-note">都道府県タグは「#東京都」「#北海道」などの正式名称で。複数の県への参加もできます。<br>公開から反映まで時間がかかる場合があります。</p><p id="copyStatus" class="copy-status" role="status" aria-live="polite"></p></div>
+      <div class="participation-details"><ol class="steps"><li><span class="step-number" aria-hidden="true">01</span><h3>土地にまつわる記事を書く</h3><p>ふるさとの思い出や、おすすめの店。<br>その土地とのつながりを書いてください。</p></li><li><span class="step-number" aria-hidden="true">02</span><h3>２つのタグをつける</h3><button type="button" class="copy-tag" data-copy="都道府県クリエイター図鑑"><span>#都道府県クリエイター図鑑</span><span class="copy-icon" aria-hidden="true"></span></button><p class="prefecture-tag-guide">#都道府県名 <span>（例：東京都）</span></p></li><li><span class="step-number" aria-hidden="true">03</span><h3>noteで公開する</h3><p>この地図と記事一覧に自動で反映されます。</p></li></ol><p class="participation-note">公開から反映まで時間がかかる場合があります。</p><p id="copyStatus" class="copy-status" role="status" aria-live="polite"></p></div>
     </section>
   </main>
   <footer class="footer"><div class="container footer-inner"><span>© シロクマ文芸部</span><a href="../">ホームに戻る</a></div></footer>
