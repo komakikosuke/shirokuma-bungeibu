@@ -1,0 +1,81 @@
+{
+  "version": 1,
+  "purpose": "prefecture-atlas-preview",
+  "creator": "komaki_kousuke",
+  "generatedAt": "2026-11-24T23:37:30Z",
+  "source": "https://note.com/komaki_kousuke/rss",
+  "articles": [
+    {
+      "key": "n84bf4fd4083c",
+      "url": "https://note.com/komaki_kousuke/n/n84bf4fd4083c",
+      "title": "20字小説｜島を買ってみた　#はじめてのnote",
+      "publishedAt": "2026-11-24T11:00:00+00:00",
+      "author": {
+        "handle": "komaki_kousuke",
+        "name": "小牧幸助｜小説・エッセイ",
+        "avatarUrl": "https://assets.st-note.com/production/uploads/images/88616473/profile_d46a24f4be47b8bea73eca6dab05e66f.png?fit=bounds&format=jpeg&quality=85&width=330"
+      },
+      "imageUrl": "https://assets.st-note.com/production/uploads/images/340068075/rectangle_large_type_2_eff92c636a516e9c6069bc7dabfc0fc7.png?fit=bounds&quality=85&width=1280",
+      "tags": [
+        "20字小説",
+        "はじめてのnote",
+        "オリジナル小説",
+        "ショートショート",
+        "ショートストーリー",
+        "シロクマ文芸部",
+        "小説",
+        "掌編小説",
+        "短編小説"
+      ],
+      "isPaid": false
+    },
+    {
+      "key": "n3366f4e63548",
+      "url": "https://note.com/komaki_kousuke/n/n3366f4e63548",
+      "title": "企画予告｜20字小説　#はじめてのnote",
+      "publishedAt": "2026-11-23T12:00:00+00:00",
+      "author": {
+        "handle": "komaki_kousuke",
+        "name": "小牧幸助｜小説・エッセイ",
+        "avatarUrl": "https://assets.st-note.com/production/uploads/images/88616473/profile_d46a24f4be47b8bea73eca6dab05e66f.png?fit=bounds&format=jpeg&quality=85&width=330"
+      },
+      "imageUrl": "https://assets.st-note.com/production/uploads/images/339586393/rectangle_large_type_2_fd6fead3e2c4af922ddf0ff5c04834de.png?fit=bounds&quality=85&width=1280",
+      "tags": [
+        "20字小説",
+        "はじめてのnote",
+        "オリジナル小説",
+        "ショートショート",
+        "ショートストーリー",
+        "シロクマ文芸部",
+        "小説",
+        "掌編小説",
+        "短編小説"
+      ],
+      "isPaid": false
+    },
+    {
+      "key": "n04c2c0357581",
+      "url": "https://note.com/komaki_kousuke/n/n04c2c0357581",
+      "title": "掌編小説｜拾った指輪に自分の名前　#はじめてのnote",
+      "publishedAt": "2026-11-22T12:00:00+00:00",
+      "author": {
+        "handle": "komaki_kousuke",
+        "name": "小牧幸助｜小説・エッセイ",
+        "avatarUrl": "https://assets.st-note.com/production/uploads/images/88616473/profile_d46a24f4be47b8bea73eca6dab05e66f.png?fit=bounds&format=jpeg&quality=85&width=330"
+      },
+      "imageUrl": "https://assets.st-note.com/production/uploads/images/339152787/rectangle_large_type_2_7fa843ad8c73b33c45dde3d69eebb74b.png?fit=bounds&quality=85&width=1280",
+      "tags": [
+        "はじめてのnote",
+        "オリジナル小説",
+        "ショートショート",
+        "ショートストーリー",
+        "シロクマ文芸部",
+        "ミステリー小説",
+        "小説",
+        "掌編小説",
+        "短編小説"
+      ],
+      "isPaid": false
+    }
+  ]
+}
