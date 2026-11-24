@@ -310,9 +310,12 @@
     $("prefectureTag").firstElementChild.textContent = "#" + guideName;
   }
   async function getJson(url) {
-    const response = await fetch(url, {cache: "no-store"});
-    if (!response.ok) throw Error("読み込みに失敗しました: " + response.status);
-    return response.json();
+    const controller = new AbortController(), timer = setTimeout(() => controller.abort(), 15000);
+    try {
+      const response = await fetch(url, {cache: "no-store", signal: controller.signal});
+      if (!response.ok) throw Error("読み込みに失敗しました: " + response.status);
+      return await response.json();
+    } finally { clearTimeout(timer); }
   }
   async function load() {
     $("retryButton").disabled = true;
