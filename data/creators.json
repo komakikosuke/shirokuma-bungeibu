@@ -63,7 +63,7 @@
     },
     "aomame_nono": {
       "name": "青豆ノノ",
-      "checkedAt": "2026-11-21T10:25:29Z"
+      "checkedAt": "2026-11-24T10:31:51Z"
     },
     "aonn001": {
       "name": "あおん",
@@ -171,7 +171,7 @@
     },
     "happy_daisy640": {
       "name": "桜街スピカ",
-      "checkedAt": "2026-11-21T10:25:29Z"
+      "checkedAt": "2026-11-24T10:31:51Z"
     },
     "hasoyam": {
       "name": "はそやm（真庭真子）",
@@ -248,6 +248,10 @@
     "kitanshi_massan": {
       "name": "奇譚師まっさん",
       "checkedAt": "2026-11-23T04:47:21Z"
+    },
+    "komaki_kousuke": {
+      "name": "小牧幸助｜小説・エッセイ",
+      "checkedAt": "2026-11-24T10:31:51Z"
     },
     "kossiy": {
       "name": "コッシー",
@@ -343,11 +347,11 @@
     },
     "n_kojuro_k_0829": {
       "name": "kojuro",
-      "checkedAt": "2026-11-21T10:25:29Z"
+      "checkedAt": "2026-11-24T10:31:51Z"
     },
     "nice_stilt502": {
       "name": "かわしまりこ",
-      "checkedAt": "2026-11-21T10:25:29Z"
+      "checkedAt": "2026-11-24T10:31:51Z"
     },
     "nisou": {
       "name": "nisou",
@@ -470,5 +474,5 @@
       "checkedAt": "2026-11-23T22:27:40Z"
     }
   },
-  "updatedAt": "2026-11-24T04:40:10Z"
+  "updatedAt": "2026-11-24T10:31:51Z"
 }
