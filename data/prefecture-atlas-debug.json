@@ -2,9 +2,34 @@
   "version": 1,
   "purpose": "prefecture-atlas-preview",
   "creator": "komaki_kousuke",
-  "generatedAt": "2026-11-25T09:52:33Z",
+  "generatedAt": "2026-11-25T12:54:48Z",
   "source": "https://note.com/komaki_kousuke/rss",
   "articles": [
+    {
+      "key": "n92ca78c1d11d",
+      "url": "https://note.com/komaki_kousuke/n/n92ca78c1d11d",
+      "title": "企画「20字小説」のエンドロール　#はじめてのnote",
+      "publishedAt": "2026-11-25T12:00:00+00:00",
+      "author": {
+        "handle": "komaki_kousuke",
+        "name": "小牧幸助｜小説・エッセイ",
+        "avatarUrl": "https://assets.st-note.com/production/uploads/images/88616473/profile_d46a24f4be47b8bea73eca6dab05e66f.png?fit=bounds&format=jpeg&quality=85&width=330"
+      },
+      "imageUrl": "https://assets.st-note.com/production/uploads/images/340587647/rectangle_large_type_2_49cf105b32e2c3f674d1110aed95cdc3.png?fit=bounds&quality=85&width=1280",
+      "tags": [
+        "20字小説",
+        "はじめてのnote",
+        "オリジナル小説",
+        "ショートショート",
+        "ショートストーリー",
+        "シロクマ文芸部",
+        "小説",
+        "掌編小説",
+        "短編小説",
+        "自己紹介"
+      ],
+      "isPaid": false
+    },
     {
       "key": "n84bf4fd4083c",
       "url": "https://note.com/komaki_kousuke/n/n84bf4fd4083c",
@@ -47,31 +72,6 @@
         "ショートショート",
         "ショートストーリー",
         "シロクマ文芸部",
-        "小説",
-        "掌編小説",
-        "短編小説"
-      ],
-      "isPaid": false
-    },
-    {
-      "key": "n04c2c0357581",
-      "url": "https://note.com/komaki_kousuke/n/n04c2c0357581",
-      "title": "掌編小説｜拾った指輪に自分の名前　#あの日の仕事をきっかけに",
-      "publishedAt": "2026-11-22T12:00:00+00:00",
-      "author": {
-        "handle": "komaki_kousuke",
-        "name": "小牧幸助｜小説・エッセイ",
-        "avatarUrl": "https://assets.st-note.com/production/uploads/images/88616473/profile_d46a24f4be47b8bea73eca6dab05e66f.png?fit=bounds&format=jpeg&quality=85&width=330"
-      },
-      "imageUrl": "https://assets.st-note.com/production/uploads/images/339152787/rectangle_large_type_2_7fa843ad8c73b33c45dde3d69eebb74b.png?fit=bounds&quality=85&width=1280",
-      "tags": [
-        "あの日の仕事をきっかけに",
-        "はじめてのnote",
-        "オリジナル小説",
-        "ショートショート",
-        "ショートストーリー",
-        "シロクマ文芸部",
-        "ミステリー小説",
         "小説",
         "掌編小説",
         "短編小説"
