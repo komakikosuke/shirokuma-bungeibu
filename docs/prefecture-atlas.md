@@ -32,7 +32,7 @@
     node --check prefectures/app.js
     python3 scripts/sync_prefecture_atlas.py
 
-サンプルは `python3 scripts/build_prefecture_atlas_preview.py` で制作プレビュー用の `dist/` 内にだけ生成する。`sample: true` を検出するとサンプル表示の案内を出す。本番データにサンプル記事は混ぜない。
+サンプルは `python3 scripts/build_prefecture_atlas_preview.py` で制作プレビュー用の `dist/` 内にだけ生成する。サンプル表示の案内と確認用リンクは画面に出さず、`sample: true` の場合は更新日時欄も非表示にする。本番データにサンプル記事は混ぜない。
 
 ## 小牧幸助の最新記事を使うデバッグ
 

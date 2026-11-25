@@ -322,11 +322,11 @@
       loaded = true; readHash();
       if (debugEnabled && !state.prefecture) state.prefecture = "13";
       $("debugNotice").hidden = !debugEnabled;
-      $("sampleNotice").hidden = data.sample !== true;
       $("articleTotal").textContent = number.format(stats.articles);
       $("creatorTotal").textContent = number.format(stats.creators);
       $("prefectureTotal").textContent = number.format(stats.prefectures);
-      $("updatedAt").textContent = data.sample === true ? "画面確認用サンプル" : data.generatedAt && Number.isFinite(Date.parse(data.generatedAt)) ? (debugEnabled ? "デバッグ記事の取得 " : "最終更新 ") + updateLabel.format(new Date(data.generatedAt)) + "（日本時間）" : "これから記事が集まります";
+      $("updatedAt").hidden = data.sample === true;
+      $("updatedAt").textContent = data.sample === true ? "" : data.generatedAt && Number.isFinite(Date.parse(data.generatedAt)) ? (debugEnabled ? "デバッグ記事の取得 " : "最終更新 ") + updateLabel.format(new Date(data.generatedAt)) + "（日本時間）" : "これから記事が集まります";
       buildMap(); renderMapCounts(); renderPrefectureList(); renderView(); renderResults();
     } catch (error) {
       console.error("図鑑の読み込みに失敗しました", error);
