@@ -181,12 +181,13 @@
     callouts.replaceChildren(); tooltip.replaceChildren();
     const leaders = topPrefectures(prefectures, stats);
     const pref = currentPrefecture();
+    const [mapX, mapY, mapWidth, mapHeight] = registry.viewBox.split(/\s+/).map(Number);
+    const selectionWidth = pref ? pref.name.length * 18 + 24 : 0;
     const selectionBox = pref && !leaders.some(item => item.prefecture.code === pref.code) ? {
-      x: Math.max(10, Math.min(716, pref.point[0] - 78)),
-      y: Math.max(15, pref.point[1] - 64), width: 128, height: 40
+      x: Math.max(mapX + 10, Math.min(mapX + mapWidth - selectionWidth - 10, pref.point[0] - selectionWidth / 2)),
+      y: Math.max(mapY + 15, pref.point[1] - 64), width: selectionWidth, height: 40
     } : null;
     const occupied = selectionBox ? [selectionBox] : [];
-    const [mapX, mapY, mapWidth, mapHeight] = registry.viewBox.split(/\s+/).map(Number);
     for (const {prefecture: leader, count} of [...leaders].sort((a, b) => a.prefecture.point[1] - b.prefecture.point[1])) {
       const countText = number.format(count), width = Math.max(112, leader.name.length * 13 + countText.length * 8 + 30), height = 32;
       const right = leader.point[0] >= mapX + mapWidth / 2;
@@ -204,8 +205,8 @@
       callouts.append(group);
     }
     if (selectionBox) {
-      const {x, y} = selectionBox;
-      tooltip.append(svg("rect", {x, y, width: 128, height: 40, rx: 8}), svg("text", {x: x + 13, y: y + 26, class: "tooltip-name"}, pref.name));
+      const {x, y, width, height} = selectionBox;
+      tooltip.append(svg("rect", {x, y, width, height, rx: 8}), svg("text", {x: x + width / 2, y: y + 26, "text-anchor": "middle", class: "tooltip-name"}, pref.name));
     }
   }
   function renderPrefectureList() {
