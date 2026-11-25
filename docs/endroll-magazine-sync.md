@@ -10,6 +10,7 @@
 
 - 公式サイトの `twenty-credits/data/works.json` に実掲載された作品だけを対象とする。
   抽出候補・除外作品・試作データ・対象期間外の記事は追加しない。
+- 現在の投稿期間は火曜19:00以上・翌水曜00:00未満（日本時間）。過去の21:00締切の掲載データも元の期間で検証する。2026-11-25より前にMacへ導入したコードは、下記のインストールコマンドで更新する。
 - 対象火曜の翌日、水曜21:00（日本時間）まで待つ。
 - 21:00を過ぎても、小牧幸助の公開案内記事を確認できなければ追加しない。
   当該水曜21:00以降に公開された無料の公開記事で、本文内に
@@ -41,7 +42,7 @@ Safariは小牧幸助のnoteアカウントにログイン済みで、
 
 ```bash
 sync_tmp="$(mktemp -t shirokuma-endroll)" &&
-curl -fsSL 'https://komakikosuke.github.io/shirokuma-bungeibu/scripts/note_magazine_sync.py' -o "$sync_tmp" &&
+curl -fsSL 'https://komakikosuke.github.io/shirokuma-bungeibu/scripts/note_magazine_sync.py?v=20261125-window24' -o "$sync_tmp" &&
 /usr/bin/python3 "$sync_tmp" --install-endroll
 ```
 

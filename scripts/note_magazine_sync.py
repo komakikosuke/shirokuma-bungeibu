@@ -85,10 +85,14 @@ def validate_endroll(data):
     if day.weekday() != 1 or day.isoformat() != event_date:
         raise RuntimeError('End-roll event must be a Tuesday')
     since = datetime.combine(day, clock_time(19), JST)
-    until = datetime.combine(day, clock_time(21), JST)
+    until = datetime.combine(day + timedelta(days=1), clock_time(0), JST)
     release = datetime.combine(day + timedelta(days=1), clock_time(21), JST)
     if data.get('sourceWindow') != {'since': since.isoformat(), 'until': until.isoformat()}:
-        raise RuntimeError('Unexpected end-roll submission window')
+        # Existing archives used a Tuesday 21:00 cutoff before the expansion.
+        legacy_until = datetime.combine(day, clock_time(21), JST)
+        if data.get('sourceWindow') != {'since': since.isoformat(), 'until': legacy_until.isoformat()}:
+            raise RuntimeError('Unexpected end-roll submission window')
+        until = legacy_until
     works = {}
     for row in data['works']:
         if not isinstance(row, dict):

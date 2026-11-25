@@ -43,7 +43,7 @@ def event_window(event_date: str):
     if day.weekday() != 1:
         raise ValueError("event-date は火曜日を指定してください")
     return (datetime.combine(day, time(19, 0), JST),
-            datetime.combine(day, time(21, 0), JST))
+            datetime.combine(day + timedelta(days=1), time(0, 0), JST))
 
 
 def parse_published(value):
@@ -155,7 +155,7 @@ def build_documents(extraction, members, event_date, generated_at=None):
     if not isinstance(latest, dict):
         raise ValueError("抽出結果に今回の実行情報がありません")
     if latest.get("since") != since.isoformat() or latest.get("until") != until.isoformat():
-        raise ValueError("抽出期間が火曜19:00〜21:00の公開対象期間と一致しません")
+        raise ValueError("抽出期間が火曜19:00〜24:00の公開対象期間と一致しません")
     if latest.get("stopReason") in {"discovery_error", "running"} or latest.get("truncated") is True:
         raise ValueError("収集が完了していないためエンドロールを更新しません")
 

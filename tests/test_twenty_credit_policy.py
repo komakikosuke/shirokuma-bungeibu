@@ -62,7 +62,7 @@ class TwentyCreditPolicyTests(unittest.TestCase):
             {"text": "あ" * 22, "charCount": 22, "exactly20": False},
             {"charCount": 19, "exactly20": False},
             {"status": "failed"},
-            {"publishedAt": "2026-11-17T21:00:00+09:00"},
+            {"publishedAt": "2026-11-18T00:00:00+09:00"},
         ):
             with self.subTest(changes=changes):
                 self.assertIsNone(eligible_work({**self.record, **changes}, self.since, self.until, set()))

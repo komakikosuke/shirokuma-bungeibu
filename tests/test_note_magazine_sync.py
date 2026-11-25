@@ -29,7 +29,7 @@ def feed(count=1):
     return {'version': 1, 'pageStatus': 'ready', 'sourceHashtag': '20字小説',
             'eventDate': '2026-11-17',
             'sourceWindow': {'since': '2026-11-17T19:00:00+09:00',
-                             'until': '2026-11-17T21:00:00+09:00'},
+                             'until': '2026-11-18T00:00:00+09:00'},
             'sourceSummary': {'extracted': count}, 'works': [work(i) for i in range(1, count + 1)]}
 
 
@@ -122,8 +122,8 @@ class ReleaseTests(unittest.TestCase):
     def test_new_week_cannot_reuse_last_weeks_announcement(self):
         data = feed()
         data['eventDate'] = '2026-11-24'
-        data['sourceWindow'] = {k: v.replace('2026-11-17', '2026-11-24')
-                                for k, v in data['sourceWindow'].items()}
+        data['sourceWindow'] = {'since': '2026-11-24T19:00:00+09:00',
+                                'until': '2026-11-25T00:00:00+09:00'}
         data['works'][0]['publishedAt'] = '2026-11-24T20:00:00+09:00'
         result = sync.load_endroll_feed(datetime.fromisoformat('2026-11-25T21:01:00+09:00'), PublicData(data))
         self.assertEqual(result['status'], 'waiting_for_public_announcement')
@@ -153,7 +153,7 @@ class ReleaseTests(unittest.TestCase):
             variants.append(dict(feed(), **changes))
         for changes in [{'sourceType': 'demo'}, {'charCount': 18}, {'charCount': True},
                         {'url': 'https://note.com/wrong/n/n1'},
-                        {'publishedAt': '2026-11-17T21:00:00+09:00'}]:
+                        {'publishedAt': '2026-11-18T00:00:00+09:00'}]:
             data = feed()
             data['works'][0].update(changes)
             variants.append(data)
@@ -163,6 +163,21 @@ class ReleaseTests(unittest.TestCase):
         for data in variants:
             with self.subTest(data=data), self.assertRaises(RuntimeError):
                 sync.validate_endroll(data)
+
+    def test_expanded_submission_window_keeps_wednesday_release_gate(self):
+        data = feed()
+        data['works'][0]['publishedAt'] = '2026-11-17T23:59:59.999+09:00'
+        self.assertEqual(sync.load_endroll_feed(NOW, PublicData(data))['status'], 'released')
+        self.assertEqual(sync.load_endroll_feed(datetime.fromisoformat('2026-11-18T00:00:00+09:00'), PublicData(data))['status'],
+                         'waiting_for_wednesday_21')
+
+    def test_original_21_hour_archives_remain_readable_with_their_original_cutoff(self):
+        data = feed()
+        data['sourceWindow']['until'] = '2026-11-17T21:00:00+09:00'
+        self.assertEqual(sync.load_endroll_feed(NOW, PublicData(data))['status'], 'released')
+        data['works'][0]['publishedAt'] = '2026-11-17T21:00:00+09:00'
+        with self.assertRaises(RuntimeError):
+            sync.validate_endroll(data)
 
 
 class StateAndScheduleTests(unittest.TestCase):

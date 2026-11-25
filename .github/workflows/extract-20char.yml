@@ -12,8 +12,8 @@ on:
       - "twenty-credits/app.js"
       - "tests/test_twenty_playback.mjs"
   schedule:
-    # GitHub Actions uses UTC. 12:00 UTC = Tuesday 21:00 JST.
-    - cron: "0 12 * * 2"
+    # GitHub Actions uses UTC. 15:00 UTC = Wednesday 00:00 JST.
+    - cron: "0 15 * * 2"
   pull_request:
     paths:
       - "scripts/extract-20char.py"
@@ -31,7 +31,7 @@ on:
   workflow_dispatch:
     inputs:
       event_date:
-        description: "対象の火曜日（YYYY-MM-DD、空欄なら日本時間の当日）"
+        description: "対象の火曜日（YYYY-MM-DD、空欄なら日本時間の直近の火曜日）"
         type: string
       publish:
         description: "結果を公開データへ反映する"
@@ -75,21 +75,24 @@ jobs:
           python-version: "3.12"
       - name: Install isolated extraction dependency
         run: python -m pip install -r scripts/requirements-20char.txt
-      - name: Set Tuesday 19:00–21:00 JST window
+      - name: Set Tuesday 19:00–24:00 JST window
         id: window
         env:
           REQUESTED_DATE: ${{ inputs.event_date }}
         shell: bash
         run: |
           event_date="$REQUESTED_DATE"
-          if [[ -z "$event_date" ]]; then event_date="$(TZ=Asia/Tokyo date +%F)"; fi
+          if [[ -z "$event_date" ]]; then
+            event_date="$(python -c 'from datetime import datetime,timedelta; from zoneinfo import ZoneInfo; day=datetime.now(ZoneInfo("Asia/Tokyo")).date(); print((day-timedelta(days=(day.weekday()-1)%7)).isoformat())')"
+          fi
           if [[ ! "$event_date" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ ]] || [[ "$(date -d "$event_date" +%u)" != "2" ]]; then
             echo "event_date must be a Tuesday in YYYY-MM-DD format" >&2
             exit 2
           fi
           echo "event_date=$event_date" >> "$GITHUB_OUTPUT"
           echo "since=${event_date}T19:00:00+09:00" >> "$GITHUB_OUTPUT"
-          echo "until=${event_date}T21:00:00+09:00" >> "$GITHUB_OUTPUT"
+          next_day="$(date -d "$event_date +1 day" +%F)"
+          echo "until=${next_day}T00:00:00+09:00" >> "$GITHUB_OUTPUT"
       - name: Extract #20字小説 candidates
         run: >-
           python scripts/extract-20char.py

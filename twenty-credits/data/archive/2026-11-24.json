@@ -5,13 +5,13 @@
   "eventDate": "2026-11-24",
   "sourceWindow": {
     "since": "2026-11-24T19:00:00+09:00",
-    "until": "2026-11-24T21:00:00+09:00"
+    "until": "2026-11-25T00:00:00+09:00"
   },
-  "generatedAt": "2026-11-24T18:47:20Z",
+  "generatedAt": "2026-11-25T02:10:19Z",
   "countRule": "extended-grapheme-clusters:regex-2024.11.6:unicode-16.0",
   "sourceSummary": {
-    "checked": 109,
-    "extracted": 106
+    "checked": 122,
+    "extracted": 117
   },
   "works": [
     {
@@ -134,7 +134,7 @@
       "handle": "osunu_note2023",
       "creditGroup": "membership",
       "sourceType": "extracted",
-      "title": "ととんとん｜シロクマ文芸部",
+      "title": "ととんとん｜シロクマ20字小説",
       "publishedAt": "2026-11-24T20:25:54+09:00",
       "url": "https://note.com/osunu_note2023/n/n2ca3fada0298"
     },
@@ -785,7 +785,7 @@
       "key": "n6172f482f2a8",
       "text": "集め使わずは罪な気がした、アラ50の朝。",
       "charCount": 20,
-      "authorName": "72",
+      "authorName": "MAHALO",
       "handle": "mute_bison1068",
       "creditGroup": "club",
       "sourceType": "extracted",
@@ -1053,7 +1053,7 @@
       "handle": "yuzu343",
       "creditGroup": "club",
       "sourceType": "extracted",
-      "title": "きっとハーゲンダッツ。|＃20字小説「シロクマ文芸部」",
+      "title": "きっとハーゲンダッツ。|シロクマ文芸部＃20字小説",
       "publishedAt": "2026-11-24T20:05:12+09:00",
       "url": "https://note.com/yuzu343/n/n14146ad6ae2a"
     },
@@ -1326,9 +1326,152 @@
       "handle": "1degreelower",
       "creditGroup": "club",
       "sourceType": "extracted",
-      "title": "⚪️企画作品｜スキ消し勢大量発生の予感",
+      "title": "⚪️企画作品｜スキ消し勢大量発生の予感［謝罪します］",
       "publishedAt": "2026-11-24T20:56:16+09:00",
       "url": "https://note.com/1degreelower/n/nf97a8b968e8a"
+    },
+    {
+      "key": "n3925031453ab",
+      "text": "20字の小節が5つ縦に並び100字なう。",
+      "charCount": 20,
+      "authorName": "✫みぃ活🐰",
+      "handle": "mi_cd90",
+      "creditGroup": "club",
+      "sourceType": "extracted",
+      "title": "100字なう",
+      "publishedAt": "2026-11-24T21:03:55+09:00",
+      "url": "https://note.com/mi_cd90/n/n3925031453ab"
+    },
+    {
+      "key": "n8be46d5f3cf7",
+      "text": "散歩中、私の頭上に舞い降りたマヨビーム。",
+      "charCount": 20,
+      "authorName": "MAHALO",
+      "handle": "mute_bison1068",
+      "creditGroup": "club",
+      "sourceType": "extracted",
+      "title": "20字小説　悲劇のものがたり",
+      "publishedAt": "2026-11-24T21:16:47+09:00",
+      "url": "https://note.com/mute_bison1068/n/n8be46d5f3cf7"
+    },
+    {
+      "key": "n5a74eb173a19",
+      "text": "飲み込めない祖父。滴に触れると微笑む唇。",
+      "charCount": 20,
+      "authorName": "ことり｜読書と読書感想文",
+      "handle": "sourcilkotori",
+      "creditGroup": "club",
+      "sourceType": "extracted",
+      "title": "そばにいる　＃20字小説　＃シロクマ文芸部",
+      "publishedAt": "2026-11-24T21:22:35+09:00",
+      "url": "https://note.com/sourcilkotori/n/n5a74eb173a19"
+    },
+    {
+      "key": "n3a1d439d26b1",
+      "text": "全力で走ったのに、今日は日曜日だった。",
+      "charCount": 19,
+      "authorName": "碧葉 （あおば）",
+      "handle": "grand_dunlin9647",
+      "creditGroup": "club",
+      "sourceType": "extracted",
+      "title": "シロクマ文芸部 #20字｜遅刻",
+      "publishedAt": "2026-11-24T21:43:58+09:00",
+      "url": "https://note.com/grand_dunlin9647/n/n3a1d439d26b1"
+    },
+    {
+      "key": "nb4e0a5433986",
+      "text": "ふたりはずっとすれちがう、他人のままで。",
+      "charCount": 20,
+      "authorName": "三千白",
+      "handle": "cute_human3932",
+      "creditGroup": "club",
+      "sourceType": "extracted",
+      "title": "出会わなかったら[20字小説]",
+      "publishedAt": "2026-11-24T21:52:31+09:00",
+      "url": "https://note.com/cute_human3932/n/nb4e0a5433986"
+    },
+    {
+      "key": "na81488ea04aa",
+      "text": "なぜ走る。 知るか。 そう即答する奴が速い。",
+      "charCount": 20,
+      "authorName": "小タ（こた）",
+      "handle": "kecapu_nurikabe",
+      "creditGroup": "club",
+      "sourceType": "extracted",
+      "title": "韋駄天【シロクマ文芸部】#20字小説",
+      "publishedAt": "2026-11-24T22:05:31+09:00",
+      "url": "https://note.com/kecapu_nurikabe/n/na81488ea04aa",
+      "sourceLines": [
+        "なぜ走る。",
+        "知るか。",
+        "そう即答する奴が速い。"
+      ]
+    },
+    {
+      "key": "na391dfac0255",
+      "text": "君に勧められた本を読んで、別れを決めた。",
+      "charCount": 20,
+      "authorName": "極夜 / Kyokuya",
+      "handle": "huge_dove563",
+      "creditGroup": "club",
+      "sourceType": "extracted",
+      "title": "理由【20字小説】",
+      "publishedAt": "2026-11-24T22:14:40+09:00",
+      "url": "https://note.com/huge_dove563/n/na391dfac0255"
+    },
+    {
+      "key": "n7303f7d6af6a",
+      "text": "２０代で夢を４０代で夢を夕暮れ老いても。",
+      "charCount": 20,
+      "authorName": "大原吉人",
+      "handle": "oohara106",
+      "creditGroup": "club",
+      "sourceType": "extracted",
+      "title": "いつでも夢を！夢の字の三分割#20字小説",
+      "publishedAt": "2026-11-24T22:32:42+09:00",
+      "url": "https://note.com/oohara106/n/n7303f7d6af6a"
+    },
+    {
+      "key": "n20a941aaaafb",
+      "text": "やりたい事も 行きたい所も 会いたい人も 無い",
+      "charCount": 20,
+      "authorName": "Blue Rose 55",
+      "handle": "clean_auklet416",
+      "creditGroup": "club",
+      "sourceType": "extracted",
+      "title": "嘘つき｜20字小説　シロクマ文芸部",
+      "publishedAt": "2026-11-24T22:33:01+09:00",
+      "url": "https://note.com/clean_auklet416/n/n20a941aaaafb",
+      "sourceLines": [
+        "やりたい事も",
+        "行きたい所も",
+        "会いたい人も",
+        "無い"
+      ]
+    },
+    {
+      "key": "n3ce05d29b579",
+      "text": "お前、またその寝癖。直してやるから座れ。",
+      "charCount": 20,
+      "authorName": "佐波かいり｜距離を書いてみたい人",
+      "handle": "cool_broom8252",
+      "creditGroup": "club",
+      "sourceType": "extracted",
+      "title": "おはようを言う前に｜#20字小説｜シロクマ文芸部",
+      "publishedAt": "2026-11-24T23:00:28+09:00",
+      "url": "https://note.com/cool_broom8252/n/n3ce05d29b579"
+    },
+    {
+      "key": "n5867817f0bc7",
+      "text": "満員電車で眼鏡が曇り。カップ麺食べよう。",
+      "charCount": 20,
+      "authorName": "めたもるふぉーぜ｜大谷結実",
+      "handle": "lush_kudu3527",
+      "creditGroup": "club",
+      "sourceType": "extracted",
+      "title": "20字小説：眼鏡",
+      "publishedAt": "2026-11-24T23:30:41+09:00",
+      "url": "https://note.com/lush_kudu3527/n/n5867817f0bc7"
     }
   ],
   "membershipSource": {

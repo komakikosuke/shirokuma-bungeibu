@@ -35,7 +35,7 @@ def work(key, handle, published_at, *, status="success", exactly20=True,
 def extraction(works, **latest_overrides):
     latest = {
         "since": "2026-11-17T19:00:00+09:00",
-        "until": "2026-11-17T21:00:00+09:00",
+        "until": "2026-11-18T00:00:00+09:00",
         "stopReason": "since_boundary",
         "truncated": False,
         "summary": {"total": len(works)},
@@ -54,8 +54,8 @@ class EndrollBuilderTests(unittest.TestCase):
     def test_allowed_lengths_inside_tuesday_window_are_published(self):
         rows = [
             work("na1", "member_one", "2026-11-17T19:00:00+09:00"),
-            work("na2", "club_one", "2026-11-17T20:59:59+09:00"),
-            work("na3", "club_two", "2026-11-17T21:00:00+09:00"),
+            work("na2", "club_one", "2026-11-17T23:59:59+09:00"),
+            work("na3", "club_two", "2026-11-18T00:00:00+09:00"),
             work("na4", "club_three", "2026-11-17T20:00:00+09:00",
                  status="pending", exactly20=False, char_count=19,
                  reasons=["non_exact_length"]),
@@ -67,7 +67,7 @@ class EndrollBuilderTests(unittest.TestCase):
         self.assertEqual([row["creditGroup"] for row in document["works"]], ["membership", "club", "club"])
         self.assertEqual(document["sourceWindow"], {
             "since": "2026-11-17T19:00:00+09:00",
-            "until": "2026-11-17T21:00:00+09:00",
+            "until": "2026-11-18T00:00:00+09:00",
         })
         self.assertEqual(document["sourceSummary"], {"checked": 4, "extracted": 3})
         self.assertEqual(status["status"], "ready")
@@ -87,8 +87,18 @@ class EndrollBuilderTests(unittest.TestCase):
 
     def test_event_date_must_be_tuesday(self):
         self.assertEqual(event_window("2026-11-17")[0], datetime(2026, 11, 17, 19, tzinfo=JST))
+        self.assertEqual(event_window("2026-11-17")[1], datetime(2026, 11, 18, 0, tzinfo=JST))
         with self.assertRaisesRegex(ValueError, "火曜日"):
             event_window("2026-11-16")
+
+    def test_expanded_window_includes_21_to_24_but_excludes_midnight(self):
+        rows = [work("na1", "writer_one", "2026-11-17T21:00:00+09:00"),
+                work("na2", "writer_two", "2026-11-17T23:59:59.999+09:00"),
+                work("na3", "writer_three", "2026-11-18T00:00:00+09:00"),
+                work("na4", "writer_four", "2026-11-17T18:59:59.999+09:00")]
+        document, status = build_documents(extraction(rows), set(), "2026-11-17")
+        self.assertEqual([row["key"] for row in document["works"]], ["na1", "na2"])
+        self.assertEqual(status["workCount"], 2)
 
     def test_home_entrance_starts_disabled_until_real_data_exists(self):
         homepage = (ROOT / "index.html").read_text(encoding="utf-8")
