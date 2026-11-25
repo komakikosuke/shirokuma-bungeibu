@@ -270,7 +270,7 @@
   function emptyMessage() {
     const node = element("div", "empty-message");
     const pref = currentPrefecture();
-    node.append(element("strong", "", pref ? pref.name + "の最初の記事を、あなたから。" : "最初のひと記事を、待っています。"), element("p", "", "ふるさとの話も、旅先の記憶も。タグをつけて、地図に色を添えてください。"));
+    node.append(element("strong", "", pref ? pref.name + "の最初の記事を書こう。" : "最初のひと記事を、待っています。"), element("p", "", "ふるさとの話も、旅先の記憶も。タグをつけて、地図に色を添えてください。"));
     const link = element("a", "", "参加方法を見る"); link.href = "#participate"; node.append(link);
     return node;
   }
