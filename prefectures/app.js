@@ -29,7 +29,7 @@
   function normalizeArticle(raw, prefectures) {
     const article = normalizePublicMetadata(raw);
     if (!article) return null;
-    const codes = prefectures.filter(p => article.tags.includes(p.name)).map(p => p.code);
+    const codes = prefectures.filter(p => article.tags.includes(p.name) || article.tags.includes(p.name.replace(/[都府県]$/, ""))).map(p => p.code);
     if (!article.tags.includes(TAG) || !codes.length) return null;
     return {...article, prefectures: codes};
   }
@@ -303,13 +303,15 @@
       // Data commits made by GitHub Actions need not rebuild the Pages HTML.
       // Read the current feed directly on the public origin, as the home counter does.
       const debugMeta = document.querySelector('meta[name="atlas-debug-feed"]');
+      const normalMeta = document.querySelector('meta[name="atlas-feed"]');
       const debugFeed = debugMeta?.content;
       const debugEnabled = new URLSearchParams(location.search).get("debug") === "komaki" && Boolean(debugFeed);
-      const feedUrl = debugEnabled ? debugFeed : location.hostname === "komakikosuke.github.io"
+      const feedUrl = debugEnabled ? debugFeed : normalMeta?.content || (location.hostname === "komakikosuke.github.io"
         ? "https://raw.githubusercontent.com/komakikosuke/shirokuma-bungeibu/main/data/prefecture-atlas.json"
-        : "../data/prefecture-atlas.json";
+        : "../data/prefecture-atlas.json");
+      const feedMeta = debugEnabled ? debugMeta : normalMeta;
       const feed = getJson(feedUrl).catch(error => {
-        if (debugEnabled && debugMeta.dataset.fallback) return getJson(debugMeta.dataset.fallback);
+        if (feedMeta?.dataset.fallback) return getJson(feedMeta.dataset.fallback);
         throw error;
       });
       const [map, data] = await Promise.all([getJson("./map.json"), feed]);

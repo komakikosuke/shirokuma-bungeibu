@@ -18,8 +18,14 @@ test("multiple prefectures count once globally and once in each prefecture", () 
   assert.equal(stats.counts.get("13").articles.size, 1); assert.equal(stats.counts.get("26").creators.size, 1);
 });
 test("eligibility is derived from exact registered tags, not supplied prefecture codes", () => {
-  assert.equal(model.normalizeArticle(sample("n111", "writer", ["京都"], {prefectures: ["26"]}), prefectures), null);
+  assert.equal(model.normalizeArticle(sample("n111", "writer", ["京都旅行"], {prefectures: ["26"]}), prefectures), null);
   assert.equal(model.normalizeArticle(sample("n111", "writer", ["京都府"], {tags: ["京都府"]}), prefectures), null);
+});
+test("official and short prefecture tags share one code without accepting partial matches", () => {
+  const article = model.normalizeArticle(sample("n111", "writer", ["東京", "東京都", "京都", "大阪", "神奈川", "北海道"]), prefectures);
+  assert.deepEqual(article.prefectures, ["01", "13", "14", "26", "27"]);
+  assert.equal(model.normalizeArticle(sample("n222", "writer", ["東京旅行", "北海"]), prefectures), null);
+  assert.equal(model.normalizeArticle(sample("n333", "writer", [], {tags: ["東京"]}), prefectures), null);
 });
 test("unsafe article destinations and image URLs are rejected", () => {
   assert.equal(model.normalizeArticle(sample("n111", "writer", ["京都府"], {url: "javascript:alert(1)"}), prefectures), null);

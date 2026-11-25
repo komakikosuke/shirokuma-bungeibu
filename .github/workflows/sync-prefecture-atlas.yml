@@ -10,6 +10,7 @@ on:
       - "scripts/build_prefecture_atlas_debug.py"
       - "tests/test_prefecture_atlas*"
       - ".github/workflows/sync-prefecture-atlas.yml"
+      - "data/prefecture-atlas-request.json"
   pull_request:
     paths:
       - "prefectures/**"
@@ -17,9 +18,6 @@ on:
       - "scripts/build_prefecture_atlas_debug.py"
       - "tests/test_prefecture_atlas*"
       - ".github/workflows/sync-prefecture-atlas.yml"
-  schedule:
-    # Cron activates on the default branch after release.
-    - cron: "17 * * * *"
 
 permissions:
   contents: read

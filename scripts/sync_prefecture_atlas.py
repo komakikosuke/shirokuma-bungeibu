@@ -30,6 +30,11 @@ def normalize_tag(value: str) -> str:
     return unicodedata.normalize("NFKC", value).strip().removeprefix("#")
 
 
+def prefecture_tag_names(name: str) -> set[str]:
+    # 北海道 is already the commonly used place name; 北海 is a different tag.
+    return {name, name[:-1]} if name.endswith(("都", "府", "県")) else {name}
+
+
 def seed_from_row(row):
     if not isinstance(row, dict) or not KEY.fullmatch(str(row.get("key", ""))):
         raise ValueError("記事一覧の記事キーを確認できません")
@@ -78,7 +83,7 @@ def parse_article(seed, payload, prefectures):
             or data.get("is_published") is False or data.get("is_reserved") is True):
         return None
     tags = registered_tags(data)
-    codes = [pref["code"] for pref in prefectures if pref["name"] in tags]
+    codes = [pref["code"] for pref in prefectures if prefecture_tag_names(pref["name"]).intersection(tags)]
     if TAG not in tags or not codes:
         return None
     user = data.get("user")

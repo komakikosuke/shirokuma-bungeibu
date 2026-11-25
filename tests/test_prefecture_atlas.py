@@ -48,7 +48,7 @@ def previous(*articles):
 class EligibilityTests(unittest.TestCase):
     def test_requires_campaign_and_registered_prefecture_tag(self):
         self.assertIsNotNone(atlas.parse_article(SEED, payload(), PREFECTURES))
-        for tags in [[], [atlas.TAG], ["京都府"], [atlas.TAG, "京都"], [atlas.TAG, "京都旅行"], [atlas.TAG + "2", "京都府"]]:
+        for tags in [[], [atlas.TAG], ["京都府"], ["京都"], [atlas.TAG, "京都旅行"], [atlas.TAG + "2", "京都府"], [atlas.TAG, "北海"]]:
             with self.subTest(tags=tags):
                 self.assertIsNone(atlas.parse_article(SEED, payload(tags), PREFECTURES))
 
@@ -57,7 +57,7 @@ class EligibilityTests(unittest.TestCase):
         self.assertIsNone(atlas.parse_article(SEED, data, PREFECTURES))
 
     def test_multiple_prefectures_and_duplicate_tags(self):
-        article = atlas.parse_article(SEED, payload([atlas.TAG, "#東京都", "京都府", "東京都", "北海道"]), PREFECTURES)
+        article = atlas.parse_article(SEED, payload([atlas.TAG, "#東京都", "京都府", "東京", "京都", "北海道"]), PREFECTURES)
         self.assertEqual(["01", "13", "26"], article["prefectures"])
 
     def test_paid_and_non_text_notes_are_not_excluded(self):
@@ -70,6 +70,14 @@ class EligibilityTests(unittest.TestCase):
         for pref in PREFECTURES:
             article = atlas.parse_article(SEED, payload([atlas.TAG, pref["name"]]), PREFECTURES)
             self.assertEqual([pref["code"]], article["prefectures"])
+
+    def test_short_place_tags_use_the_same_prefecture_codes(self):
+        cases = {"東京": "13", "大阪": "27", "京都": "26", "神奈川": "14", "和歌山": "30", "鹿児島": "46", "北海道": "01"}
+        for name, code in cases.items():
+            with self.subTest(name=name):
+                article = atlas.parse_article(SEED, payload([atlas.TAG, name]), PREFECTURES)
+                self.assertEqual([code], article["prefectures"])
+                self.assertIn(name, article["tags"])
 
     def test_unknown_tag_schema_is_an_error_not_an_exclusion(self):
         data = payload()
@@ -167,9 +175,9 @@ class RefreshTests(unittest.TestCase):
         self.assertEqual(before, old)
 
     def test_edited_prefecture_tags_move_article(self):
-        client = FakeClient([SEED], {"n111": payload([atlas.TAG, "北海道", "沖縄県"])})
+        client = FakeClient([SEED], {"n111": payload([atlas.TAG, "東京", "沖縄"])})
         document, _ = atlas.sync_atlas(client, previous(self.old), PREFECTURES)
-        self.assertEqual(["01", "47"], document["articles"][0]["prefectures"])
+        self.assertEqual(["13", "47"], document["articles"][0]["prefectures"])
 
 
 if __name__ == "__main__":
