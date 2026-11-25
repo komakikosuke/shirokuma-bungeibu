@@ -52,6 +52,20 @@ test("debug mode only accepts the requested creator's public article identity", 
 test("all five color intervals include their boundary values", () => {
   assert.deepEqual([0,1,4,5,9,10,19,20,100].map(model.colorLevel), [0,1,1,2,2,3,3,4,4]);
 });
+test("callouts show at most three populated prefectures ranked by article count with stable ties", () => {
+  const articles = model.parseDocument({version: 1, tag: model.TAG, articles: [
+    sample("n111", "writer", ["東京都", "神奈川県"]),
+    sample("n222", "writer", ["大阪府"]),
+    sample("n333", "writer", ["京都府"]),
+    sample("n444", "writer", ["東京都"]),
+    sample("n555", "writer", ["大阪府"])
+  ]}, prefectures);
+  const leaders = model.topPrefectures([...prefectures].reverse(), model.summarize(articles, prefectures));
+  assert.deepEqual(leaders.map(({prefecture, count}) => [prefecture.code, count]), [["13", 2], ["27", 2], ["14", 1]]);
+  assert.deepEqual(model.topPrefectures(prefectures, model.summarize([], prefectures)), []);
+  const smaller = model.topPrefectures(prefectures, model.summarize(articles.slice(0, 1), prefectures));
+  assert.deepEqual(smaller.map(({prefecture, count}) => [prefecture.code, count]), [["13", 1], ["14", 1]]);
+});
 test("map contains exactly the 47 official prefectures and usable geometry", () => {
   assert.equal(prefectures.length, 47);
   assert.deepEqual(prefectures.map(p => p.code), Array.from({length: 47}, (_, i) => String(i + 1).padStart(2, "0")));

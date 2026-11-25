@@ -68,13 +68,19 @@
     return {articles: unique.size, creators: creators.size, prefectures: [...counts.values()].filter(c => c.articles.size).length, counts};
   }
   const colorLevel = count => count === 0 ? 0 : count < 5 ? 1 : count < 10 ? 2 : count < 20 ? 3 : 4;
+  function topPrefectures(prefectures, stats) {
+    return prefectures.map(prefecture => ({prefecture, count: stats.counts.get(prefecture.code).articles.size}))
+      .filter(item => item.count > 0)
+      .sort((a, b) => b.count - a.count || a.prefecture.code.localeCompare(b.prefecture.code))
+      .slice(0, 3);
+  }
   function filterArticles(articles, state) {
     return articles.filter(article => {
       if (state.prefecture && !article.prefectures.includes(state.prefecture)) return false;
       return true;
     }).sort((a, b) => Date.parse(b.publishedAt) - Date.parse(a.publishedAt) || a.key.localeCompare(b.key));
   }
-  const model = Object.freeze({TAG, normalizeArticle, parseDocument, parseDebugDocument, summarize, colorLevel, filterArticles});
+  const model = Object.freeze({TAG, normalizeArticle, parseDocument, parseDebugDocument, summarize, colorLevel, filterArticles, topPrefectures});
   if (typeof module !== "undefined" && module.exports) module.exports = model;
   if (typeof document === "undefined") return;
 
@@ -173,20 +179,32 @@
     const selected = mapGroups.get(state.prefecture);
     if (selected) selected.parentNode.append(selected);
     callouts.replaceChildren(); tooltip.replaceChildren();
-    const positions = {"01": [668, 80], "13": [608, 394], "40": [24, 506], "47": [24, 434]};
-    for (const [code, position] of Object.entries(positions)) {
-      const pref = prefectures.find(p => p.code === code), count = stats.counts.get(code).articles.size;
-      if (!pref || !count || state.prefecture === code) continue;
-      const [x, y] = position;
-      const group = svg("g", {class: "map-callout"});
-      group.append(svg("line", {x1: x + 47, y1: y + 16, x2: pref.point[0], y2: pref.point[1]}), svg("rect", {x, y, width: 98, height: 32, rx: 16}), svg("text", {x: x + 11, y: y + 21}, pref.name), svg("text", {x: x + 86, y: y + 21, "text-anchor": "end", class: "callout-count"}, number.format(count)));
-      group.addEventListener("click", () => selectPrefecture(code, true));
+    const leaders = topPrefectures(prefectures, stats);
+    const pref = currentPrefecture();
+    const selectionBox = pref && !leaders.some(item => item.prefecture.code === pref.code) ? {
+      x: Math.max(10, Math.min(716, pref.point[0] - 78)),
+      y: Math.max(15, pref.point[1] - 64), width: 128, height: 40
+    } : null;
+    const occupied = selectionBox ? [selectionBox] : [];
+    const [mapX, mapY, mapWidth, mapHeight] = registry.viewBox.split(/\s+/).map(Number);
+    for (const {prefecture: leader, count} of [...leaders].sort((a, b) => a.prefecture.point[1] - b.prefecture.point[1])) {
+      const countText = number.format(count), width = Math.max(112, leader.name.length * 13 + countText.length * 8 + 30), height = 32;
+      const right = leader.point[0] >= mapX + mapWidth / 2;
+      // Place western labels in the sea below the Okinawa inset so they do not cover neighboring prefectures.
+      const x = Math.max(mapX + 10, Math.min(mapX + mapWidth - width - 10, right ? leader.point[0] + 70 : mapX + 16));
+      const minY = right ? mapY + 15 : mapY + 450;
+      const candidates = [0, 44, -44, 88, -88, 132, -132].map(offset =>
+        Math.max(minY, Math.min(mapY + mapHeight - height - 15, leader.point[1] - height / 2 + offset)));
+      const y = candidates.find(candidate => occupied.every(box =>
+        x + width + 8 <= box.x || x >= box.x + box.width + 8 || candidate + height + 8 <= box.y || candidate >= box.y + box.height + 8)) ?? candidates[0];
+      occupied.push({x, y, width, height});
+      const group = svg("g", {class: "map-callout" + (state.prefecture === leader.code ? " is-selected" : ""), "data-prefecture": leader.code});
+      group.append(svg("line", {x1: right ? x : x + width, y1: y + height / 2, x2: leader.point[0], y2: leader.point[1]}), svg("rect", {x, y, width, height, rx: 16}), svg("text", {x: x + 12, y: y + 21}, leader.name), svg("text", {x: x + width - 12, y: y + 21, "text-anchor": "end", class: "callout-count"}, countText));
+      group.addEventListener("click", () => selectPrefecture(leader.code, true));
       callouts.append(group);
     }
-    const pref = currentPrefecture();
-    if (pref) {
-      const x = Math.max(10, Math.min(716, pref.point[0] - 78));
-      const y = Math.max(15, pref.point[1] - 64);
+    if (selectionBox) {
+      const {x, y} = selectionBox;
       tooltip.append(svg("rect", {x, y, width: 128, height: 40, rx: 8}), svg("text", {x: x + 13, y: y + 26, class: "tooltip-name"}, pref.name));
     }
   }
