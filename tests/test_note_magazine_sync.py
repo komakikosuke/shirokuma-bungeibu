@@ -1,6 +1,6 @@
 """Offline checks for Wednesday release gating and resumable magazine additions."""
 import copy
-from datetime import datetime
+from datetime import datetime, timedelta
 import importlib.util
 import json
 from pathlib import Path
@@ -180,6 +180,35 @@ class ReleaseTests(unittest.TestCase):
             sync.validate_endroll(data)
 
 
+class PublicMagazineTests(unittest.TestCase):
+    @staticmethod
+    def page(keys, next_page=None, last_page=True):
+        payload = PublicData()('https://note.com/api/v1/magazines/m47893b257d5a')
+        payload['data'].update(notes=[{'key': key} for key in keys],
+                               next_page=next_page, last_page=last_page)
+        return payload
+
+    def test_reads_all_pages_before_deciding_which_works_are_missing(self):
+        responses = [self.page(['n1', 'n2'], next_page=2, last_page=False), self.page(['n3'])]
+        calls = []
+        def fetch(url):
+            calls.append(url)
+            return responses[len(calls) - 1]
+        self.assertEqual(sync.load_endroll_magazine_keys(fetch), {'n1', 'n2', 'n3'})
+        self.assertTrue(calls[0].endswith('page=1'))
+        self.assertTrue(calls[1].endswith('page=2'))
+
+    def test_incomplete_or_repeated_pagination_is_not_treated_as_missing_works(self):
+        for changes in [{'next_page': 1, 'last_page': False},
+                        {'next_page': None, 'last_page': False},
+                        {'notes': [], 'next_page': 2, 'last_page': False},
+                        {'magazine_url': sync.ROOM_MAGAZINE}, {'notes': [{'key': None}]}]:
+            payload = self.page(['n1'])
+            payload['data'].update(changes)
+            with self.subTest(changes=changes), self.assertRaises(RuntimeError):
+                sync.load_endroll_magazine_keys(lambda url: payload)
+
+
 class StateAndScheduleTests(unittest.TestCase):
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
@@ -189,24 +218,34 @@ class StateAndScheduleTests(unittest.TestCase):
                             ('STATE_FILE', root / 'state.json'),
                             ('ROOM_STATE_FILE', root / 'room-state.json'),
                             ('SAFARI_GUARD_FILE', root / 'safari-guard.json'),
+                            ('ADDITION_RATE_FILE', root / 'addition-rate.json'),
                             ('ENDROLL_STATE_FILE', root / 'endroll-state.json')]:
             patched = patch.object(sync, name, value)
             patched.start()
             self.addCleanup(patched.stop)
         self.log = patch.object(sync, 'log').start()
+        self.public_keys = patch.object(sync, 'load_endroll_magazine_keys',
+                                       side_effect=self.confirmed_public_keys).start()
         self.addCleanup(patch.stopall)
+
+    @staticmethod
+    def confirmed_public_keys():
+        if not sync.ENDROLL_STATE_FILE.exists():
+            return set()
+        return {url.rsplit('/', 1)[-1]
+                for url in sync._load_state(sync.ENDROLL_STATE_FILE).get('added', [])}
 
     @staticmethod
     def safari(operation, *args):
         if operation == 'open':return '42'
         return 'ok'
 
-    def test_first_endroll_run_queues_all_works_and_old_channels_still_cap_at_five(self):
+    def test_first_endroll_run_caps_at_50_and_old_channels_still_cap_at_five(self):
         works = {row['url']: row for row in feed(113)['works']}
         channel = sync._prepare_channel('20字小説', works, sync.ENDROLL_STATE_FILE,
                                         sync.ENDROLL_TARGET, False,
-                                        lambda w: w['url'], max_per_run=None)
-        self.assertEqual(len(channel['pending']), 113)
+                                        lambda w: w['url'], max_per_run=sync.MAX_ADDITIONS_PER_HOUR)
+        self.assertEqual(len(channel['pending']), 50)
         room = sync._prepare_channel('部室', works, sync.DATA_DIR / 'room-state.json',
                                      sync.ROOM_TARGET, False, lambda w: w['url'])
         self.assertEqual(len(room['pending']), 5)
@@ -356,13 +395,114 @@ class StateAndScheduleTests(unittest.TestCase):
         room.assert_not_called()
         featured.assert_not_called()
 
-    def test_agent_runs_wednesday_at_21_and_retries_without_changing_old_triggers(self):
+    def test_public_reconciliation_repairs_false_confirmations_and_preserves_old_weeks(self):
+        release = sync.load_endroll_feed(NOW, PublicData(feed(117)))
+        previous_url = 'https://note.com/previous/n/nprevious'
+        urls = [row['url'] for row in feed(117)['works']]
+        sync.save_state({'version': 1, 'seen': urls + [previous_url],
+                         'added': urls + [previous_url], 'failures': []}, sync.ENDROLL_STATE_FILE)
+        published = {f'n{i}' for i in range(1, 102)}
+        self.public_keys.side_effect = lambda: published
+        with patch.object(sync, 'load_endroll_feed', return_value=release):
+            channels, errors = sync.prepare_channels(True)
+        self.assertEqual(errors, [])
+        self.assertEqual(len(channels[0]['pending']), 16)
+        self.assertEqual({row['key'] for row in channels[0]['pending']},
+                         {f'n{i}' for i in range(102, 118)})
+        state = sync._load_state(sync.ENDROLL_STATE_FILE)
+        self.assertIn(previous_url, state['added'])
+        self.assertEqual(state['eventConfirmedCount'], 101)
+        self.assertEqual(state['eventRemainingCount'], 16)
+
+    def test_117_works_finish_as_50_50_17_across_hours_and_repeat_runs_do_not_bypass_limit(self):
+        release = sync.load_endroll_feed(NOW, PublicData(feed(117)))
+        published = set()
+        self.public_keys.side_effect = lambda: published
+        clock = {'now': NOW}
+        class Clock(datetime):
+            @classmethod
+            def now(cls, tz=None):
+                return clock['now'].astimezone(tz)
+        def process(window, item, target):
+            if not sync.reserve_addition_slot():
+                return 'deferred'
+            published.add(item['key'])
+            return 'added'
+        with patch.object(sync, 'datetime', Clock), \
+                patch.object(sync, 'load_endroll_feed', return_value=release), \
+                patch.object(sync.sys, 'platform', 'darwin'), \
+                patch.object(sync, 'applescript', side_effect=self.safari) as safari, \
+                patch.object(sync.time, 'sleep'), patch.object(sync, 'process', side_effect=process):
+            sync.main(endroll_only=True, max_works=1000)
+            self.assertEqual(len(published), 50)
+            self.assertTrue(sync.ADDITION_RATE_FILE.exists())
+            safari.reset_mock()
+            clock['now'] += timedelta(minutes=59)
+            sync.safari_guard('process', RuntimeError('previous failure'))
+            sync.main(endroll_only=True, resume_safari=True, max_works=1000)
+            self.assertEqual(len(published), 50)
+            safari.assert_not_called()
+            clock['now'] += timedelta(minutes=1)
+            sync.main(endroll_only=True)
+            self.assertEqual(len(published), 100)
+            clock['now'] += timedelta(hours=1)
+            sync.main(endroll_only=True)
+            self.assertEqual(len(published), 117)
+            self.assertEqual(sync._load_state(sync.ENDROLL_STATE_FILE)['eventRemainingCount'], 0)
+            safari.reset_mock()
+            sync.main(endroll_only=True)
+            safari.assert_not_called()
+
+    def test_rolling_hour_releases_only_expired_slots_including_across_midnight(self):
+        start = datetime.fromisoformat('2026-11-18T23:40:00+09:00')
+        for _ in range(25):self.assertTrue(sync.reserve_addition_slot(start))
+        for _ in range(25):self.assertTrue(sync.reserve_addition_slot(start + timedelta(minutes=10)))
+        self.assertFalse(sync.reserve_addition_slot(start + timedelta(minutes=59, seconds=59)))
+        self.assertEqual(sync.addition_quota(start + timedelta(hours=1))['remaining'], 25)
+        for _ in range(25):self.assertTrue(sync.reserve_addition_slot(start + timedelta(hours=1)))
+        self.assertFalse(sync.reserve_addition_slot(start + timedelta(hours=1)))
+
+    def test_existing_channels_share_the_same_50_article_hourly_capacity(self):
+        waiting = {'status': 'waiting_for_public_announcement', 'eventDate': '2026-11-17',
+                   'workCount': 117, 'works': {}}
+        for _ in range(49):sync.reserve_addition_slot()
+        works = {row['url']: row for row in feed(5)['works']}
+        with patch.object(sync, 'load_endroll_feed', return_value=waiting), \
+                patch.object(sync, 'load_room_feed', return_value=works), \
+                patch.object(sync, 'load_feed', return_value={}), \
+                patch.object(sync.sys, 'platform', 'darwin'), \
+                patch.object(sync, 'applescript', side_effect=self.safari), \
+                patch.object(sync.time, 'sleep'), patch.object(sync, 'process', return_value='added') as process:
+            sync.main()
+        self.assertEqual(process.call_count, 1)
+
+    def test_already_added_ui_does_not_use_a_slot_but_unconfirmed_click_does(self):
+        with patch.object(sync, 'applescript'), patch.object(sync, 'wait_article'), \
+                patch.object(sync, 'js', return_value={'status': 'already'}):
+            self.assertEqual(sync.process('42', work()), 'already')
+        self.assertEqual(sync.addition_quota()['used'], 0)
+        with patch.object(sync, 'applescript'), patch.object(sync, 'wait_article'), \
+                patch.object(sync, 'js', side_effect=[{'status': 'ready'}, {'status': 'clicked'},
+                                                     RuntimeError('confirmation lost')]):
+            with self.assertRaisesRegex(RuntimeError, 'confirmation lost'):
+                sync.process('42', work())
+        self.assertEqual(sync.addition_quota()['used'], 1)
+
+    def test_invalid_hourly_state_never_opens_safari(self):
+        release = sync.load_endroll_feed(NOW, PublicData())
+        sync.ADDITION_RATE_FILE.write_text('{"version": 1, "attempts": ["invalid"]}', encoding='utf-8')
+        with patch.object(sync, 'load_endroll_feed', return_value=release), \
+                patch.object(sync.sys, 'platform', 'darwin'), patch.object(sync, 'applescript') as safari:
+            with self.assertRaisesRegex(RuntimeError, 'timestamp'):
+                sync.main(endroll_only=True)
+        safari.assert_not_called()
+
+    def test_agent_rechecks_capacity_and_remaining_works_after_wednesday_night(self):
         path = sync.DATA_DIR / 'note_magazine_sync.py'
         config = plistlib.loads(plistlib.dumps(sync.agent_config(path)))
         self.assertEqual(config['ProgramArguments'], ['/usr/bin/python3', str(path), '--endroll-only'])
-        self.assertIn({'Weekday': 3, 'Hour': 21, 'Minute': 0}, config['StartCalendarInterval'])
-        self.assertTrue(all(time['Weekday'] == 3 and time['Hour'] >= 21
-                            for time in config['StartCalendarInterval']))
+        self.assertEqual(config['StartCalendarInterval'],
+                         [{'Minute': minute} for minute in range(0, 60, 5)])
         self.assertTrue(config['RunAtLoad'])
 
 

@@ -6,7 +6,8 @@ Develop > Allow JavaScript from Apple Events option. No private note API used.
 Featured works keep the original baseline-on-first-run behavior. Writing-room
 works are backfilled (five per run) when that channel is initialized.
 End-roll works wait for Wednesday 21:00 JST AND the owner's public announcement.
-They are then added in one throttled batch, resuming after the last confirmed add.
+They are added in batches of at most 50 per rolling hour, with public magazine
+reconciliation and persistent progress across runs and Mac restarts.
 
 Keyboard Maestro: Execute Shell Script: /usr/bin/python3 /PATH/note_magazine_sync.py
 Cron trigger: 20 1,7,13,19 * * * (JST when macOS timezone is Asia/Tokyo).
@@ -46,9 +47,11 @@ STATE_FILE = DATA_DIR / 'state.json'
 ROOM_STATE_FILE = DATA_DIR / 'room-state.json'
 ENDROLL_STATE_FILE = DATA_DIR / 'endroll-state.json'
 SAFARI_GUARD_FILE = DATA_DIR / 'safari-guard.json'
+ADDITION_RATE_FILE = DATA_DIR / 'addition-rate.json'
 SAFARI_MARKER = '#shirokuma-magazine-sync'
 LOG_FILE = DATA_DIR / 'sync.log'
 MAX_PER_RUN = 5
+MAX_ADDITIONS_PER_HOUR = 50
 NOTE_URL = re.compile(r'^https://note\.com/[A-Za-z0-9_-]+/n/n[A-Za-z0-9]+$')
 
 
@@ -185,6 +188,37 @@ def load_endroll_feed(now=None, fetch=public_json):
             or (magazine.get('user') or {}).get('urlname') != AUTHOR):
         raise RuntimeError('End-roll magazine identity or name changed; no additions')
     return dict(result, status='released', announcement=announcement, works=works)
+
+
+def load_endroll_magazine_keys(fetch=public_json):
+    """Read every public magazine page; never treat an incomplete list as final."""
+    keys, pages = set(), set()
+    page = 1
+    for _ in range(1000):
+        if page in pages:
+            raise RuntimeError('Repeated end-roll magazine page; no additions')
+        pages.add(page)
+        payload = fetch(f'https://note.com/api/v1/magazines/m47893b257d5a/notes?page={page}')
+        block = payload.get('data') if isinstance(payload, dict) else None
+        if (not isinstance(block, dict) or block.get('key') != 'm47893b257d5a'
+                or block.get('name') != ENDROLL_TARGET or block.get('status') != 'public'
+                or block.get('magazine_url') != ENDROLL_MAGAZINE
+                or (block.get('user') or {}).get('urlname') != AUTHOR
+                or not isinstance(block.get('notes'), list)):
+            raise RuntimeError('Unexpected public end-roll magazine page; no additions')
+        for note in block['notes']:
+            key = note.get('key') if isinstance(note, dict) else None
+            if not isinstance(key, str) or not re.fullmatch(r'n[A-Za-z0-9]+', key):
+                raise RuntimeError('Invalid public magazine article; no additions')
+            keys.add(key)
+        next_page = block.get('next_page')
+        if next_page is None and block.get('last_page') is True:
+            return keys
+        if (type(next_page) is not int or next_page <= page
+                or block.get('last_page') is not False or not block['notes']):
+            raise RuntimeError('Incomplete public magazine pagination; no additions')
+        page = next_page
+    raise RuntimeError('Too many end-roll magazine pages; no additions')
 
 SCRIPT = '''on run argv
   set operation to item 1 of argv
@@ -372,6 +406,41 @@ def save_state(state, state_file=STATE_FILE):
     target.replace(state_file)
 
 
+def _recent_addition_attempts(now=None):
+    now = now or datetime.now(timezone.utc)
+    if now.tzinfo is None:
+        raise RuntimeError('An explicit timezone is required for the hourly limit')
+    if not ADDITION_RATE_FILE.exists():
+        return now, []
+    data = json.loads(ADDITION_RATE_FILE.read_text(encoding='utf-8'))
+    if not isinstance(data, dict) or data.get('version') != 1 or not isinstance(data.get('attempts'), list):
+        raise RuntimeError('Unknown hourly addition state; refusing additions')
+    attempts = [timestamp(value) for value in data['attempts']]
+    if any(value is None for value in attempts):
+        raise RuntimeError('Invalid hourly addition timestamp; refusing additions')
+    # Keep future timestamps if the system clock moves backwards.
+    return now, sorted(value for value in attempts if value > now - timedelta(hours=1))
+
+
+def addition_quota(now=None):
+    now, attempts = _recent_addition_attempts(now)
+    remaining = max(0, MAX_ADDITIONS_PER_HOUR - len(attempts))
+    next_at = (attempts[len(attempts) - MAX_ADDITIONS_PER_HOUR] + timedelta(hours=1)
+               if not remaining else None)
+    return {'used': len(attempts), 'remaining': remaining,
+            'nextAvailableAt': next_at.isoformat() if next_at else None}
+
+
+def reserve_addition_slot(now=None):
+    """Called under run.lock, before UI work, including attempts that may fail."""
+    now, attempts = _recent_addition_attempts(now)
+    if len(attempts) >= MAX_ADDITIONS_PER_HOUR:
+        return False
+    attempts.append(now)
+    save_state({'version': 1, 'attempts': [value.isoformat() for value in attempts]}, ADDITION_RATE_FILE)
+    return True
+
+
 def js(window,action,target=TARGET):
     code = JS % (json.dumps(target,ensure_ascii=False), json.dumps(action),json.dumps(action))
     raw = applescript('js',window,code)
@@ -413,6 +482,8 @@ def process(window,item,target=TARGET):
         time.sleep(.8)
     else:raise RuntimeError('Magazine dialog not ready')
 
+    if not reserve_addition_slot():
+        return 'deferred'
     result=js(window,'add',target)
     if result['status']=='already':return 'already'
     if result['status']!='clicked':raise RuntimeError('Add click not accepted: '+str(result))
@@ -451,6 +522,21 @@ def _prepare_channel(label, works, state_file, target, baseline_first_run, sort_
             'state':state,'seen':seen,'added':added,'pending':pending[:max_per_run]}
 
 
+def reconcile_endroll(channel, published_keys):
+    """Repair optimistic or missing checkpoints using actual public membership."""
+    current = set(channel['works'])
+    confirmed = {url for url, work in channel['works'].items() if work['key'] in published_keys}
+    for name in ('seen', 'added'):
+        channel[name] = (channel[name] - current) | confirmed
+        channel['state'][name] = sorted(channel[name])
+    pending = [dict(work, url=url) for url, work in channel['works'].items() if url not in confirmed]
+    pending.sort(key=lambda work: (work['publishedAt'], work['url']))
+    channel['pending'] = pending[:MAX_ADDITIONS_PER_HOUR]
+    channel['state'].update(publicConfirmedAt=datetime.now(timezone.utc).isoformat(),
+                            eventConfirmedCount=len(confirmed), eventRemainingCount=len(pending))
+    log(f"[20字小説] VERIFIED: {len(confirmed)} present, {len(pending)} remaining")
+
+
 def prepare_channels(endroll_only=False):
     channels, errors = [], []
     try:
@@ -459,7 +545,9 @@ def prepare_channels(endroll_only=False):
         if release['status'] == 'released':
             channel = _prepare_channel('20字小説', release['works'], ENDROLL_STATE_FILE,
                                        ENDROLL_TARGET, False,
-                                       lambda w: (w['publishedAt'], w['url']), max_per_run=None)
+                                       lambda w: (w['publishedAt'], w['url']),
+                                       max_per_run=MAX_ADDITIONS_PER_HOUR)
+            reconcile_endroll(channel, load_endroll_magazine_keys())
             channel['state'].update(eventDate=release['eventDate'], releaseAt=release['releaseAt'],
                                     announcement=release['announcement'])
             save_state(channel['state'], ENDROLL_STATE_FILE)
@@ -483,8 +571,8 @@ def prepare_channels(endroll_only=False):
 
 def agent_config(script_path):
     # launchd calendar fields use the Mac's local timezone. Installation verifies JST.
-    times = [{'Weekday': 3, 'Hour': 21, 'Minute': minute} for minute in (0, 2, 5, 10, 20, 40)]
-    times += [{'Weekday': 3, 'Hour': 22, 'Minute': minute} for minute in (0, 30)]
+    # Recheck hourly capacity and unfinished work even after Wednesday night.
+    times = [{'Minute': minute} for minute in range(0, 60, 5)]
     return {'Label': AGENT_LABEL,
             'ProgramArguments': ['/usr/bin/python3', str(script_path), '--endroll-only'],
             'StartCalendarInterval': times, 'RunAtLoad': True, 'ProcessType': 'Background',
@@ -525,8 +613,8 @@ def install_endroll_agent(start_paused=False):
     registered = subprocess.run(['/bin/launchctl', 'bootstrap', domain, str(agent)],
                                 stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, timeout=15)
     if registered.returncode:
-        raise RuntimeError('Could not register Wednesday schedule: ' + registered.stderr.strip()[:400])
-    log('INSTALLED: Wednesday 21:00 JST; Safari error circuit breaker enabled'
+        raise RuntimeError('Could not register end-roll schedule: ' + registered.stderr.strip()[:400])
+    log('INSTALLED: Wednesday 21:00 JST release; max 50 articles per rolling hour; checks every 5 minutes; Safari error circuit breaker enabled'
         + ('; PAUSED for diagnosis' if start_paused else ''))
 
 
@@ -544,7 +632,10 @@ def diagnose_endroll():
         state = _load_state(ENDROLL_STATE_FILE)
         print('End-roll checkpoint: ' + json.dumps(
             {'eventDate': state.get('eventDate'), 'confirmedCount': len(state.get('added', [])),
+             'eventConfirmedCount': state.get('eventConfirmedCount'),
+             'eventRemainingCount': state.get('eventRemainingCount'),
              'latestFailure': (state.get('failures') or [None])[-1]}, ensure_ascii=False))
+    print('Hourly addition quota: ' + json.dumps(addition_quota(), ensure_ascii=False))
     result = load_endroll_feed()
     result.pop('works')
     print('Public release check: ' + json.dumps(result, ensure_ascii=False))
@@ -574,15 +665,18 @@ def main(endroll_only=False, resume_safari=False, max_works=None):
             SAFARI_GUARD_FILE.unlink()
             log('RESUMED: explicit Safari retry requested')
         channels,channel_errors=prepare_channels(endroll_only)
-        if max_works is not None:
-            budget = max_works
-            for channel in channels:
-                channel['pending'] = channel['pending'][:budget]
-                budget -= len(channel['pending'])
         pending_count=sum(len(channel['pending']) for channel in channels)
         if not pending_count:
             if channel_errors:raise RuntimeError(' / '.join(channel_errors))
             log('OK: no released, unprocessed works');return
+        quota = addition_quota()
+        budget = min(quota['remaining'], max_works if max_works is not None else MAX_ADDITIONS_PER_HOUR)
+        if not budget:
+            log(f"DEFER: hourly limit {MAX_ADDITIONS_PER_HOUR}; next capacity at {quota['nextAvailableAt']}; progress saved")
+            return
+        for channel in channels:
+            channel['pending'] = channel['pending'][:budget]
+            budget -= len(channel['pending'])
         log('Processing '+', '.join(f"{channel['label']} {len(channel['pending'])}" for channel in channels if channel['pending']))
         window=None
         ui_error=None
@@ -605,15 +699,20 @@ def main(endroll_only=False, resume_safari=False, max_works=None):
                         stage='process '+url;safari_guard(stage)
                         log(f"[{channel['label']}] CHECK: {url}")
                         outcome=process(window,item,channel['target'])
+                        if outcome == 'deferred':
+                            log('DEFER: hourly addition limit reached; progress saved')
+                            break
                         if outcome not in ('added','already'):
                             raise RuntimeError('Unconfirmed magazine result: '+repr(outcome)[:200])
                         seen.add(url);added.add(url)
                         state['seen']=sorted(seen);state['added']=sorted(added)
+                        if channel['state_file'] == ENDROLL_STATE_FILE:
+                            state['eventConfirmedCount'] = len(set(channel['works']) & added)
+                            state['eventRemainingCount'] = len(set(channel['works']) - added)
                         save_state(state,channel['state_file'])
                         log(f"[{channel['label']}] {outcome.upper()}: {url}")
                     except Exception as e:
-                        # Do NOT mark as processed or continue blindly within the
-                        # same channel. The other independent channel may proceed.
+                        # Preserve progress and stop UI work until an explicit resume.
                         state.setdefault('failures',[]).append({'url':url,'at':datetime.now(timezone.utc).isoformat(), 'error':str(e)[:400]})
                         save_state(state,channel['state_file'])
                         log(f"[{channel['label']}] STOP CHANNEL: {url} / {e}")
