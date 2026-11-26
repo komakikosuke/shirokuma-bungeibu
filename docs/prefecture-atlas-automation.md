@@ -1,4 +1,4 @@
-# 都道府県クリエイター図鑑の定期収集
+# 記事で塗る日本地図の定期収集
 
 対象Site: appgprj_6b060907928081918668c39b5a473203
 GitHub: komakikosuke/shirokuma-bungeibu
