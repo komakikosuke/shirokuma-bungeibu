@@ -342,7 +342,6 @@
     $("historyDate").dateTime = frame.at;
     $("historyDate").textContent = updateLabel.format(new Date(frame.at)) + "（日本時間）";
     $("historyRange").setAttribute("aria-valuetext", $("historyDate").textContent);
-    $("historyPosition").textContent = index === 0 ? "はじまり" : index === historyFrames.length - 1 ? "最新" : "過去の地図";
     renderMapCounts();
   }
   function playHistory() {
