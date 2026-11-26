@@ -104,3 +104,16 @@ test('history requires ordered timestamps and all 47 nonnegative counts', () => 
   assert.deepEqual(model.parseHistory({...data, generatedAt: first.at}, prefectures), []);
   assert.deepEqual(model.parseHistory({}, prefectures), []);
 });
+
+
+test("history demo is deterministic, isolated, and grows from white to all 47 prefectures", () => {
+  const demo = model.buildHistoryDemo(prefectures);
+  assert.equal(demo.history.length, 33);
+  assert.ok(Object.values(demo.history[0].counts).every(count => count === 0));
+  assert.ok(Object.values(demo.history.at(-1).counts).every(count => count > 0));
+  assert.ok(Object.values(demo.history.at(-1).counts).some(count => count >= 20));
+  assert.equal(model.parseHistory(demo, prefectures).length, 33);
+  assert.deepEqual(model.buildHistoryDemo(prefectures), demo);
+  assert.deepEqual(demo.articles, []);
+  assert.throws(() => model.parseDocument(demo, prefectures));
+});

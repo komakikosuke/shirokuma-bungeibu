@@ -45,7 +45,7 @@
     return [...unique.values()].sort((a, b) => Date.parse(b.publishedAt) - Date.parse(a.publishedAt) || a.key.localeCompare(b.key)).slice(0, 3);
   }
   function parseDocument(data, prefectures) {
-    if (!data || data.version !== 1 || data.purpose === "prefecture-atlas-preview" || data.tag !== TAG || !Array.isArray(data.articles)) throw Error("掲載データの形式が違います");
+    if (!data || data.version !== 1 || (data.purpose === "prefecture-atlas-preview" || data.purpose === "prefecture-atlas-history-demo") || data.tag !== TAG || !Array.isArray(data.articles)) throw Error("掲載データの形式が違います");
     const unique = new Map();
     for (const raw of data.articles) {
       const article = normalizeArticle(raw, prefectures);
@@ -80,6 +80,20 @@
       return true;
     }).sort((a, b) => Date.parse(b.publishedAt) - Date.parse(a.publishedAt) || a.key.localeCompare(b.key));
   }
+  function buildHistoryDemo(prefectures) {
+    // Synthetic map counts only: no fabricated article URLs or real feed writes.
+    const start = Date.UTC(2026, 10, 30, 15), history = [];
+    const ordered = [...prefectures].sort((a, b) => a.code.localeCompare(b.code));
+    for (let step = 0; step <= 32; step++) {
+      const counts = Object.fromEntries(ordered.map((pref, index) => {
+        const first = 1 + Math.floor(index * 23 / ordered.length);
+        const age = Math.max(0, step - first + 1);
+        return [pref.code, age ? 1 + Math.floor(age * (1 + index % 5) / 3) : 0];
+      }));
+      history.push({at: new Date(start + step * 3 * 3600000).toISOString(), counts});
+    }
+    return {version: 1, tag: TAG, purpose: "prefecture-atlas-history-demo", generatedAt: history.at(-1).at, articles: [], history};
+  }
   function parseHistory(data, prefectures) {
     if (!Array.isArray(data.history) || !Number.isFinite(Date.parse(data.generatedAt))) return [];
     const codes = prefectures.map(p => p.code), frames = [];
@@ -93,7 +107,7 @@
     }
     return frames;
   }
-  const model = Object.freeze({TAG, normalizeArticle, parseDocument, parseDebugDocument, summarize, colorLevel, filterArticles, topPrefectures, parseHistory});
+  const model = Object.freeze({TAG, normalizeArticle, parseDocument, parseDebugDocument, summarize, colorLevel, filterArticles, topPrefectures, parseHistory, buildHistoryDemo});
   if (typeof module !== "undefined" && module.exports) module.exports = model;
   if (typeof document === "undefined") return;
 
@@ -104,6 +118,7 @@
   let prefectures = [], articles = [], stats, registry, mapGroups = new Map(), callouts, tooltip;
   let loaded = false;
   let resultsScrollTimer;
+  let historyDemo = false;
   let historyFrames = [], historyFrame = null, historyAnimation = 0;
   const state = {prefecture: "", view: "map", limit: PAGE_SIZE};
   function element(name, className, text) {
@@ -295,6 +310,17 @@
   function renderResults() {
     if (!loaded) return;
     const pref = currentPrefecture(), list = filterArticles(articles, state);
+    if (historyDemo) {
+      $("resultsEnglish").textContent = "HISTORY DEMO";
+      $("resultsTitle").textContent = pref?.name || "変化のデバッグ";
+      $("clearPrefecture").hidden = !pref;
+      const message = element("div", "empty-message");
+      message.append(element("strong", "", "仮データで確認中"), element("p", "", "地図の色と記事数は動作確認用です。実際の掲載記事・履歴には影響しません。"));
+      $("resultsList").replaceChildren(message);
+      $("loadMore").hidden = true;
+      $("resultAnnouncement").textContent = "仮の記事数で地図の変化を表示しています。";
+      return;
+    }
     $("resultsEnglish").textContent = pref?.englishName || "ALL JAPAN";
     $("resultsTitle").textContent = pref?.name || "全国の新着記事";
     $("clearPrefecture").hidden = !pref;
@@ -370,31 +396,44 @@
       const debugMeta = document.querySelector('meta[name="atlas-debug-feed"]');
       const normalMeta = document.querySelector('meta[name="atlas-feed"]');
       const debugFeed = debugMeta?.content;
-      const debugEnabled = new URLSearchParams(location.search).get("debug") === "komaki" && Boolean(debugFeed);
+      const debugMode = new URLSearchParams(location.search).get("debug");
+      const debugEnabled = debugMode === "komaki" && Boolean(debugFeed);
+      historyDemo = debugMode === "history" && Boolean(debugFeed);
       const feedUrl = debugEnabled ? debugFeed : normalMeta?.content || (location.hostname === "komakikosuke.github.io"
         ? "https://raw.githubusercontent.com/komakikosuke/shirokuma-bungeibu/main/data/prefecture-atlas.json"
         : "../data/prefecture-atlas.json");
       const feedMeta = debugEnabled ? debugMeta : normalMeta;
-      const feed = getJson(feedUrl).catch(error => {
+      const feed = historyDemo ? Promise.resolve(null) : getJson(feedUrl).catch(error => {
         if (feedMeta?.dataset.fallback) return getJson(feedMeta.dataset.fallback);
         throw error;
       });
-      const [map, data] = await Promise.all([getJson("./map.json"), feed]);
+      const [map, feedData] = await Promise.all([getJson("./map.json"), feed]);
       if (map.version !== 1 || !Array.isArray(map.prefectures) || map.prefectures.length !== 47 ||
           new Set(map.prefectures.map(p => p.code)).size !== 47 ||
           !map.prefectures.every(p => /^(0[1-9]|[1-3]\d|4[0-7])$/.test(p.code) && typeof p.name === "string" && /^[MLZ\d,.\s-]+$/.test(p.path) && Array.isArray(p.point) && p.point.length === 2 && p.point.every(Number.isFinite))) throw Error("地図データの形式が違います");
       registry = map; prefectures = map.prefectures;
-      articles = debugEnabled ? parseDebugDocument(data) : parseDocument(data, prefectures);
+      const data = historyDemo ? buildHistoryDemo(prefectures) : feedData;
+      articles = historyDemo ? [] : debugEnabled ? parseDebugDocument(data) : parseDocument(data, prefectures);
       stats = summarize(articles, prefectures);
+      if (historyDemo) {
+        const counts = data.history.at(-1).counts;
+        stats = {articles: Object.values(counts).reduce((sum, count) => sum + count, 0), creators: 0,
+          prefectures: Object.values(counts).filter(count => count > 0).length,
+          counts: new Map(prefectures.map(pref => [pref.code, {articles: {size: counts[pref.code]}, creators: new Set()}]))};
+      }
       loaded = true; readHash();
       if (debugEnabled && !state.prefecture) state.prefecture = "13";
-      $("debugNotice").hidden = !debugEnabled;
+      $("debugNotice").hidden = !debugEnabled && !historyDemo;
+      $("debugNotice").querySelector("span").textContent = historyDemo ? "デバッグ表示：仮の記事数で地図の変化を再現しています。実際の掲載状況ではありません。" : "デバッグ表示：小牧幸助の最新記事を東京に仮表示しています。";
+      $("debugNotice").querySelector("a").href = historyDemo ? "./" : "./#pref=13";
+      document.querySelector(".history-note").textContent = historyDemo ? "仮の記事数で地図の変化を再現しています。" : "地図の色を巻き戻します。記事一覧は最新のままです。";
       $("articleTotal").textContent = number.format(stats.articles);
-      $("creatorTotal").textContent = number.format(stats.creators);
+      $("creatorTotal").textContent = historyDemo ? "—" : number.format(stats.creators);
       $("prefectureTotal").textContent = number.format(stats.prefectures);
-      $("updatedAt").hidden = data.sample === true;
+      $("updatedAt").hidden = data.sample === true || historyDemo;
       $("updatedAt").textContent = data.sample === true ? "" : data.generatedAt && Number.isFinite(Date.parse(data.generatedAt)) ? (debugEnabled ? "デバッグ記事の取得 " : "最終更新 ") + updateLabel.format(new Date(data.generatedAt)) + "（日本時間）" : "これから記事が集まります";
       buildMap(); configureHistory(data, debugEnabled); renderMapCounts(); renderPrefectureList(); renderView(); renderResults();
+      if (historyDemo) $("historyToggle").click();
     } catch (error) {
       console.error("図鑑の読み込みに失敗しました", error);
       $("loadError").hidden = false;
