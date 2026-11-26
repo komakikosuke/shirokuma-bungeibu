@@ -233,6 +233,44 @@ def sync_atlas(client, previous, prefectures, now=None, max_pages=200):
     return document, failed
 
 
+HISTORY_START = "2026-11-30T15:00:00Z"  # December 1, 00:00 JST
+
+
+def record_history(previous, document, prefectures):
+    """Keep successful collection snapshots; never infer history from publication dates."""
+    history = previous.get("history", [])
+    if not isinstance(history, list):
+        raise ValueError("地図の履歴データの形式が違います")
+    codes = {pref["code"] for pref in prefectures}
+    last = None
+    for frame in history:
+        if not isinstance(frame, dict) or set(frame.get("counts", {})) != codes:
+            raise ValueError("地図の履歴データの形式が違います")
+        at = frame.get("at", "")
+        try:
+            moment = dt.datetime.fromisoformat(at.replace("Z", "+00:00"))
+        except (TypeError, ValueError, AttributeError):
+            raise ValueError("地図の履歴日時が不正です") from None
+        if moment.tzinfo is None or (last is not None and moment <= last):
+            raise ValueError("地図の履歴日時が不正です")
+        if any(type(n) is not int or n < 0 for n in frame["counts"].values()):
+            raise ValueError("地図の履歴件数が不正です")
+        last = moment
+    frames = list(history)
+    at = document["generatedAt"]
+    if document["sync"]["status"] == "ok" and at >= HISTORY_START:
+        counts = {code: set() for code in sorted(codes)}
+        for article in document["articles"]:
+            for code in article["prefectures"]:
+                if code in counts:
+                    counts[code].add(article["key"])
+        if not frames:
+            frames.append({"at": HISTORY_START, "counts": {code: 0 for code in sorted(codes)}})
+        if at > frames[-1]["at"]:
+            frames.append({"at": at, "counts": {code: len(keys) for code, keys in counts.items()}})
+    document["history"] = frames
+
+
 def write_atomic(path, document):
     path.parent.mkdir(parents=True, exist_ok=True)
     descriptor, temporary = tempfile.mkstemp(prefix="." + path.name + ".", dir=path.parent)
@@ -260,6 +298,7 @@ def main():
         raise ValueError("47都道府県の対応表を確認できません")
     previous = json.loads(args.output.read_text(encoding="utf-8")) if args.output.exists() else {"version": 1, "tag": TAG, "articles": []}
     document, failures = sync_atlas(NoteClient(args.delay), previous, prefectures, max_pages=args.max_pages)
+    record_history(previous, document, prefectures)
     write_atomic(args.output, document)
     print(json.dumps({"articles": len(document["articles"]), **document["sync"]}, ensure_ascii=False))
     for failure in failures:

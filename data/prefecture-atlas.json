@@ -9,5 +9,6 @@
     "discoveredArticles": 0,
     "checkedArticles": 0,
     "failedArticles": 0
-  }
+  },
+  "history": []
 }

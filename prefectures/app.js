@@ -80,7 +80,20 @@
       return true;
     }).sort((a, b) => Date.parse(b.publishedAt) - Date.parse(a.publishedAt) || a.key.localeCompare(b.key));
   }
-  const model = Object.freeze({TAG, normalizeArticle, parseDocument, parseDebugDocument, summarize, colorLevel, filterArticles, topPrefectures});
+  function parseHistory(data, prefectures) {
+    if (!Array.isArray(data.history) || !Number.isFinite(Date.parse(data.generatedAt))) return [];
+    const codes = prefectures.map(p => p.code), frames = [];
+    let previous = -Infinity;
+    for (const frame of data.history) {
+      const time = Date.parse(frame?.at);
+      if (!Number.isFinite(time) || time <= previous || time > Date.parse(data.generatedAt) ||
+          !frame.counts || Object.keys(frame.counts).length !== codes.length ||
+          !codes.every(code => Number.isSafeInteger(frame.counts[code]) && frame.counts[code] >= 0)) return [];
+      frames.push({at: frame.at, counts: {...frame.counts}}); previous = time;
+    }
+    return frames;
+  }
+  const model = Object.freeze({TAG, normalizeArticle, parseDocument, parseDebugDocument, summarize, colorLevel, filterArticles, topPrefectures, parseHistory});
   if (typeof module !== "undefined" && module.exports) module.exports = model;
   if (typeof document === "undefined") return;
 
@@ -91,6 +104,7 @@
   let prefectures = [], articles = [], stats, registry, mapGroups = new Map(), callouts, tooltip;
   let loaded = false;
   let resultsScrollTimer;
+  let historyFrames = [], historyFrame = null, historyAnimation = 0;
   const state = {prefecture: "", view: "map", limit: PAGE_SIZE};
   function element(name, className, text) {
     const node = document.createElement(name);
@@ -135,6 +149,7 @@
   function selectPrefecture(code, scroll = false) {
     if (!loaded || (code && !prefectures.some(p => p.code === code))) return;
     cancelResultsScroll();
+    closeHistory();
     state.prefecture = code; state.limit = PAGE_SIZE;
     writeHash(); renderMapCounts(); renderPrefectureList(); renderResults();
     if (scroll && matchMedia("(max-width: 960px)").matches) {
@@ -167,8 +182,9 @@
     $("japanMap").setAttribute("aria-busy", "false");
   }
   function renderMapCounts() {
+    const displayed = historyFrame ? {counts: new Map(prefectures.map(p => [p.code, {articles: {size: historyFrame.counts[p.code]}}]))} : stats;
     for (const pref of prefectures) {
-      const count = stats.counts.get(pref.code);
+      const count = displayed.counts.get(pref.code);
       const group = mapGroups.get(pref.code);
       group.setAttribute("aria-pressed", String(state.prefecture === pref.code));
       const label = pref.name + "の記事を読む";
@@ -179,7 +195,7 @@
     const selected = mapGroups.get(state.prefecture);
     if (selected) selected.parentNode.append(selected);
     callouts.replaceChildren(); tooltip.replaceChildren();
-    const leaders = topPrefectures(prefectures, stats);
+    const leaders = topPrefectures(prefectures, displayed);
     const pref = currentPrefecture();
     const [mapX, mapY, mapWidth, mapHeight] = registry.viewBox.split(/\s+/).map(Number);
     const selectionWidth = pref ? pref.name.length * 18 + 24 : 0;
@@ -289,6 +305,53 @@
     $("loadMore").textContent = "さらに" + Math.min(6, list.length - state.limit) + "記事を見る";
     $("resultAnnouncement").textContent = (pref?.name || "全国") + "の記事を表示しました。";
   }
+  function pauseHistory() {
+    cancelAnimationFrame(historyAnimation); historyAnimation = 0;
+    $("historyPlay").textContent = "巻き戻す";
+  }
+  function showHistoryFrame(index) {
+    const frame = historyFrames[index];
+    if (!frame) return;
+    historyFrame = frame;
+    $("historyRange").value = String(index);
+    $("historyDate").dateTime = frame.at;
+    $("historyDate").textContent = updateLabel.format(new Date(frame.at)) + "（日本時間）";
+    $("historyRange").setAttribute("aria-valuetext", $("historyDate").textContent);
+    $("historyPosition").textContent = index === 0 ? "はじまり" : index === historyFrames.length - 1 ? "最新" : "過去の地図";
+    renderMapCounts();
+  }
+  function playHistory() {
+    if (historyFrames.length < 2) return;
+    pauseHistory();
+    let from = Number($("historyRange").value);
+    if (!from) from = historyFrames.length - 1;
+    showHistoryFrame(from);
+    const start = performance.now(), duration = 12000;
+    $("historyPlay").textContent = "一時停止";
+    function tick(now) {
+      const index = Math.max(0, Math.ceil(from * (1 - (now - start) / duration)));
+      if (index !== Number($("historyRange").value)) showHistoryFrame(index);
+      if (index > 0) historyAnimation = requestAnimationFrame(tick);
+      else pauseHistory();
+    }
+    historyAnimation = requestAnimationFrame(tick);
+  }
+  function closeHistory() {
+    pauseHistory(); historyFrame = null;
+    $("historyPanel").hidden = true;
+    $("historyToggle").setAttribute("aria-expanded", "false");
+    if (loaded) renderMapCounts();
+  }
+  function configureHistory(data, debugEnabled) {
+    closeHistory();
+    historyFrames = debugEnabled || data.sample ? [] : parseHistory(data, prefectures);
+    $("historyToggle").hidden = debugEnabled || data.sample === true;
+    const available = historyFrames.length >= 2;
+    $("historyControls").hidden = !available;
+    $("historyEmpty").hidden = available;
+    $("historyRange").max = String(Math.max(0, historyFrames.length - 1));
+    $("historyRange").value = $("historyRange").max;
+  }
   async function getJson(url) {
     const controller = new AbortController(), timer = setTimeout(() => controller.abort(), 15000);
     try {
@@ -331,7 +394,7 @@
       $("prefectureTotal").textContent = number.format(stats.prefectures);
       $("updatedAt").hidden = data.sample === true;
       $("updatedAt").textContent = data.sample === true ? "" : data.generatedAt && Number.isFinite(Date.parse(data.generatedAt)) ? (debugEnabled ? "デバッグ記事の取得 " : "最終更新 ") + updateLabel.format(new Date(data.generatedAt)) + "（日本時間）" : "これから記事が集まります";
-      buildMap(); renderMapCounts(); renderPrefectureList(); renderView(); renderResults();
+      buildMap(); configureHistory(data, debugEnabled); renderMapCounts(); renderPrefectureList(); renderView(); renderResults();
     } catch (error) {
       console.error("図鑑の読み込みに失敗しました", error);
       $("loadError").hidden = false;
@@ -354,8 +417,23 @@
       $(ids[index]).click(); $(ids[index]).focus();
     });
   }
+  $("historyToggle").addEventListener("click", () => {
+    if (!$("historyPanel").hidden) { closeHistory(); return; }
+    cancelResultsScroll();
+    state.view = "map"; writeHash(); renderView();
+    $("historyPanel").hidden = false;
+    $("historyToggle").setAttribute("aria-expanded", "true");
+    if (historyFrames.length >= 2) {
+      showHistoryFrame(historyFrames.length - 1);
+      if (!matchMedia("(prefers-reduced-motion: reduce)").matches) playHistory();
+    }
+  });
+  $("historyPlay").addEventListener("click", () => historyAnimation ? pauseHistory() : playHistory());
+  $("historyRange").addEventListener("input", () => { pauseHistory(); showHistoryFrame(Number($("historyRange").value)); });
+  $("historyLatest").addEventListener("click", closeHistory);
+  document.addEventListener("visibilitychange", () => { if (document.hidden) pauseHistory(); });
   $("mapTab").addEventListener("click", () => { cancelResultsScroll(); state.view = "map"; writeHash(); renderView(); });
-  $("listTab").addEventListener("click", () => { cancelResultsScroll(); state.view = "list"; writeHash(); renderView(); });
+  $("listTab").addEventListener("click", () => { cancelResultsScroll(); closeHistory(); state.view = "list"; writeHash(); renderView(); });
   bindTabKeys(["mapTab", "listTab"]);
   $("clearPrefecture").addEventListener("click", () => selectPrefecture(""));
   $("loadMore").addEventListener("click", () => { state.limit += 6; renderResults(); });
@@ -373,7 +451,7 @@
     }
   }));
   window.addEventListener("hashchange", () => {
-    cancelResultsScroll();
+    cancelResultsScroll(); closeHistory();
     if (!loaded || location.hash === "#participate" || location.hash === "#explore") return;
     readHash(); state.limit = PAGE_SIZE;
     renderMapCounts(); renderPrefectureList(); renderView(); renderResults();

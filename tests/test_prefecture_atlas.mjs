@@ -91,3 +91,16 @@ test("renamed campaign tag is required in the browser model", () => {
   assert.ok(model.normalizeArticle(sample("n111", "writer", ["東京"]), prefectures));
   assert.equal(model.normalizeArticle(sample("n111", "writer", [], {tags: ["都道府県クリエイター図鑑", "東京"]}), prefectures), null);
 });
+
+test('history requires ordered timestamps and all 47 nonnegative counts', () => {
+  const counts = Object.fromEntries(prefectures.map(p => [p.code, 0]));
+  const first = {at: '2026-11-30T15:00:00Z', counts};
+  const last = {at: '2026-11-30T18:00:00Z', counts: {...counts, '13': 2}};
+  const data = {generatedAt: last.at, history: [first, last]};
+  assert.equal(model.parseHistory(data, prefectures).length, 2);
+  assert.deepEqual(model.parseHistory({...data, history: [last, first]}, prefectures), []);
+  assert.deepEqual(model.parseHistory({...data, history: [{...first, counts: {...counts, '13': -1}}]}, prefectures), []);
+  assert.deepEqual(model.parseHistory({...data, history: [{...first, counts: {}}]}, prefectures), []);
+  assert.deepEqual(model.parseHistory({...data, generatedAt: first.at}, prefectures), []);
+  assert.deepEqual(model.parseHistory({}, prefectures), []);
+});

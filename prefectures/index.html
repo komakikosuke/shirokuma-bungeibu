@@ -8,8 +8,8 @@
   <meta name="robots" content="noindex,nofollow">
   <title>記事で塗る日本地図｜シロクマ文芸部</title>
   <link rel="icon" href="../assets/polarbear-icon.png" type="image/png">
-  <link rel="stylesheet" href="./style.css?v=10">
-  <script defer src="./app.js?v=10"></script>
+  <link rel="stylesheet" href="./style.css?v=12">
+  <script defer src="./app.js?v=12"></script>
 </head>
 <body>
   <a class="skip-link" href="#explore">地図と記事一覧へ</a>
@@ -54,6 +54,16 @@
             <div class="view-switch" role="tablist" aria-label="都道府県の探し方">
               <button id="mapTab" type="button" role="tab" aria-selected="true" aria-controls="mapView">地図</button>
               <button id="listTab" type="button" role="tab" aria-selected="false" aria-controls="listView" tabindex="-1">都道府県一覧</button>
+            </div>
+            <button id="historyToggle" class="history-toggle" type="button" aria-expanded="false" aria-controls="historyPanel" hidden>これまでの変化を見る</button>
+          </div>
+          <div id="historyPanel" class="history-panel" hidden>
+            <p id="historyEmpty">12月1日から地図の変化を記録します。記録が集まると、ここで巻き戻して見られます。</p>
+            <div id="historyControls" hidden>
+              <div class="history-heading"><span id="historyPosition">最新</span><time id="historyDate"></time></div>
+              <input id="historyRange" type="range" min="0" max="0" value="0" step="1" aria-label="地図の記録日時">
+              <div class="history-actions"><button id="historyPlay" type="button">巻き戻す</button><button id="historyLatest" type="button">最新に戻る</button></div>
+              <p class="history-note">地図の色を巻き戻します。記事一覧は最新のままです。</p>
             </div>
           </div>
           <div id="mapView" role="tabpanel" aria-labelledby="mapTab">
