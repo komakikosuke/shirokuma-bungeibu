@@ -372,6 +372,7 @@
     closeHistory();
     historyFrames = debugEnabled || data.sample ? [] : parseHistory(data, prefectures);
     $("historyToggle").hidden = debugEnabled || data.sample === true;
+    $("historyDemoLink").hidden = historyDemo || !document.querySelector('meta[name="atlas-debug-feed"]');
     const available = historyFrames.length >= 2;
     $("historyControls").hidden = !available;
     $("historyEmpty").hidden = available;
@@ -433,7 +434,11 @@
       $("updatedAt").hidden = data.sample === true || historyDemo;
       $("updatedAt").textContent = data.sample === true ? "" : data.generatedAt && Number.isFinite(Date.parse(data.generatedAt)) ? (debugEnabled ? "デバッグ記事の取得 " : "最終更新 ") + updateLabel.format(new Date(data.generatedAt)) + "（日本時間）" : "これから記事が集まります";
       buildMap(); configureHistory(data, debugEnabled); renderMapCounts(); renderPrefectureList(); renderView(); renderResults();
-      if (historyDemo) $("historyToggle").click();
+      if (historyDemo) {
+        $("historyToggle").click();
+        pauseHistory(); showHistoryFrame(historyFrames.length - 1);
+        $("historyPanel").scrollIntoView({behavior: "instant", block: "start"});
+      }
     } catch (error) {
       console.error("図鑑の読み込みに失敗しました", error);
       $("loadError").hidden = false;
@@ -466,6 +471,11 @@
       showHistoryFrame(historyFrames.length - 1);
       if (!matchMedia("(prefers-reduced-motion: reduce)").matches) playHistory();
     }
+  });
+  $("historyDemoLink").addEventListener("click", () => {
+    const url = new URL(location.href);
+    url.searchParams.set("debug", "history"); url.hash = "";
+    history.replaceState(null, "", url); load();
   });
   $("historyPlay").addEventListener("click", () => historyAnimation ? pauseHistory() : playHistory());
   $("historyRange").addEventListener("input", () => { pauseHistory(); showHistoryFrame(Number($("historyRange").value)); });
