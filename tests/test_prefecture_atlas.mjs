@@ -85,3 +85,9 @@ test("initial production data is real and contains no demo records", () => {
   assert.notEqual(data.sample, true);
   assert.doesNotThrow(() => model.parseDocument(data, prefectures));
 });
+
+test("renamed campaign tag is required in the browser model", () => {
+  assert.equal(model.TAG, "記事で塗る日本地図");
+  assert.ok(model.normalizeArticle(sample("n111", "writer", ["東京"]), prefectures));
+  assert.equal(model.normalizeArticle(sample("n111", "writer", [], {tags: ["都道府県クリエイター図鑑", "東京"]}), prefectures), null);
+});

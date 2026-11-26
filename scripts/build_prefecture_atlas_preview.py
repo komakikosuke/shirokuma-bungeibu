@@ -37,10 +37,10 @@ def sample_document():
                 "key": key, "url": "https://note.com/" + handle + "/n/" + key,
                 "title": title, "publishedAt": published.isoformat(),
                 "author": {"handle": handle, "name": name, "avatarUrl": ""},
-                "imageUrl": "", "tags": ["都道府県クリエイター図鑑", pref["name"], category],
+                "imageUrl": "", "tags": ["記事で塗る日本地図", pref["name"], category],
                 "prefectures": [pref["code"]], "isPaid": False,
             })
-    return {"version": 1, "tag": "都道府県クリエイター図鑑", "sample": True, "generatedAt": "2026-11-24T12:00:00Z", "articles": articles}
+    return {"version": 1, "tag": "記事で塗る日本地図", "sample": True, "generatedAt": "2026-11-24T12:00:00Z", "articles": articles}
 
 
 def main():

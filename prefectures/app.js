@@ -1,6 +1,6 @@
 (function () {
   "use strict";
-  const TAG = "都道府県クリエイター図鑑";
+  const TAG = "記事で塗る日本地図";
   const PAGE_SIZE = 3;
   const MOBILE_SELECTION_DELAY = 450;
   const SVG_NS = "http://www.w3.org/2000/svg";

@@ -46,6 +46,11 @@ def previous(*articles):
 
 
 class EligibilityTests(unittest.TestCase):
+    def test_renamed_campaign_tag_is_required(self):
+        self.assertEqual(atlas.TAG, "記事で塗る日本地図")
+        self.assertIsNotNone(atlas.parse_article(SEED, payload(["記事で塗る日本地図", "東京"]), PREFECTURES))
+        self.assertIsNone(atlas.parse_article(SEED, payload(["都道府県クリエイター図鑑", "東京"]), PREFECTURES))
+
     def test_requires_campaign_and_registered_prefecture_tag(self):
         self.assertIsNotNone(atlas.parse_article(SEED, payload(), PREFECTURES))
         for tags in [[], [atlas.TAG], ["京都府"], ["京都"], [atlas.TAG, "京都旅行"], [atlas.TAG + "2", "京都府"], [atlas.TAG, "北海"]]:

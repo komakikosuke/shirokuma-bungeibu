@@ -20,7 +20,7 @@ import urllib.parse
 import urllib.request
 
 ROOT = Path(__file__).resolve().parents[1]
-TAG = "都道府県クリエイター図鑑"
+TAG = "記事で塗る日本地図"
 HANDLE = re.compile(r"^[A-Za-z0-9_-]{1,100}$")
 KEY = re.compile(r"^n[A-Za-z0-9]+$")
 UTC = dt.timezone.utc
