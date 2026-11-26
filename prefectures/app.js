@@ -333,7 +333,6 @@
   }
   function pauseHistory() {
     cancelAnimationFrame(historyAnimation); historyAnimation = 0;
-    $("historyPlay").textContent = "巻き戻す";
   }
   function showHistoryFrame(index) {
     const frame = historyFrames[index];
@@ -349,15 +348,13 @@
   function playHistory() {
     if (historyFrames.length < 2) return;
     pauseHistory();
-    let from = Number($("historyRange").value);
-    if (!from) from = historyFrames.length - 1;
-    showHistoryFrame(from);
+    const last = historyFrames.length - 1;
+    showHistoryFrame(0);
     const start = performance.now(), duration = 12000;
-    $("historyPlay").textContent = "一時停止";
     function tick(now) {
-      const index = Math.max(0, Math.ceil(from * (1 - (now - start) / duration)));
+      const index = Math.min(last, Math.floor(last * Math.max(0, now - start) / duration));
       if (index !== Number($("historyRange").value)) showHistoryFrame(index);
-      if (index > 0) historyAnimation = requestAnimationFrame(tick);
+      if (index < last) historyAnimation = requestAnimationFrame(tick);
       else pauseHistory();
     }
     historyAnimation = requestAnimationFrame(tick);
@@ -377,7 +374,7 @@
     $("historyControls").hidden = !available;
     $("historyEmpty").hidden = available;
     $("historyRange").max = String(Math.max(0, historyFrames.length - 1));
-    $("historyRange").value = $("historyRange").max;
+    $("historyRange").value = "0";
   }
   async function getJson(url) {
     const controller = new AbortController(), timer = setTimeout(() => controller.abort(), 15000);
@@ -425,9 +422,8 @@
       loaded = true; readHash();
       if (debugEnabled && !state.prefecture) state.prefecture = "13";
       $("debugNotice").hidden = !debugEnabled && !historyDemo;
-      $("debugNotice").querySelector("span").textContent = historyDemo ? "デバッグ表示：仮の記事数で地図の変化を再現しています。実際の掲載状況ではありません。" : "デバッグ表示：小牧幸助の最新記事を東京に仮表示しています。";
+      $("debugNotice").querySelector("span").textContent = historyDemo ? "デバッグ表示：動作確認用の仮データです。" : "デバッグ表示：小牧幸助の最新記事を東京に仮表示しています。";
       $("debugNotice").querySelector("a").href = historyDemo ? "./" : "./#pref=13";
-      document.querySelector(".history-note").textContent = historyDemo ? "仮の記事数で地図の変化を再現しています。" : "地図の色を巻き戻します。記事一覧は最新のままです。";
       $("articleTotal").textContent = number.format(stats.articles);
       $("creatorTotal").textContent = historyDemo ? "—" : number.format(stats.creators);
       $("prefectureTotal").textContent = number.format(stats.prefectures);
@@ -436,7 +432,6 @@
       buildMap(); configureHistory(data, debugEnabled); renderMapCounts(); renderPrefectureList(); renderView(); renderResults();
       if (historyDemo) {
         $("historyToggle").click();
-        pauseHistory(); showHistoryFrame(historyFrames.length - 1);
         $("historyPanel").scrollIntoView({behavior: "instant", block: "start"});
       }
     } catch (error) {
@@ -468,7 +463,7 @@
     $("historyPanel").hidden = false;
     $("historyToggle").setAttribute("aria-expanded", "true");
     if (historyFrames.length >= 2) {
-      showHistoryFrame(historyFrames.length - 1);
+      showHistoryFrame(0);
       if (!matchMedia("(prefers-reduced-motion: reduce)").matches) playHistory();
     }
   });
@@ -477,9 +472,8 @@
     url.searchParams.set("debug", "history"); url.hash = "";
     history.replaceState(null, "", url); load();
   });
-  $("historyPlay").addEventListener("click", () => historyAnimation ? pauseHistory() : playHistory());
   $("historyRange").addEventListener("input", () => { pauseHistory(); showHistoryFrame(Number($("historyRange").value)); });
-  $("historyLatest").addEventListener("click", closeHistory);
+  ["pointerdown", "touchstart", "keydown"].forEach(type => $("historyRange").addEventListener(type, pauseHistory, {passive: true}));
   document.addEventListener("visibilitychange", () => { if (document.hidden) pauseHistory(); });
   $("mapTab").addEventListener("click", () => { cancelResultsScroll(); state.view = "map"; writeHash(); renderView(); });
   $("listTab").addEventListener("click", () => { cancelResultsScroll(); closeHistory(); state.view = "list"; writeHash(); renderView(); });
