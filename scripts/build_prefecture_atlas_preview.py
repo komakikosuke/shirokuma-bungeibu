@@ -63,7 +63,7 @@ def main():
         page = dist / "prefectures/index.html"
         page.write_text(page.read_text().replace("</head>", '<meta name="atlas-debug-feed" content="../data/prefecture-atlas-debug.json">\n</head>'))
     target = "./prefectures/?debug=komaki#pref=13" if args.debug_komaki else "./prefectures/#pref=26"
-    (dist / "index.html").write_text('<!doctype html><html lang="ja"><meta charset="utf-8"><meta name="robots" content="noindex,nofollow"><meta http-equiv="refresh" content="0;url=' + target + '"><title>都道府県クリエイター図鑑・制作プレビュー</title><a href="' + target + '">制作プレビューを開く</a></html>\n')
+    (dist / "index.html").write_text('<!doctype html><html lang="ja"><meta charset="utf-8"><meta name="robots" content="noindex,nofollow"><meta http-equiv="refresh" content="0;url=' + target + '"><title>記事で塗る日本地図・制作プレビュー</title><a href="' + target + '">制作プレビューを開く</a></html>\n')
     config = ROOT / ".openai"
     config.mkdir(exist_ok=True)
     (config / "hosting.json").write_text(json.dumps({"static": {"directory": "dist"}}) + "\n")
