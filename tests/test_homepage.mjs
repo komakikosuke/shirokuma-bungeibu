@@ -10,7 +10,7 @@ const flush = () => new Promise(resolve => setImmediate(resolve));
 async function activity(initialCount) {
   const state = { count: initialCount, requests: 0, fail: false };
   const events = {}, timers = [];
-  const badges = ['みんなの部室', '部室に入る'].map(label => {
+  const badges = ['部室に入る'].map(label => {
     const link = { dataset: { roomLabel: label }, attributes: {}, setAttribute(key, value) { this.attributes[key] = value; } };
     return { textContent: '', hidden: true, closest: () => link, link };
   });
@@ -31,7 +31,7 @@ async function activity(initialCount) {
   await flush();
   return { state, events, timers, badges, document };
 }
-test('activity is displayed in the header and room banner and refreshes every 30 seconds', async () => {
+test('activity is displayed in the room banner and refreshes every 30 seconds', async () => {
   const env = await activity(7);
   assert.equal(env.timers[0].ms, 30000);
   for (const badge of env.badges) {
@@ -74,7 +74,8 @@ test('the homepage links to the dedicated content pages and keeps the map nonint
   assert.equal((html.match(/<article class="content-card/g) || []).length, 4);
   assert.match(html, /href="\.\/featured\/"/);
   assert.match(html, /id="endrollEntry" aria-disabled="true" tabindex="-1"/);
-  assert.equal((html.match(/data-room-activity hidden/g) || []).length, 2);
+  assert.equal((html.match(/data-room-activity hidden/g) || []).length, 1);
+  assert.doesNotMatch(html.slice(html.indexOf('<header'), html.indexOf('</header>')), /みんなの部室|data-room-activity/);
   const coming = html.slice(html.indexOf('<article class="content-card coming-soon"'));
   assert.match(coming, /COMING SOON/);
   assert.doesNotMatch(coming.slice(0, coming.indexOf('</article>')), /<a\b/);
