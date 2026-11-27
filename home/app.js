@@ -15,7 +15,7 @@ async function loadHashtagCount() {
       count.textContent = new Intl.NumberFormat("ja-JP").format(data.count);
       if (data.updatedAt && !Number.isNaN(Date.parse(data.updatedAt))) {
         const date = new Intl.DateTimeFormat("ja-JP", { timeZone: "Asia/Tokyo", month: "numeric", day: "numeric", hour: "numeric", minute: "2-digit" }).format(new Date(data.updatedAt));
-        caption.title = "更新 " + date;
+        caption.textContent = "noteのハッシュタグ登録記事数（更新 " + date + "）";
       }
       return;
     } catch (error) { console.info("累計記事数の取得を再試行します", error); }
