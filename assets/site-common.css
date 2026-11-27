@@ -1,0 +1,46 @@
+/* Shared Shirokuma site chrome and editorial rhythm. */
+:root{--navy:#133e59;--blue:#238bab;--aqua:#5dc0d5;--line:#d5e6ed;--sans:-apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;--serif:"Hiragino Mincho ProN","Yu Mincho",YuMincho,"Noto Serif JP",serif}
+body{background:#fff;color:var(--navy);font-family:var(--sans)}
+body .container{width:min(1400px,calc(100% - 76px));margin-inline:auto}
+body .site-header{background:#fff;border-bottom:1px solid #e4ecee}
+body .site-header .header-inner{min-height:76px;height:auto;display:flex;align-items:center;justify-content:flex-start;gap:22px;padding-block:12px}
+body .site-header .brand{display:flex;align-items:center;gap:12px;white-space:nowrap;text-decoration:none;font:700 23px/1.4 var(--serif);letter-spacing:.09em}
+body .site-header .brand-name{font:inherit;letter-spacing:inherit}
+body .site-header .brand img{display:block;width:44px;height:44px;flex:none;border:1px solid #c7e2e8;border-radius:50%;box-shadow:none}
+body .site-header .tagline{display:inline;border-left:1px solid var(--line);padding-left:22px;color:#5e7b8b;font:13px/1.6 var(--serif);letter-spacing:0;white-space:nowrap}
+body .site-header .header-nav{display:flex;margin-left:auto;align-items:center;gap:0}
+body .site-header .header-nav a,body .site-header .header-nav .about-link{display:inline;padding:0;border:0;color:#527588;font:600 13px/1.6 var(--sans);text-decoration:none;white-space:nowrap}
+body .site-header .header-nav a:hover{color:#238bab}
+body .hero,body .featured-hero,body .room-hero,body .page-hero,body .room-archive-hero{background:linear-gradient(112deg,#d0edf3,#b5e4ee 68%,#a9dfeb);border-bottom:1px solid #c9e2e9}
+body .breadcrumb,body .hero-breadcrumb{display:flex;align-items:center;flex-wrap:wrap;gap:12px;margin:0 0 24px;color:#4a7185;font:13px/1.75 var(--sans);letter-spacing:0}
+body .breadcrumb a,body .hero-breadcrumb a{text-decoration:none;border:0;border-bottom:1px solid #80adbf;padding-bottom:2px}
+body .page-heading,body .hero-copy .page-heading{font:500 clamp(32px,3.2vw,44px)/1.5 var(--serif);letter-spacing:.06em;white-space:normal;margin:0 0 12px;text-shadow:none;overflow-wrap:anywhere}
+body .page-lead,body .hero-copy .page-lead{font:500 clamp(22px,2vw,28px)/1.8 var(--serif);letter-spacing:.05em;margin:0 0 15px}
+body .hero-description,body .intro-copy,body .page-intro,body .room-archive-intro{font:14px/1.95 var(--sans);color:#345f75;letter-spacing:.01em}
+body .how-to-intro p,body .how-to p,body .step p,body .how-copy p{font-family:var(--sans);font-size:14px;line-height:1.9}
+body .how-to h3{font:600 14px/1.7 var(--serif);white-space:normal}
+body .how-to-inner{padding-block:40px}
+body .pill,body .primary-action,body #loadMore,body .load-more,body .room-archive-more button{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:44px;border:1px solid #376d83;border-radius:999px;padding:8px 23px;background:transparent;color:#133e59;font:500 14px/1.6 var(--sans);text-decoration:none}
+body .pill:hover,body .primary-action:hover:not(:disabled),body #loadMore:hover,body .load-more:hover,body .room-archive-more button:hover:not(:disabled){background:#e7f8fc;color:#133e59}
+body .text-link,body .participation-link,body .room-shelf-all-link,body .room-archive-back a{font:14px/1.7 var(--sans);text-decoration:none;border:0;border-bottom:1px solid #80adbf;padding-bottom:3px;color:#345f75}
+body .footer,body .site-footer{background:#fff;border-top:1px solid #e4ecee;color:#57788b;padding:22px 0}
+body .footer-inner{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px;min-height:0;font:12px/1.8 var(--sans)}
+body .footer-inner a{font:12px/1.8 var(--sans);color:#345f75;text-decoration:none;text-underline-offset:4px}
+body .footer-inner a:hover{text-decoration:underline}.footer-links{display:flex;gap:20px;flex-wrap:wrap}
+@media(max-width:1180px){body .site-header .tagline{display:none}}
+@media(max-width:900px){body .container{width:calc(100% - 44px)}}
+@media(max-width:700px){
+ body .container{width:calc(100% - 32px)}
+ body .site-header .header-inner{min-height:67px;gap:12px;padding-block:12px}
+ body .site-header .brand{font-size:18px;gap:9px}body .site-header .brand img{width:35px;height:35px}
+ body .site-header .header-nav a,body .site-header .header-nav .about-link{display:inline;font-size:12px}
+ body .breadcrumb,body .hero-breadcrumb{font-size:12px;gap:10px;margin-bottom:20px}
+ body .page-heading,body .hero-copy .page-heading{font-size:32px;letter-spacing:.045em}
+ body .page-lead,body .hero-copy .page-lead{font-size:24px;line-height:1.7}
+ body .pill,body .primary-action,body #loadMore,body .load-more,body .room-archive-more button{font-size:13px;padding:8px 15px;gap:8px;min-height:44px}
+ body .primary-action .action-arrow{margin-left:2px}
+ body .hero-description,body .intro-copy,body .page-intro,body .room-archive-intro{font-size:14px}
+ body .footer,body .site-footer{padding:20px 0}body .footer-inner,body .footer-inner a{font-size:12px}
+}
+@media(max-width:390px){body .site-header .brand{font-size:16px;gap:7px}body .site-header .brand img{width:32px;height:32px}body .site-header .header-nav a,body .site-header .header-nav .about-link{font-size:11px}}
+@media(max-width:350px){body .site-header .brand{letter-spacing:.04em}body .site-header .header-nav a,body .site-header .header-nav .about-link{font-size:10.5px}}
