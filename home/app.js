@@ -1,7 +1,7 @@
 "use strict";
 async function loadHashtagCount() {
   const count = document.getElementById("asideCount");
-  const caption = document.getElementById("asideFoot");
+  const updated = document.getElementById("asideUpdated");
   const urls = [
     "https://raw.githubusercontent.com/komakikosuke/shirokuma-bungeibu/main/data/hashtag-total.json",
     "./data/hashtag-total.json"
@@ -15,12 +15,14 @@ async function loadHashtagCount() {
       count.textContent = new Intl.NumberFormat("ja-JP").format(data.count);
       if (data.updatedAt && !Number.isNaN(Date.parse(data.updatedAt))) {
         const date = new Intl.DateTimeFormat("ja-JP", { timeZone: "Asia/Tokyo", month: "numeric", day: "numeric", hour: "numeric", minute: "2-digit" }).format(new Date(data.updatedAt));
-        caption.textContent = "noteのハッシュタグ登録記事数（更新 " + date + "）";
+        updated.textContent = "更新 " + date;
+        updated.dateTime = new Date(data.updatedAt).toISOString();
+        updated.hidden = false;
       }
       return;
     } catch (error) { console.info("累計記事数の取得を再試行します", error); }
   }
-  caption.textContent = "累計記事数を取得できませんでした";
+  count.setAttribute("aria-label", "累計記事数を取得できませんでした");
 }
 async function loadEndrollStatus() {
   const entry = document.getElementById("endrollEntry");
