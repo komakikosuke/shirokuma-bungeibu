@@ -15,7 +15,7 @@ from build_twenty_credits import (
 )
 from twenty_char import write_json_atomic
 
-ENDPOINT = "https://shirokuma-writing-room.claska.chatgpt.site/api/endroll/membership"
+ENDPOINT = "https://shirokuma-writing-room.komakikosuke.chatgpt.site/api/endroll/membership"
 
 
 def request_json(request):

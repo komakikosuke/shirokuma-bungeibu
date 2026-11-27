@@ -32,7 +32,7 @@ from datetime import datetime, time as clock_time, timedelta, timezone
 FEED = 'https://komakikosuke.github.io/shirokuma-bungeibu/data/magazine-eligible.json'
 MAGAZINE = 'https://note.com/komaki_kousuke/m/mc02c43cae693'
 TARGET = '注目記事｜シロクマ文芸部'
-ROOM_FEED = 'https://shirokuma-writing-room.claska.chatgpt.site/api/room/articles'
+ROOM_FEED = 'https://shirokuma-writing-room.komakikosuke.chatgpt.site/api/room/articles'
 ROOM_MAGAZINE = 'https://note.com/komaki_kousuke/m/m43afa48b795e'
 ROOM_TARGET = '「みんなの部室」で書かれた作品'
 ENDROLL_FEED = 'https://komakikosuke.github.io/shirokuma-bungeibu/twenty-credits/data/works.json'

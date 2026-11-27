@@ -7,7 +7,7 @@ import tempfile
 from urllib.request import Request, urlopen
 
 TARGET = Path("twenty-credits/assets/arishihi-no-teiryusho-long.mp3")
-SOURCE = "https://shirokuma-writing-room.claska.chatgpt.site/endroll-audio/arishihi-no-teiryusho-long.mp3"
+SOURCE = "https://shirokuma-writing-room.komakikosuke.chatgpt.site/endroll-audio/arishihi-no-teiryusho-long.mp3"
 EXPECTED_SHA256 = "b686c1043711fee238127a4a63cbccb90f4b3902fef0a23c3142ea292a1afa9b"
 
 

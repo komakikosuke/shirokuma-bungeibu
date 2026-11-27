@@ -20,7 +20,7 @@ async function activity(initialCount) {
     setTimeout: () => 1, clearTimeout: () => {}, setInterval: (fn, ms) => timers.push({ fn, ms }),
     fetch: async (url, options) => {
       state.requests++;
-      assert.equal(url, 'https://shirokuma-writing-room.claska.chatgpt.site/api/room/activity');
+      assert.equal(url, 'https://shirokuma-writing-room.komakikosuke.chatgpt.site/api/room/activity');
       assert.equal(options.credentials, 'omit');
       assert.equal(options.cache, 'no-store');
       if (state.fail) throw Error('offline');

@@ -18,7 +18,7 @@
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 8000);
     try {
-      const response = await fetch("https://shirokuma-writing-room.claska.chatgpt.site/api/room/activity", {
+      const response = await fetch("https://shirokuma-writing-room.komakikosuke.chatgpt.site/api/room/activity", {
         credentials: "omit", mode: "cors", cache: "no-store", signal: controller.signal,
       });
       if (!response.ok) throw new Error("Activity unavailable");
