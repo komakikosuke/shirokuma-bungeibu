@@ -36,7 +36,7 @@ class TwentyCreditsTests(unittest.TestCase):
         self.assertIn('name="robots" content="noindex,nofollow,noarchive"', self.index)
         homepage = (ROOT / "index.html").read_text(encoding="utf-8")
         self.assertIn('id="endrollEntry" aria-disabled="true" tabindex="-1"', homepage)
-        self.assertIn('entry.href="./twenty-credits/"', homepage)
+        self.assertIn('entry.href = "./twenty-credits/"', (ROOT / "home/app.js").read_text(encoding="utf-8"))
 
     def test_page_has_controls_empty_state_and_reduced_motion_support(self):
         self.assertIn('id="toggleButton"', self.index)

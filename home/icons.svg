@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg">
+<symbol id="books" viewBox="0 0 256 256">
+  <g fill="#fff"><path d="m48 148 157-15q17-2 17 9v10q0 8-14 9L63 175q-25 3-32-12-5-12 17-15Z"/><path d="m48 184 159 14q15 2 15 10v9q0 9-16 8L53 210q-24-2-24-16 0-13 19-10Z"/><path d="M66 115q-25-11-25-36 0-34 44-36 43-1 46 33 3 29-32 39l-28 20 6-21Z" transform="translate(46 -12)"/><path d="m174 28 4-16m12 23 11-13m-4 27 16-7" fill="none" stroke="#fff" stroke-width="7" stroke-linecap="round"/></g>
+  <g fill="#95d9e2"><path d="m64 158 151-14v10L64 168q-11 1-11-4t11-6Z"/><path d="m59 193 156 14v10L59 203q-11-1-11-6t11-4Z"/><path d="M131 68c-11-17-34 0 0 23 34-23 11-40 0-23Z"/></g>
+</symbol>
+<symbol id="room" viewBox="0 0 256 256">
+  <g fill="#fff"><rect x="14" y="177" width="228" height="12" rx="6"/><path d="m34 187-8 49H15l7-49m200 0 8 49h11l-7-49"/><path d="M30 165q-9-21 0-47l4-12q-10-18 6-24 13-5 19 8 14-5 25 0 7-13 19-6 12 8 0 23 11 19 11 45 0 16-13 16H43q-10 0-13-3Z"/><path d="M152 165q-9-21 0-47l4-12q-10-18 6-24 13-5 19 8 14-5 25 0 7-13 19-6 12 8 0 23 11 19 11 45 0 16-13 16h-58q-10 0-13-3Z"/><rect x="116" y="150" width="19" height="21" rx="3"/><path d="M134 154q17 0 11 11-3 5-11 3" fill="none" stroke="#fff" stroke-width="5"/><path d="m101 57-7-13m32 9V37m24 20 9-13" fill="none" stroke="#fff" stroke-width="7" stroke-linecap="round"/></g>
+  <g fill="#133e59"><circle cx="55" cy="115" r="3"/><circle cx="78" cy="115" r="3"/><ellipse cx="67" cy="127" rx="4" ry="3"/><circle cx="177" cy="115" r="3"/><circle cx="200" cy="115" r="3"/><ellipse cx="189" cy="127" rx="4" ry="3"/></g>
+  <g fill="#95d9e2"><path d="m177 141 13 5 14-5v25l-14 4-13-4Z"/><path d="m53 139 25 22-6 4-25-23Z"/></g><path d="M190 148v19M47 157l21 5" fill="none" stroke="#fff" stroke-width="2"/>
+</symbol>
+<symbol id="credits" viewBox="0 0 256 256">
+  <text x="128" y="92" text-anchor="middle" fill="#fff" font-family="Georgia,'Times New Roman',serif" font-size="88">20</text>
+  <g fill="none" stroke="#fff" stroke-width="9" stroke-linecap="round"><path d="M67 121h122M82 145h92M66 169h124M86 193h84"/></g><path d="m112 213 27 15-27 16q-6 3-6-3v-25q0-6 6-3Z" fill="#fff"/>
+</symbol>
+</svg>

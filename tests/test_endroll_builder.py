@@ -103,7 +103,7 @@ class EndrollBuilderTests(unittest.TestCase):
     def test_home_entrance_starts_disabled_until_real_data_exists(self):
         homepage = (ROOT / "index.html").read_text(encoding="utf-8")
         self.assertIn('id="endrollEntry" aria-disabled="true" tabindex="-1"', homepage)
-        self.assertIn('entry.href="./twenty-credits/"', homepage)
+        self.assertIn('entry.href = "./twenty-credits/"', (ROOT / "home/app.js").read_text(encoding="utf-8"))
         status = json.loads((ROOT / "data/twenty-char-status.json").read_text(encoding="utf-8"))
         published = json.loads((ROOT / "twenty-credits/data/works.json").read_text(encoding="utf-8"))
         self.assertEqual(status["workCount"], len(published["works"]))
