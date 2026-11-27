@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "tag": "記事で塗る日本地図",
+  "generatedAt": "2026-11-27T22:51:04Z",
+  "articles": [],
+  "sync": {
+    "status": "ok",
+    "scannedPages": 1,
+    "discoveredArticles": 0,
+    "checkedArticles": 0,
+    "failedArticles": 0
+  },
+  "history": []
+}
