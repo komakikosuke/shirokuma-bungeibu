@@ -109,20 +109,5 @@ async function loadWorks() {
     loading = false;
   }
 }
-async function loadWeeklyTopic() {
-  try {
-    const item = await getData("weekly-topic.json");
-    if (typeof item.topic !== "string" || !item.topic.trim() || item.topic.length > 80 || typeof item.url !== "string") throw Error("Invalid weekly topic");
-    const url = new URL(item.url);
-    if (url.protocol !== "https:" || url.hostname !== "note.com" || !/^\/komaki_kousuke\/n\/n[A-Za-z0-9]+\/?$/.test(url.pathname)) throw Error("Invalid topic URL");
-    $("weeklyTopicWord").textContent = "「" + item.topic + "」";
-    $("weeklyTopicLink").href = url.href;
-    $("weeklyTopicLink").textContent = "お題の記事を読む";
-  } catch (error) {
-    console.info("今週のお題を取得できませんでした", error);
-    $("weeklyTopicWord").textContent = "今週のお題はnoteでご確認ください。";
-  }
-}
 $("retryWorks").addEventListener("click", loadWorks);
 loadWorks();
-loadWeeklyTopic();

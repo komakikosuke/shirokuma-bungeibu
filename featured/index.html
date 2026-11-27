@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#5dc0d5">
   <title>注目記事｜シロクマ文芸部</title>
-  <meta name="description" content="まだコメントのない参加作品へ、コメントをした人の記事を紹介。シロクマ文芸部の注目記事と、今週のお題をご覧いただけます。">
+  <meta name="description" content="まだコメントのない参加作品へ、コメントをした人の記事を紹介。シロクマ文芸部の注目記事をご覧いただけます。">
   <link rel="canonical" href="https://komakikosuke.github.io/shirokuma-bungeibu/featured/">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="シロクマ文芸部">
@@ -15,10 +15,10 @@
   <meta property="og:image" content="https://komakikosuke.github.io/shirokuma-bungeibu/assets/ogp-bear-preview-medium-20261108.jpg">
   <link rel="icon" type="image/png" href="../assets/polarbear-icon.png">
   <link rel="stylesheet" href="../articles/style.css?v=3">
-  <link rel="stylesheet" href="./style.css?v=1">
+  <link rel="stylesheet" href="./style.css?v=2">
   <script defer src="../assets/featured-week.js?v=1"></script>
   <script defer src="../assets/fit-cover-text.js?v=1"></script>
-  <script defer src="./app.js?v=1"></script>
+  <script defer src="./app.js?v=2"></script>
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-739CYW7P77"></script>
   <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-739CYW7P77');</script>
 </head>
@@ -41,21 +41,15 @@
             <p class="hero-lead">はじめてのコメントが、<br>次の作品に繋がる。</p>
             <p class="hero-description">まだコメントのない参加作品へ、<br>コメントをした人の記事を紹介。</p>
             <div class="hero-actions"><a class="pill" href="https://note.com/hashtag/%E3%82%B7%E3%83%AD%E3%82%AF%E3%83%9E%E6%96%87%E8%8A%B8%E9%83%A8" target="_blank" rel="noopener noreferrer">参加作品を読む</a><a class="text-link" href="#how-it-works">紹介のしくみ</a></div>
-            <section class="weekly-topic" aria-labelledby="weeklyTopicTitle">
-              <div class="weekly-meta"><h2 id="weeklyTopicTitle">今週のお題</h2><span>毎週木曜よる8時に発表</span></div>
-              <p id="weeklyTopicWord" class="weekly-word" aria-live="polite">お題を読み込んでいます…</p>
-              <a id="weeklyTopicLink" class="text-link" href="https://note.com/komaki_kousuke" target="_blank" rel="noopener noreferrer">noteでお題を確認する</a>
-            </section>
           </div>
-          <section class="lead-feature" aria-labelledby="leadTitle">
-            <h2 id="leadTitle">いまの注目記事</h2>
+          <section class="lead-feature" aria-label="注目記事の作品">
             <div id="leadWork" class="lead-work" aria-busy="true"><p class="lead-status" role="status">作品を読み込んでいます…</p></div>
           </section>
         </div>
       </div>
     </section>
     <section class="container recent" id="recent" aria-labelledby="recentTitle">
-      <div class="section-heading"><div><h2 id="recentTitle">最近の注目記事</h2><p>感想を届けた人の作品が、本棚に並びます。</p></div><a class="text-link archive-link" href="../articles/">注目記事の一覧を見る</a></div>
+      <div class="section-heading"><div><h2 id="recentTitle">注目記事</h2><p>感想を届けた人の作品が、本棚に並びます。</p></div><a class="text-link archive-link" href="../articles/">注目記事の一覧を見る</a></div>
       <div id="loadError" class="load-error" hidden role="alert"><p>注目記事を読み込めませんでした。</p><button id="retryWorks" class="pill" type="button">もう一度読み込む</button></div>
       <div id="recentWorks" class="article-grid" aria-busy="true"><p class="empty">本棚の作品を読み込んでいます…</p></div>
     </section>
@@ -63,9 +57,9 @@
       <div class="container how-layout">
         <div class="how-copy"><h2 id="howTitle">はじめてのコメントが、<br>次の作品に繋がる。</h2><p>作品への感想はクリエイターの励みになります。<br>まだコメントのない参加作品に、最初のひと言を届けた人の記事をご紹介します。</p></div>
         <ol class="steps">
-          <li><span class="step-icon" aria-hidden="true"><svg viewBox="0 0 32 32"><path d="M16 9C11 5 6 5 3 7v19c4-2 8-2 13 1 5-3 9-3 13-1V7c-3-2-8-2-13 2Zm0 0v18"/></svg></span><h3>参加作品を読む</h3><p>noteで「#シロクマ文芸部」の参加作品を読んでみましょう。</p></li>
-          <li><span class="step-icon" aria-hidden="true"><svg viewBox="0 0 32 32"><path d="M27 14c0 6-5 10-11 10h-3l-7 5 1-8c-3-2-4-4-4-7C3 8 8 4 15 4s12 4 12 10Z"/><path d="M10 12h12M10 17h8"/></svg></span><h3>最初のひと言を届ける</h3><p>まだコメントのない作品に、感想を届けてください。</p></li>
-          <li><span class="step-icon" aria-hidden="true"><svg viewBox="0 0 32 32"><path d="M6 5h18v23H6zM10 10h10M10 15h10M10 20h6M24 8h3v20H9"/></svg></span><h3>あなたの記事をご紹介</h3><p>コメントをしてくれた人の記事が、このページに並びます。</p></li>
+          <li class="step"><b class="step-number" aria-hidden="true">1</b><h3>参加作品を読む</h3><p>noteで「#シロクマ文芸部」の参加作品を読んでみましょう。</p></li>
+          <li class="step"><b class="step-number" aria-hidden="true">2</b><h3>最初のひと言を届ける</h3><p>まだコメントのない作品に、感想を届けてください。</p></li>
+          <li class="step"><b class="step-number" aria-hidden="true">3</b><h3>あなたの記事をご紹介</h3><p>コメントをしてくれた人の記事が、このページに並びます。</p></li>
         </ol>
       </div>
       <div class="container how-action"><a class="pill" href="https://note.com/hashtag/%E3%82%B7%E3%83%AD%E3%82%AF%E3%83%9E%E6%96%87%E8%8A%B8%E9%83%A8" target="_blank" rel="noopener noreferrer">noteで参加作品を読む</a></div>
