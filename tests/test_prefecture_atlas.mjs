@@ -41,20 +41,6 @@ test("prefecture selection and chronological ordering work together", () => {
   assert.deepEqual(model.filterArticles(articles, {prefecture: "26"}).map(a => a.key), ["n111"]);
   assert.deepEqual(model.filterArticles(articles, {}).map(a => a.key), ["n222", "n111"]);
 });
-test("Komaki preview is isolated from normal hashtag eligibility", () => {
-  const article = sample("n333", "komaki_kousuke", [], {tags: ["20字小説"]});
-  const debug = {version: 1, purpose: "prefecture-atlas-preview", creator: "komaki_kousuke", articles: [article]};
-  assert.equal(model.normalizeArticle(article, prefectures), null);
-  const preview = model.parseDebugDocument(debug);
-  assert.deepEqual(preview[0].prefectures, ["13"]);
-  assert.deepEqual(preview[0].tags, ["20字小説"]);
-  assert.equal(preview[0].debug, true);
-  assert.throws(() => model.parseDocument({...debug, tag: model.TAG}, prefectures));
-});
-test("debug mode only accepts the requested creator's public article identity", () => {
-  const debug = {version: 1, purpose: "prefecture-atlas-preview", creator: "komaki_kousuke", articles: [sample("n333", "someone_else", ["東京都"])]};
-  assert.throws(() => model.parseDebugDocument(debug));
-});
 test("all five color intervals include their boundary values", () => {
   assert.deepEqual([0,1,4,5,9,10,19,20,100].map(model.colorLevel), [0,1,1,2,2,3,3,4,4]);
 });
@@ -106,14 +92,16 @@ test('history requires ordered timestamps and all 47 nonnegative counts', () => 
 });
 
 
-test("history demo is deterministic, isolated, and grows from white to all 47 prefectures", () => {
-  const demo = model.buildHistoryDemo(prefectures);
-  assert.equal(demo.history.length, 33);
-  assert.ok(Object.values(demo.history[0].counts).every(count => count === 0));
-  assert.ok(Object.values(demo.history.at(-1).counts).every(count => count > 0));
-  assert.ok(Object.values(demo.history.at(-1).counts).some(count => count >= 20));
-  assert.equal(model.parseHistory(demo, prefectures).length, 33);
-  assert.deepEqual(model.buildHistoryDemo(prefectures), demo);
-  assert.deepEqual(demo.articles, []);
-  assert.throws(() => model.parseDocument(demo, prefectures));
+
+
+test("production feed rejects sample and preview documents", () => {
+  for (const extra of [{sample: true}, {purpose: "prefecture-atlas-preview"}, {purpose: "prefecture-atlas-history-demo"}]) {
+    assert.throws(() => model.parseDocument({version: 1, tag: model.TAG, articles: [], ...extra}, prefectures));
+  }
+});
+test("production page and runtime have no debug entry or URL switch", () => {
+  const page = readFileSync(new URL("../prefectures/index.html", import.meta.url), "utf8");
+  const runtime = readFileSync(new URL("../prefectures/app.js", import.meta.url), "utf8");
+  for (const text of ["debugNotice", "historyDemoLink", "atlas-debug-feed"]) assert.equal(page.includes(text), false);
+  for (const text of ["historyDemo", "parseDebugDocument", "buildHistoryDemo", 'get("debug")']) assert.equal(runtime.includes(text), false);
 });

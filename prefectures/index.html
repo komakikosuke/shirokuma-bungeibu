@@ -9,7 +9,7 @@
   <title>記事で塗る日本地図｜シロクマ文芸部</title>
   <link rel="icon" href="../assets/polarbear-icon.png" type="image/png">
   <link rel="stylesheet" href="./style.css?v=12">
-  <script defer src="./app.js?v=16"></script>
+  <script defer src="./app.js?v=17"></script>
 </head>
 <body>
   <a class="skip-link" href="#explore">地図と記事一覧へ</a>
@@ -25,7 +25,6 @@
       </nav>
     </div>
   </header>
-  <div id="debugNotice" class="debug-notice" hidden><div class="container"><span>デバッグ表示：小牧幸助の最新記事を東京に仮表示しています。</span><a href="./#pref=13">通常表示に戻る</a></div></div>
   <section class="hero" aria-labelledby="pageTitle">
     <div class="container hero-inner">
       <div class="hero-copy">
@@ -59,7 +58,6 @@
           </div>
           <div id="historyPanel" class="history-panel" hidden>
             <p id="historyEmpty">12月1日から地図の変化を記録します。記録が集まると、ここで再生して見られます。</p>
-            <button id="historyDemoLink" class="history-toggle" type="button" hidden>仮データで動作確認</button>
             <div id="historyControls" hidden>
               <div class="history-heading"><time id="historyDate"></time></div>
               <input id="historyRange" type="range" min="0" max="0" value="0" step="1" aria-label="地図の記録日時">
