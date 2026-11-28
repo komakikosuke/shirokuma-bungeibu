@@ -269,7 +269,11 @@ SCRIPT = '''on run argv
       return "ok"
     end if
     if operation is "url" then return URL of current tab of targetWindow
-    if operation is "js" then return do JavaScript (item 3 of argv) in current tab of targetWindow
+    if operation is "js" then
+      if (count of tabs of targetWindow) is not 1 then error "Working window has extra tabs"
+      if (URL of current tab of targetWindow) does not end with syncMarker then error "Working window marker lost"
+      return do JavaScript (item 3 of argv) in current tab of targetWindow
+    end if
     if operation is "close" then
       if (count of tabs of targetWindow) is not 1 then error "Preserved working window: extra tabs"
       if (URL of current tab of targetWindow) does not end with syncMarker then error "Preserved window: marker lost"
@@ -279,56 +283,53 @@ SCRIPT = '''on run argv
   end tell
 end run'''
 
-# Exact target magazine name and exactly ONE button in its row are required.
-# These calls never use note's private APIs; they only interact with visible UI.
+class ArticleError(RuntimeError):
+    """Keep this work pending while the Safari session remains usable."""
+
+
 JS = r'''(() => {
-  const target = %s;
-  const text = e => (e?.innerText || e?.textContent || '').trim();
+  const target = %s, magazine = %s, action = %s;
+  const text = e => (e.innerText || e.textContent || '').trim();
   const visible = e => {
-    const s=getComputedStyle(e),r=e.getBoundingClientRect();
-    return s.display!=='none' && s.visibility!=='hidden' && r.width>0 && r.height>0;
+    const s = getComputedStyle(e), r = e.getBoundingClientRect();
+    return s.display !== 'none' && s.visibility === 'visible' && r.width > 0 && r.height > 0;
   };
-  const buttons = [...document.querySelectorAll('button')]
-    .filter(b => visible(b) && /^(追加|追加済|追加する|追加済み)$/.test(text(b)));
-  const rows=[];
-  for (const button of buttons) {
-    let el=button.parentElement;
-    for(let d=0;el && d<9;d++,el=el.parentElement) {
-      const lines=text(el).split('\n').map(s=>s.trim()).filter(Boolean);
-      if (lines.includes(target) && el.querySelectorAll('button').length === 1) {
-        rows.push({button,container:el}); break;
-      }
+  const result = (status, message) => JSON.stringify({status, message});
+  const rows = [...document.querySelectorAll('li')].filter(row =>
+    visible(row) && [...row.querySelectorAll('a[href]')].some(a => a.href.replace(/\/$/, '') === magazine) &&
+    [...row.querySelectorAll('h3')].some(h => text(h) === target));
+  if (rows.length > 1) return result('error', 'Multiple matching magazine rows');
+  if (rows.length === 1) {
+    const buttons = [...rows[0].querySelectorAll('button[aria-pressed]')].filter(visible);
+    if (buttons.length !== 1) return result('error', 'Unexpected magazine toggle');
+    const button = buttons[0];
+    const pressed = button.getAttribute('aria-pressed');
+    if (pressed === 'true') return result('already');
+    if (pressed !== 'false' || button.disabled || text(button) !== '追加') {
+      return result('error', 'Unexpected magazine toggle state');
     }
+    if (action === 'add') {
+      button.click();
+      return result('clicked');
+    }
+    return result('ready');
   }
-  if (rows.length>1) return JSON.stringify({status:'error',message:'multiple magazine rows'});
-  if (rows.length===1) {
-    const row=rows[0]; const state=text(row.button);
-    if (/^追加済/.test(state))return JSON.stringify({status:'already'});
-    if (!/^追加/.test(state))return JSON.stringify({status:'error',message:'unknown button status'});
-    if (%s === 'add') {row.button.click();return JSON.stringify({status:'clicked'});}
-    return JSON.stringify({status:'ready'});
+  if (action === 'open') {
+    const icons = [...document.querySelectorAll('button[data-id="ButtonIcon"]')].filter(b =>
+      visible(b) && !b.disabled && [...b.querySelectorAll('svg path')].some(p => {
+        const path = p.getAttribute('d') || '';
+        return path.startsWith('M21 12h-2V5.493l-6 1.333v11.908l') ||
+          path.includes('5.493v11.902Z');
+      }));
+    if (icons.length) {
+      icons[0].click();
+      return result('opened');
+    }
+    if ([...document.querySelectorAll('header a[href], header button')].some(e =>
+      visible(e) && text(e) === 'ログイン')) return result('signed-out');
+    return result('waiting', 'Article magazine control unavailable');
   }
-  if (%s === 'open') {
-    // Verified note DOM: "記事を追加" is an icon-only ButtonIcon. In the
-    // rendered DOM it may have no text, aria-label, or title, so identify the
-    // book-plus icon by the observed SVG path instead of its accessible text.
-    const bookIcon = b => [...b.querySelectorAll('svg path')].some(p =>
-      (p.getAttribute('d') || '').includes('5.493v11.902Z'));
-    const displayed = b => {
-      const r = b.getBoundingClientRect();
-      const st = getComputedStyle(b);
-      return r.width > 0 && r.height > 0 && st.visibility !== 'hidden'
-        && st.display !== 'none' && !b.disabled;
-    };
-    const icons=[...document.querySelectorAll('button[data-id="ButtonIcon"]')]
-      .filter(b => bookIcon(b) && displayed(b));
-    // Responsive layouts can render duplicates; the first visible match is
-    // the article-toolbar action, and both matches represent the same action.
-    if (!icons.length) return JSON.stringify({status:'error',message:'book-plus icon not found'});
-    icons[0].click();
-    return JSON.stringify({status:'opened'});
-  }
-  return JSON.stringify({status:'waiting'});
+  return result('waiting');
 })()'''
 
 
@@ -441,8 +442,10 @@ def reserve_addition_slot(now=None):
     return True
 
 
-def js(window,action,target=TARGET):
-    code = JS % (json.dumps(target,ensure_ascii=False), json.dumps(action),json.dumps(action))
+def js(window, action, target=TARGET):
+    magazines = {TARGET: MAGAZINE, ROOM_TARGET: ROOM_MAGAZINE, ENDROLL_TARGET: ENDROLL_MAGAZINE}
+    code = JS % tuple(json.dumps(value, ensure_ascii=False)
+                      for value in (target, magazines[target], action))
     raw = applescript('js',window,code)
     try:return json.loads(raw)
     except json.JSONDecodeError:raise RuntimeError('Unexpected Safari result: '+raw[:200])
@@ -450,50 +453,57 @@ def js(window,action,target=TARGET):
 
 def wait_article(window,url):
     until=time.monotonic()+35
-    while time.monotonic()<until:
-        try:
-            current=urllib.parse.urlsplit(applescript('url',window))._replace(query='',fragment='').geturl().rstrip('/')
-            if current==url:
-                ready=applescript('js',window,'document.readyState')
-                if ready=='complete':return
-        except RuntimeError:pass
+    while time.monotonic() < until:
+        current = urllib.parse.urlsplit(applescript('url', window))
+        if current.scheme == 'https' and current.netloc == 'note.com':
+            if current.path.rstrip('/') == '/login':
+                raise RuntimeError('Safari is signed out of note')
+            if current._replace(query='', fragment='').geturl().rstrip('/') == url:
+                if applescript('js', window, 'document.readyState') == 'complete':
+                    return
         time.sleep(1.2)
-    raise RuntimeError('Article navigation timed out: '+url)
+    raise ArticleError('Article navigation timed out: ' + url)
 
 
-def process(window,item,target=TARGET):
-    url=item['url']
-    applescript('navigate',window,url)
-    wait_article(window,url)
-    deadline=time.monotonic()+25
-    opened=False
-    while time.monotonic()<deadline:
-        status=js(window,'inspect',target)['status']
-        if status=='already':return 'already'
-        if status=='ready':break
-        if status=='error':raise RuntimeError('Unexpected magazine dialog: '+str(js(window,'inspect',target)))
-        if not opened:
-            result=js(window,'open',target)
-            if result['status']=='opened':opened=True
-            elif result['status']=='error':
-                # Wait briefly for note's client UI to load; stop if still absent.
-                if time.monotonic()+5>=deadline:
-                    raise RuntimeError(result.get('message','Unable to open magazine dialog'))
+def process(window, item, target=TARGET):
+    url = item['url']
+    applescript('navigate', window, url)
+    wait_article(window, url)
+    deadline = time.monotonic() + 25
+    opened = False
+    while time.monotonic() < deadline:
+        result = js(window, 'inspect' if opened else 'open', target)
+        status = result['status']
+        if status == 'already':
+            return 'already'
+        if status == 'ready':
+            break
+        if status == 'signed-out':
+            raise RuntimeError('Safari is signed out of note')
+        if status == 'error':
+            raise ArticleError(result['message'])
+        if status == 'opened':
+            opened = True
         time.sleep(.8)
-    else:raise RuntimeError('Magazine dialog not ready')
+    else:
+        raise ArticleError('Target magazine unavailable' if opened else 'Article magazine control unavailable')
 
     if not reserve_addition_slot():
         return 'deferred'
-    result=js(window,'add',target)
-    if result['status']=='already':return 'already'
-    if result['status']!='clicked':raise RuntimeError('Add click not accepted: '+str(result))
-    deadline=time.monotonic()+18
-    while time.monotonic()<deadline:
-        result=js(window,'inspect',target)
-        if result['status']=='already':return 'added'
-        if result['status']=='error':raise RuntimeError(str(result))
+    result = js(window, 'add', target)
+    if result['status'] == 'already':
+        return 'already'
+    if result['status'] != 'clicked':
+        raise ArticleError('Add click not accepted: ' + str(result))
+    deadline = time.monotonic() + 18
+    while time.monotonic() < deadline:
+        result = js(window, 'inspect', target)
+        if result['status'] == 'already':
+            return 'added'
+        if result['status'] == 'error':
+            raise ArticleError(result['message'])
         time.sleep(.8)
-    raise RuntimeError('Clicked add, but note did not confirm added; check magazine before retry')
+    raise ArticleError('Clicked add, but note did not confirm added')
 
 
 def _load_state(state_file):
@@ -501,6 +511,12 @@ def _load_state(state_file):
     if state.get('version')!=1 or not isinstance(state.get('seen'),list):
         raise RuntimeError('Unknown local state version, refusing additions: '+state_file.name)
     return state
+
+
+def sort_pending(pending, state, sort_key):
+    failed_at = {failure['url']: failure['at'] for failure in state.get('failures', [])
+                 if 'url' in failure and 'at' in failure}
+    pending.sort(key=lambda work: (failed_at.get(work['url'], ''), sort_key(work)))
 
 
 def _prepare_channel(label, works, state_file, target, baseline_first_run, sort_key,
@@ -517,7 +533,7 @@ def _prepare_channel(label, works, state_file, target, baseline_first_run, sort_
     state=_load_state(state_file)
     seen=set(state['seen']);added=set(state.get('added',[]))
     pending=[dict(w,url=url) for url,w in works.items() if url not in seen and url not in added]
-    pending.sort(key=sort_key)
+    sort_pending(pending, state, sort_key)
     return {'label':label,'works':works,'state_file':state_file,'target':target,
             'state':state,'seen':seen,'added':added,'pending':pending[:max_per_run]}
 
@@ -530,7 +546,7 @@ def reconcile_endroll(channel, published_keys):
         channel[name] = (channel[name] - current) | confirmed
         channel['state'][name] = sorted(channel[name])
     pending = [dict(work, url=url) for url, work in channel['works'].items() if url not in confirmed]
-    pending.sort(key=lambda work: (work['publishedAt'], work['url']))
+    sort_pending(pending, channel['state'], lambda work: (work['publishedAt'], work['url']))
     channel['pending'] = pending[:MAX_ADDITIONS_PER_HOUR]
     channel['state'].update(publicConfirmedAt=datetime.now(timezone.utc).isoformat(),
                             eventConfirmedCount=len(confirmed), eventRemainingCount=len(pending))
@@ -641,12 +657,24 @@ def diagnose_endroll():
     print('Public release check: ' + json.dumps(result, ensure_ascii=False))
 
 
+def notify_safari_pause():
+    try:
+        subprocess.run(
+            ['/usr/bin/osascript', '-e',
+             'display notification "詳細は sync.log を確認してください。" with title "noteマガジン同期を安全停止"'],
+            capture_output=True, text=True, timeout=10, check=True)
+    except (OSError, subprocess.SubprocessError) as error:
+        log(f'Unable to send Mac notification: {error}')
+
+
 def safari_guard(stage, error=None):
     payload = {'status': 'paused' if error else 'in_progress', 'stage': stage,
                'at': datetime.now(timezone.utc).isoformat()}
     if error is not None:
         payload['error'] = str(error)[:1500]
     save_state(payload, SAFARI_GUARD_FILE)
+    if error is not None:
+        notify_safari_pause()
 
 
 def main(endroll_only=False, resume_safari=False, max_works=None):
@@ -660,6 +688,9 @@ def main(endroll_only=False, resume_safari=False, max_works=None):
             log('SKIP: another run is active');return
         if SAFARI_GUARD_FILE.exists():
             if not resume_safari:
+                guard = json.loads(SAFARI_GUARD_FILE.read_text(encoding='utf-8'))
+                if guard.get('status') == 'in_progress':
+                    safari_guard(guard['stage'], 'Previous Safari operation was interrupted')
                 log('PAUSED: previous Safari operation needs diagnosis; no windows opened. Use --diagnose-endroll.')
                 return
             SAFARI_GUARD_FILE.unlink()
@@ -711,17 +742,14 @@ def main(endroll_only=False, resume_safari=False, max_works=None):
                             state['eventRemainingCount'] = len(set(channel['works']) - added)
                         save_state(state,channel['state_file'])
                         log(f"[{channel['label']}] {outcome.upper()}: {url}")
-                    except Exception as e:
-                        # Preserve progress and stop UI work until an explicit resume.
-                        state.setdefault('failures',[]).append({'url':url,'at':datetime.now(timezone.utc).isoformat(), 'error':str(e)[:400]})
-                        save_state(state,channel['state_file'])
-                        log(f"[{channel['label']}] STOP CHANNEL: {url} / {e}")
-                        channel_errors.append(f"{channel['label']}: {e}")
-                        ui_error=e
-                        safari_guard(stage,e)
-                        break
+                    except ArticleError as error:
+                        state.setdefault('failures', []).append({
+                            'url': url, 'at': datetime.now(timezone.utc).isoformat(),
+                            'error': str(error)[:400]})
+                        save_state(state, channel['state_file'])
+                        log(f"[{channel['label']}] PENDING: {url} / {error}")
+                        continue
                     time.sleep(5)
-                if ui_error is not None:break
         except BaseException as error:
             ui_error=error
             safari_guard(stage,error)
@@ -757,7 +785,8 @@ if __name__=='__main__':
     parser.add_argument('--max-works',type=int,help='Limit a manual verification run to this many works')
     args=parser.parse_args()
     if args.max_works is not None and args.max_works < 1:parser.error('--max-works must be positive')
-    if args.resume_safari and not args.endroll_only:parser.error('--resume-safari requires --endroll-only')
+    if args.resume_safari and (args.check_endroll or args.install_endroll or args.repair_endroll or args.diagnose_endroll):
+        parser.error('--resume-safari requires a sync run')
     try:
         if args.check_endroll:
             result=load_endroll_feed()
